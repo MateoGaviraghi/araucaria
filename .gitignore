@@ -1,0 +1,27 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# env values live in Vercel and in .env.local; there is no example file
+.env*
+
+# vercel
+/.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# media originals and database dumps never enter the repo
+*.mov
+*.MOV
+*.dump
+*.backup
+
+# os
+.DS_Store
+Thumbs.db
+npm-debug.log*

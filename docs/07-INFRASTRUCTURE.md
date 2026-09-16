@@ -15,10 +15,15 @@
 - **Vercel Hobby.** Its terms restrict use to non-commercial, personal projects. The risk is accepted consciously by Mateo for phase 1 (`D-005`). Move to **Pro** when the domain is bought.
 - Limits that shape this project: runtime logs kept **1 hour** (so the audit trail lives in the DB); 3 custom WAF rules (rate limiting is done in the app, `08-SECURITY.md` §5).
 - Single Vercel project, no custom `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` needed: the platform manages it for one project.
+- **Project name:** `araucaria-multiespacio` → `araucaria-multiespacio.vercel.app` (`D-015`).
+- **Node.js:** `engines.node: "24.x"` in `package.json`, which overrides the version chosen in the dashboard. Locally `.nvmrc` pins 24.21.0.
+- **Region:** Vercel functions in `gru1` (São Paulo); the Neon project in `aws-sa-east-1` (São Paulo), next to the functions (`D-014`). A Neon project's region cannot be changed after it is created.
 
 ## Environment variables
 
-**Names only. Values live in Vercel → Project → Environment Variables. No `.env.example`, ever.** Locally, values go in `.env.local`, which is git-ignored.
+**Names only. Values live in Vercel → Project → Environment Variables. No `.env.example`, ever.** Locally, values go in `.env.local`, which is git-ignored and is also read by `drizzle.config.ts`.
+
+In Vercel each variable is set for **Production** (Neon `main`) and **Preview** (Neon `dev`); `DATABASE_URL` and `IP_HASH_SALT` are marked Sensitive, with a different `IP_HASH_SALT` per environment.
 
 | Name | Scope | What |
 |---|---|---|
@@ -62,7 +67,7 @@ HEVC does not play in every browser; every published video is H.264 (`G-001`). W
 
 ## Backups and restore
 
-- **Neon:** the free plan's restore window — **verify its current length when setting up WU-01** and record it here.
+- **Neon Free** (verified 2026-09-16 in neon.com/docs/introduction/plans): history window for instant restore **6 hours**, capped at 1 GB of history; **1** manual snapshot; no scheduled backups; 10 branches per project. A mistake noticed more than 6 hours later cannot be undone with instant restore: the tested `pg_dump` below is the real backup.
 - **Before launch:** take one `pg_dump` of production and **restore it into a scratch Neon branch**, then compare row counts. An untested backup does not count.
 - Restoring availability is low-stakes (the owner can re-cross modules). Restoring the credential is not: after any restore, rotate the password (`08-SECURITY.md` §6).
 
