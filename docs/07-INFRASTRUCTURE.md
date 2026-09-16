@@ -8,7 +8,7 @@
 |---|---|---|
 | Local | `npm run dev` | A Neon **branch** for development, never production |
 | Preview | Vercel preview URL per branch | Same development branch |
-| Production | Vercel `main` → `*.vercel.app` link used in the Instagram bio | Neon main branch |
+| Production | Vercel `main` → `*.vercel.app` link used in the Instagram bio | Neon `production` branch (the project's default root branch, `D-016`) |
 
 ## Hosting
 
@@ -23,7 +23,7 @@
 
 **Names only. Values live in Vercel → Project → Environment Variables. No `.env.example`, ever.** Locally, values go in `.env.local`, which is git-ignored and is also read by `drizzle.config.ts`.
 
-In Vercel each variable is set for **Production** (Neon `main`) and **Preview** (Neon `dev`); `DATABASE_URL` and `IP_HASH_SALT` are marked Sensitive, with a different `IP_HASH_SALT` per environment.
+In Vercel each variable is set for **Production** (Neon `production`) and **Preview** (Neon `dev`); `DATABASE_URL` and `IP_HASH_SALT` are marked Sensitive, with a different `IP_HASH_SALT` per environment.
 
 | Name | Scope | What |
 |---|---|---|

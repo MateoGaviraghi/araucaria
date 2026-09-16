@@ -93,6 +93,12 @@
 **Reasoning:** the link goes in the Instagram bio until the domain is bought. Mateo: "sí".
 **Reopen if:** the domain is bought (phase 2).
 
+### D-016 · 2026-09-16 · Neon root branch keeps its default name `production`
+**Decision:** the Neon project `araucaria` (Postgres 18, `aws-sa-east-1`) has the root branch `production` for production and the child branch `dev` for local development and Vercel previews.
+**Alternatives rejected:** renaming the root branch to `main`, as `07-INFRASTRUCTURE.md` first said.
+**Reasoning:** Neon now creates the root branch as `production`; the name has no effect on the app, which only reads `DATABASE_URL`. Also confirmed while setting up WU-01: the Vercel project reports Node.js Version `24.x`, the last open check of `D-013`.
+**Reopen if:** —
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
