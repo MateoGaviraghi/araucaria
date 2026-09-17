@@ -82,6 +82,7 @@ Inside `login`, in this exact order:
   4. Insert an audit row `password_rotated`.
 - **Effect:** every existing session fails `credential_version` → all devices are logged out at once.
 - The script lives in `scripts/` and never prints or logs the passphrase.
+- **Run:** `npm run rotate-password` writes to the database in `.env.local` (dev); `npm run rotate-password -- <env file>` targets another one. It shows the target host, asks to type `rotar`, reads the passphrase twice without echo, requires ≥ 20 characters, and creates the credential if none exists (version 1).
 
 ## 7. Not implemented, with reason
 

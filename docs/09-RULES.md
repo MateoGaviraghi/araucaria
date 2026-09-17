@@ -12,6 +12,7 @@ araucaria/
     page.tsx                 landing (sections as components)
     admin/
       login/page.tsx
+      login/login-form.tsx   client form of the login (D-017)
       page.tsx               panel
       actions.ts             blockModules · unblockModule · logout
     login-action.ts          login (anonymous)
@@ -24,6 +25,7 @@ araucaria/
     salon.ts                 amenities, modules, prices, rules, contact — from 01-CONTEXT.md
   lib/
     dal.ts                   requireAdmin() + every DB call (the only importer of db)
+    action-result.ts         ActionResult and ErrorCode (05-API-CONTRACTS.md §1, D-017)
     db/                      Drizzle client + schema
     auth/                    scrypt, tokens, ip hashing, limits
     whatsapp.ts              message + URL builder (05-API-CONTRACTS.md §3)
