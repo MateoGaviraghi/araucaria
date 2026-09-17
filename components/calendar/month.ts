@@ -8,11 +8,11 @@ export type BlockChoice = ModuleCode | "dia-completo";
 
 export const MODULE_ORDER: readonly ModuleCode[] = ["mediodia", "noche"];
 
-// UI vocabulary of docs/06-UI-UX.md §5, with the grammatical gender its messages need.
+// UI vocabulary of docs/06-UI-UX.md §5 ("Reservado", D-020), with the grammatical gender it needs.
 export const MODULE_WORDS: Record<BlockChoice, { label: string; crossed: string; freed: string }> = {
-  mediodia: { label: "Mediodía", crossed: "tachado", freed: "liberado" },
-  noche: { label: "Noche", crossed: "tachada", freed: "liberada" },
-  "dia-completo": { label: "Día completo", crossed: "tachado", freed: "liberado" },
+  mediodia: { label: "Mediodía", crossed: "reservado", freed: "liberado" },
+  noche: { label: "Noche", crossed: "reservada", freed: "liberada" },
+  "dia-completo": { label: "Día completo", crossed: "reservado", freed: "liberado" },
 };
 
 export type Block = { id: string; date: IsoDate; module: ModuleCode };

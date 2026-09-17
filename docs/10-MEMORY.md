@@ -130,6 +130,13 @@
 **Rejected (do not retry):** the functional panel with "M"/"N" letters under each number and a dialog with radio buttons; variant **Diagonal** (triangles, Bookingmood literal); variant **Barras** (two small bars under the number); date-range forms in modals (Hospitable, Hostfully); generic date pickers (React Aria, Mobiscroll); multi-day selection (the salon rents by day).
 **Reopen if:** the owner finds it slow or confusing on the phone; the logo brings final colors (tokens change, not the design).
 
+### D-020 · 2026-09-17 · Confirmation alert (Apple style, GSAP) and "Reservado" vocabulary
+**Decision:** after reserving or freeing a module the day sheet closes and a centered card appears over the dimmed calendar: a teal ring and check drawn with GSAP DrawSVG (a red cross on errors), title "Reservado" / "Liberado" / "Deshecho", detail "Sábado 19/09 · Mediodía", buttons "Deshacer" and "Listo". It closes by itself after 4 s (paused while the pointer or keyboard focus is on it) and Escape closes it. Timeline: overlay 0.3 s; card 0.94 → 1 in 0.45 s `power3.out`; ring 0.55 s `power2.inOut` from 0.1 s; check 0.35 s from 0.55 s; text 0.35 s with 0.06 s stagger from 0.45 s. No overshoot. Reduced motion: a 0.2 s fade, no scale, no drawing. The panel says "Reservado" instead of "Tachado" everywhere (toggles, legend, "Próximos reservados", messages), and dates show two digits ("19/09"). This replaces the bottom undo bar of `D-019`. New dependency `@gsap/react` 2.1.2; plugins registered in `lib/gsap.ts`.
+**Sources:** `seccion-premium` round. Reference chosen: Apple Human Interface Guidelines · Alerts (centered card). The drawn ring-then-check order comes from Mateo's brief ("con la animación del tilde con gsap profesional").
+**Mateo's words:** "ejemplo tocás un día, tachás mediodía y salta la alerta sábado Reservado Mediodía 19/09 ejemplo con la animación del tilde con gsap profesional" · "quiero que sea una exp de usuario muy amigable, profesional y seria" · chose "la de apple, la 1". The three plan questions ("Reservado", close the sheet, auto-close 4 s) went with the recommended "sí" under his "go".
+**Rejected (do not retry):** the bottom "Listo, … · Deshacer" bar; overshoot/bounce entrances (CodeFronts "Success Checkmark Pop"); confetti success modals; filled green circle checks; Lottie success animations (another library).
+**Reopen if:** the owner finds the alert slows down reserving several days in a row.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
@@ -161,6 +168,8 @@
 | G-015 | On Mateo's Windows (`core.autocrlf=true`) git checks migrations out with CRLF, so `drizzle.__drizzle_migrations.hash` for `0000_init` differs between `dev` (applied from LF, 2026-09-16) and `production` (applied from CRLF, 2026-09-17). The SQL is identical and drizzle picks pending migrations by `created_at`, so nothing re-runs. Production got `0000_init` on 2026-09-17 after the backup branch `backup-pre-0000-init` |
 | G-016 | The date examples in `05-API-CONTRACTS.md` §3 and `06-UI-UX.md` §5 ("sábado 18 de octubre de 2026", "sábado 18/10") use a wrong weekday: 18/10/2026 is a **domingo**. The code formats the real weekday with `Intl`; do not copy the example as a test expectation |
 | G-017 | A Server Action only executes on routes whose page imports it. Posting its id elsewhere (`/`, `/admin/login`, a 404) returns `{}` and runs nothing (verified in WU-04). The owner actions run only on `/admin`, behind `proxy.ts` and `requireAdmin()` |
+| G-018 | `Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit" })` still prints the month without a leading zero ("21/9"). `formatDayMonth` builds "21/09" from the ISO string instead |
+| G-019 | The React Compiler lint rules (`react-hooks/refs`, `react-hooks/purity`) reject `contextSafe(fn)` called during render when `fn` reads refs, and `Date.now()` in functions defined in the component body. Wrap with `contextSafe` inside the handler; derive ids from state |
 
 ## Dependencies reviewed
 
@@ -180,3 +189,4 @@
 | `eslint-config-next` 16.3.5 | Next's rules: core-web-vitals, TypeScript, jsx-a11y | Approved by Mateo, 2026-09-16. Dev-only. Pulls in `typescript-eslint` 8.70.0 (TypeScript ≤ 6.0) |
 | `@types/node` 24.13.5 · `@types/react` · `@types/react-dom` 19.3.0 | Type definitions for Node 24 and React 19 | Approved by Mateo, 2026-09-16. Types only, no runtime code |
 | `server-only` 0.0.1 | Build fails if browser code imports `lib/dal.ts` (recommended by Next's auth guide) | Approved by Mateo, 2026-09-17. Official React package (maintainer sebmarkbage), no dependencies, no install script |
+| `@gsap/react` 2.1.2 | `useGSAP`: GSAP inside React with scoping and cleanup (`D-020`) | Approved by Mateo with the alert plan, 2026-09-17. Published by GreenSock, no dependencies, no install script; peers `gsap ^3.12.5`, `react >=17` |

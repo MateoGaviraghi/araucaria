@@ -10,9 +10,9 @@
   --admin-taken: oklch(0.43 0.075 200);
   --admin-taken-ink: oklch(0.99 0.005 85);
   --admin-focus: oklch(0.55 0.12 200);
-  /* animate skill: iOS drawer curve for the sheet, strong ease-out for the undo bar. */
+  --admin-error: oklch(0.55 0.15 30);
+  /* animate skill: iOS drawer curve for the sheet (the alert's motion lives in GSAP). */
   --admin-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  --admin-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   min-height: 100dvh;
   background: var(--admin-paper);
@@ -161,19 +161,120 @@
   }
 }
 
-/* ---- Undo bar (components/ui/undo-bar.tsx) */
+/* ---- Confirmation alert (components/ui/confirm-alert.tsx, D-020). Motion is GSAP; this is layout only.
+   The <dialog> covers the viewport so its own overlay (animatable, unlike ::backdrop) sits behind the card. */
 
-.admin-undo {
-  transition:
-    transform 220ms var(--admin-ease-out),
-    opacity 220ms var(--admin-ease-out);
+.admin-alert {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 1rem;
+  border: 0;
+  background: transparent;
+  color: var(--admin-ink);
+  overflow: hidden;
 }
 
-@starting-style {
-  .admin-undo {
-    transform: translateY(0.75rem);
-    opacity: 0;
-  }
+.admin-alert[open] {
+  display: grid;
+  place-items: center;
+}
+
+.admin-alert::backdrop {
+  background: transparent;
+}
+
+.admin-alert-overlay {
+  position: absolute;
+  inset: 0;
+  background: oklch(0.2 0.02 225 / 0.35);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.admin-alert-card {
+  position: relative;
+  width: min(18.5rem, 100%);
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: var(--admin-paper);
+  box-shadow:
+    0 24px 48px -12px oklch(0.2 0.03 225 / 0.35),
+    0 2px 8px oklch(0.2 0.03 225 / 0.12);
+  text-align: center;
+  outline: none;
+}
+
+.admin-alert-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1.25rem 1.25rem;
+}
+
+.admin-alert-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.admin-alert-ring,
+.admin-alert-mark {
+  fill: none;
+  stroke: var(--admin-taken);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-alert[data-tone="error"] .admin-alert-ring,
+.admin-alert[data-tone="error"] .admin-alert-mark {
+  stroke: var(--admin-error);
+}
+
+.admin-alert-title {
+  margin-top: 0.875rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.admin-alert-detail {
+  margin-top: 0.25rem;
+  color: var(--admin-muted);
+  font-size: 0.9375rem;
+}
+
+.admin-alert-actions {
+  display: grid;
+  border-top: 1px solid var(--admin-free-line);
+}
+
+.admin-alert-actions[data-count="2"] {
+  grid-template-columns: 1fr 1fr;
+}
+
+.admin-alert-actions button {
+  min-height: 3rem;
+  color: var(--admin-muted);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.admin-alert-actions button + button {
+  border-left: 1px solid var(--admin-free-line);
+}
+
+.admin-alert-actions .admin-alert-primary {
+  color: var(--admin-taken);
+  font-weight: 600;
+}
+
+.admin-alert-actions button:disabled {
+  opacity: 0.5;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -193,14 +294,6 @@
     .admin-sheet[open] {
       transform: none;
       opacity: 0;
-    }
-  }
-  .admin-undo {
-    transition: opacity 200ms ease;
-  }
-  @starting-style {
-    .admin-undo {
-      transform: none;
     }
   }
   .admin-toggle:active {

@@ -85,10 +85,9 @@ export function formatLongDate(date: IsoDate): string {
   return `${part("weekday")} ${part("day")} de ${part("month")} de ${part("year")}`;
 }
 
-/** "18/10" */
+/** "18/10", "05/09". Built from the ISO string: es-AR Intl ignores 2-digit months in day/month. */
 export function formatDayMonth(date: IsoDate): string {
-  const part = formatParts(date, { day: "numeric", month: "numeric" });
-  return `${part("day")}/${part("month")}`;
+  return `${date.slice(8, 10)}/${date.slice(5, 7)}`;
 }
 
 /** "domingo 18/10" */

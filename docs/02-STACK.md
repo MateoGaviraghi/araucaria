@@ -17,7 +17,7 @@ Versions were read from the npm registry on **2026-09-16**. WU-01 pins these exa
 | Lint | ESLint + Next's config | `eslint` 9.39.5 · `eslint-config-next` 16.3.5 | Next 16 has no `next lint`; lint is a blocking CI gate. Flat config in `eslint.config.mjs` | npm marks ESLint 9 as no longer supported, but 10.x is outside the peer range of `eslint-plugin-import` and `eslint-plugin-react` inside `eslint-config-next` → move to 10 when `eslint-config-next` supports it |
 | Types | Type definitions | `@types/node` 24.13.5 · `@types/react` / `@types/react-dom` 19.3.0 | Match Node 24 and React 19 | Runtime major changes |
 | Styling | Tailwind CSS v4 | `tailwindcss` / `@tailwindcss/postcss` 4.3.3 | Tokens via `@theme`; mobile-first | — |
-| Motion | GSAP (+ ScrollTrigger) | `gsap` 3.15.0 | The motion library `seccion-premium` works with | — |
+| Motion | GSAP (+ ScrollTrigger, DrawSVG) | `gsap` 3.15.0 · `@gsap/react` 2.1.2 | The motion library `seccion-premium` works with. `useGSAP` is the only way GSAP runs in React (scoped, cleaned up on unmount); plugins are registered once in `lib/gsap.ts` (`D-020`) | — |
 | Smooth scroll | Lenis | `lenis` 1.3.26 | Same method | Mateo rejects smooth scroll on this site |
 | Validation | zod | `zod` 4.6.5 | Schema at every Server Action and on the client form | — |
 | Database | Neon Postgres (Free) | `@neondatabase/serverless` 1.1.0 | Real Postgres with constraints; does not pause like Supabase | Free-tier limits are hit, or the client needs PITR beyond the free window → Neon paid |

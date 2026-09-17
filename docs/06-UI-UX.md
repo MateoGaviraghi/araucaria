@@ -85,8 +85,9 @@ After submit, the form area shows:
 | Screen | Blocks | Content |
 |---|---|---|
 | `/admin/login` | `AUTH-CARD.signin` | TITLE "Panel de Araucaria" · FIELD password · SUBMIT "Entrar" · ERROR-STATE (below) · no "forgot password" (rotation is manual) |
-| `/admin` | `APP-SHELL.topbar` + month calendar + upcoming list + undo bar | Topbar: logo and a **visible "Cerrar sesión"** · month navigation · **each day split in two ("Mitades", `D-019`): top half = Mediodía, bottom half = Noche**, beige free / teal crossed out · legend "Libre · Tachado · Arriba mediodía · abajo noche" · list **"Próximos tachados"** with "Liberar" per module |
-| Day action (`D-019`, replaces the confirmation dialogs) | Bottom sheet on the phone, side panel on desktop | Tap a day → "Tocá para tachar o liberar" + the long date + two large toggles **Mediodía** / **Noche** ("Libre" / "Tachado") + "Tachar el día completo" when both are free. Each tap saves at once and shows "Listo, … · **Deshacer**" for 6 s. No confirmation step |
+| `/admin` | `APP-SHELL.topbar` + month calendar + upcoming list + confirmation alert | Topbar: logo and a **visible "Cerrar sesión"** · month navigation · **each day split in two ("Mitades", `D-019`): top half = Mediodía, bottom half = Noche**, beige free / teal reserved · legend "Libre · Reservado · Arriba mediodía · abajo noche" · list **"Próximos reservados"** with "Liberar" per module (`D-020`) |
+| Day action (`D-019`, replaces the confirmation dialogs) | Bottom sheet on the phone, side panel on desktop | Tap a day → "Tocá para reservar o liberar" + the long date + two large toggles **Mediodía** / **Noche** ("Libre" / "Reservado") + "Reservar el día completo" when both are free. Each tap saves at once, closes the sheet and shows the confirmation alert. No confirmation step before saving |
+| Confirmation alert (`D-020`) | Centered card over the dimmed page (Apple alert) | A ring and a check drawn with GSAP DrawSVG (a cross on errors), title, detail "Sábado 19/09 · Mediodía", buttons **Deshacer** · **Listo**. Closes by itself after 4 s, paused while the pointer or keyboard focus is on it; Escape closes it |
 
 ### Error and feedback copy
 
@@ -94,13 +95,14 @@ After submit, the form area shows:
 |---|---|
 | `INVALID_CREDENTIALS` | "Contraseña incorrecta." |
 | `RATE_LIMITED` | "Demasiados intentos. Probá de nuevo más tarde." |
-| `ALREADY_TAKEN` | "Ese módulo ya estaba tachado." |
+| `ALREADY_TAKEN` | Alert with a cross: "Ese módulo ya estaba reservado." (`D-020`) |
 | `UNAUTHORIZED` | Redirect to login, message "Tu sesión terminó. Entrá de nuevo." |
-| `RETRY` | "Algo falló. Reintentá." |
-| Success block / unblock | "Listo, Noche del 18/10 tachada." / "Listo, Noche del 18/10 liberada." · "Listo, Día completo del 18/10 tachado." (`D-018`) |
-| `NOT_FOUND` on unblock | "Ese módulo ya estaba liberado." (`D-018`) |
-| After "Deshacer" | "Deshecho." (`D-019`) |
-| Empty upcoming list / desktop panel with no day | "No hay módulos tachados desde hoy." / "Tocá un día del calendario para tachar o liberar." (`D-019`) |
+| `RETRY` | Alert with a cross: "Algo falló. Reintentá." |
+| Success block / unblock | Alert with a check: title "Reservado" / "Liberado", detail "Sábado 19/09 · Mediodía" (or "· Día completo") (`D-020`) |
+| `NOT_FOUND` on unblock | Alert with a cross: "Ese módulo ya estaba liberado." (`D-018`) |
+| After "Deshacer" | Alert with a check: "Deshecho" + the same detail (`D-020`) |
+| Stale Server Action after a deploy | Alert with a cross: "Se actualizó la página, reintentá" (G-009) |
+| Empty upcoming list / desktop panel with no day | "No hay módulos reservados desde hoy." / "Tocá un día del calendario para reservar o liberar." (`D-020`) |
 
 ## 6. Brand starting point
 

@@ -30,6 +30,7 @@ araucaria/
     auth/                    scrypt, tokens, ip hashing, limits
     whatsapp.ts              message + URL builder (05-API-CONTRACTS.md §3)
     dates.ts                 Buenos Aires "today", es-AR formatting
+    gsap.ts                  registers GSAP plugins and useGSAP once (D-020)
   drizzle/                   generated migrations (reviewed before applying)
   scripts/
     rotate-password.ts       operator-only (08-SECURITY.md §6)

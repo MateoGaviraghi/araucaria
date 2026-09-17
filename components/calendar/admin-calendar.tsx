@@ -2,25 +2,32 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { blockModules, unblockModule } from "@/app/admin/actions";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { UndoBar, type Notice } from "@/components/ui/undo-bar";
+import { ConfirmAlert, type AlertMessage } from "@/components/ui/confirm-alert";
 import type { ActionResult } from "@/lib/action-result";
 import {
   addMonthsToMonth,
-  formatDayMonth,
   formatLongDate,
   formatMonthTitle,
   formatWeekdayDayMonth,
   type IsoDate,
   type IsoMonth,
 } from "@/lib/dates";
-import { MODULE_ORDER, MODULE_WORDS, buildMonth, type Block, type DayCell, type ModuleCode } from "./month";
+import {
+  MODULE_ORDER,
+  MODULE_WORDS,
+  buildMonth,
+  type Block,
+  type BlockChoice,
+  type DayCell,
+  type ModuleCode,
+} from "./month";
 
-// Owner calendar, "Mitades" variant (D-019): each day split in two, top = Mediodía, bottom = Noche.
-// Tap a day → sheet (phone) or side panel (desktop) with one toggle per module; every change saves
-// at once and can be undone for a few seconds instead of asking for confirmation.
+// Owner calendar, "Mitades" (D-019): each day split in two, top = Mediodía, bottom = Noche.
+// Tap a day → sheet (phone) or side panel (desktop) with one toggle per module. Every change saves at
+// once and is confirmed by a centered, animated alert with "Deshacer" (D-020).
 
 const WEEKDAYS = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
 const STALE_ACTION = "Failed to find Server Action";
@@ -36,10 +43,14 @@ type Props = {
   lastMonth: IsoMonth;
 };
 
-type Undo = { kind: "unblock"; ids: string[] } | { kind: "reblock"; date: IsoDate; module: ModuleCode };
+type Undo = { ids: string[] } | { date: IsoDate; module: ModuleCode };
+type Success = { title: string; detail: string; undo: Undo | null };
 
 const capitalize = (text: string) => `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
 const slot = (date: IsoDate, module: ModuleCode) => `${date}|${module}`;
+// "Sábado 19/09 · Mediodía"
+const describe = (date: IsoDate, choice: BlockChoice) =>
+  `${capitalize(formatWeekdayDayMonth(date))} · ${MODULE_WORDS[choice].label}`;
 
 function dayLabel(cell: DayCell): string {
   const modules = MODULE_ORDER.map((module) => {
@@ -54,7 +65,7 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
   const [pending, startTransition] = useTransition();
   const [selectedDate, setSelectedDate] = useState<IsoDate | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [notice, setNotice] = useState<Notice | null>(null);
+  const [alert, setAlert] = useState<AlertMessage | null>(null);
   const [undo, setUndo] = useState<Undo | null>(null);
 
   // Optimistic slots survive only until the server sends a different set of blocks.
@@ -105,20 +116,25 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
     [month, effective.blocks, today, lastBookable],
   );
   const selected = weeks.flat().find((cell) => cell.date === selectedDate && cell.status === "open") ?? null;
-  const dismissNotice = useCallback(() => {
-    setNotice(null);
-    setUndo(null);
-  }, []);
 
   function openDay(cell: DayCell) {
     setSelectedDate(cell.date);
     if (!window.matchMedia(DESKTOP).matches) setSheetOpen(true);
   }
 
+  function showAlert(tone: AlertMessage["tone"], title: string, detail: string | undefined, nextUndo: Undo | null) {
+    // One action, one confirmation: the day sheet closes so the alert sits over the updated calendar.
+    setSheetOpen(false);
+    setUndo(nextUndo);
+    // A new id re-mounts the alert so its entrance plays again.
+    setAlert((current) => ({ id: (current?.id ?? 0) + 1, tone, title, detail, canUndo: nextUndo !== null }));
+  }
+
   function run<T>(
     action: () => Promise<ActionResult<T>>,
     slots: [string, boolean][],
-    onSuccess: (data: T | undefined) => { text: string; undo: Undo | null },
+    detail: string,
+    onSuccess: (data: T | undefined) => Success,
   ) {
     setSlots(slots);
     startTransition(async () => {
@@ -126,72 +142,65 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
         const result = await action();
         if (result.ok) {
           const success = onSuccess(result.data);
-          setUndo(success.undo);
-          setNotice({ id: Date.now(), text: success.text, tone: "success", canUndo: success.undo !== null });
+          showAlert("success", success.title, success.detail, success.undo);
         } else if (result.code === "UNAUTHORIZED") {
           router.push("/admin/login?sesion=terminada");
           return;
         } else {
           clearSlots(slots.map(([key]) => key));
-          const text =
+          const title =
             result.code === "ALREADY_TAKEN"
-              ? "Ese módulo ya estaba tachado."
+              ? "Ese módulo ya estaba reservado."
               : result.code === "NOT_FOUND"
                 ? "Ese módulo ya estaba liberado."
                 : "Algo falló. Reintentá.";
-          setUndo(null);
-          setNotice({ id: Date.now(), text, tone: "error", canUndo: false });
+          showAlert("error", title, detail, null);
         }
       } catch (error) {
         clearSlots(slots.map(([key]) => key));
         const stale = error instanceof Error && error.message.includes(STALE_ACTION);
-        setUndo(null);
-        setNotice({
-          id: Date.now(),
-          text: stale ? "Se actualizó la página, reintentá" : "Algo falló. Reintentá.",
-          tone: "error",
-          canUndo: false,
-        });
+        showAlert("error", stale ? "Se actualizó la página, reintentá" : "Algo falló. Reintentá.", undefined, null);
       }
       router.refresh();
     });
   }
 
   function toggle(date: IsoDate, module: ModuleCode, blockId: string | null) {
-    const words = MODULE_WORDS[module];
+    const detail = describe(date, module);
     if (blockId) {
-      run(() => unblockModule({ id: blockId }), [[slot(date, module), false]], () => ({
-        text: `Listo, ${words.label} del ${formatDayMonth(date)} ${words.freed}.`,
-        undo: { kind: "reblock", date, module },
+      run(() => unblockModule({ id: blockId }), [[slot(date, module), false]], detail, () => ({
+        title: "Liberado",
+        detail,
+        undo: { date, module },
       }));
       return;
     }
-    run(() => blockModules({ date, choice: module }), [[slot(date, module), true]], (data) => ({
-      text: `Listo, ${words.label} del ${formatDayMonth(date)} ${words.crossed}.`,
-      undo: data ? { kind: "unblock", ids: data.ids } : null,
+    run(() => blockModules({ date, choice: module }), [[slot(date, module), true]], detail, (data) => ({
+      title: "Reservado",
+      detail,
+      undo: data ? { ids: data.ids } : null,
     }));
   }
 
   function blockWholeDay(date: IsoDate) {
-    const words = MODULE_WORDS["dia-completo"];
+    const detail = describe(date, "dia-completo");
     run(
       () => blockModules({ date, choice: "dia-completo" }),
       MODULE_ORDER.map((module) => [slot(date, module), true]),
-      (data) => ({
-        text: `Listo, ${words.label} del ${formatDayMonth(date)} ${words.crossed}.`,
-        undo: data ? { kind: "unblock", ids: data.ids } : null,
-      }),
+      detail,
+      (data) => ({ title: "Reservado", detail, undo: data ? { ids: data.ids } : null }),
     );
   }
 
   function undoLast() {
     const last = undo;
+    const detail = alert?.detail ?? "";
     if (!last) return;
     setUndo(null);
-    setNotice(null);
-    if (last.kind === "reblock") {
-      run(() => blockModules({ date: last.date, choice: last.module }), [[slot(last.date, last.module), true]], () => ({
-        text: "Deshecho.",
+    if ("date" in last) {
+      run(() => blockModules({ date: last.date, choice: last.module }), [[slot(last.date, last.module), true]], detail, () => ({
+        title: "Deshecho",
+        detail,
         undo: null,
       }));
       return;
@@ -206,7 +215,8 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
         return { ok: true };
       },
       taken.map((b) => [slot(b.date, b.module), false]),
-      () => ({ text: "Deshecho.", undo: null }),
+      detail,
+      () => ({ title: "Deshecho", detail, undo: null }),
     );
   }
 
@@ -217,7 +227,7 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
     const bothFree = MODULE_ORDER.every((module) => cell.modules[module] === null);
     return (
       <div>
-        <p className="text-sm text-[var(--admin-muted)]">Tocá para tachar o liberar</p>
+        <p className="text-sm text-[var(--admin-muted)]">Tocá para reservar o liberar</p>
         <h2 className="mt-0.5 text-xl font-semibold">{capitalize(formatLongDate(cell.date))}</h2>
         <div className="mt-4 grid grid-cols-2 gap-3">
           {MODULE_ORDER.map((module) => {
@@ -233,7 +243,7 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
                 onClick={() => toggle(cell.date, module, blockId)}
               >
                 <span className="text-lg font-semibold">{MODULE_WORDS[module].label}</span>
-                <span className="text-sm opacity-80">{taken ? "Tachado" : "Libre"}</span>
+                <span className="text-sm opacity-80">{taken ? "Reservado" : "Libre"}</span>
               </button>
             );
           })}
@@ -245,16 +255,12 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
             onClick={() => blockWholeDay(cell.date)}
             className="mt-3 min-h-12 w-full rounded-[0.875rem] px-4 text-base font-medium shadow-[inset_0_0_0_1px_var(--admin-free-line)] disabled:opacity-60"
           >
-            Tachar el día completo
+            Reservar el día completo
           </button>
         )}
       </div>
     );
   };
-
-  const undoBar = notice && (
-    <UndoBar key={notice.id} notice={notice} onUndo={undoLast} onExpire={dismissNotice} undoDisabled={pending} />
-  );
 
   return (
     <>
@@ -328,7 +334,7 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
               Libre
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="size-3 rounded-sm bg-[var(--admin-taken)]" /> Tachado
+              <span className="size-3 rounded-sm bg-[var(--admin-taken)]" /> Reservado
             </span>
             <span>Arriba mediodía · abajo noche</span>
           </div>
@@ -339,16 +345,16 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
             {selected ? (
               dayActions(selected)
             ) : (
-              <p className="text-[var(--admin-muted)]">Tocá un día del calendario para tachar o liberar.</p>
+              <p className="text-[var(--admin-muted)]">Tocá un día del calendario para reservar o liberar.</p>
             )}
           </div>
 
           <section aria-labelledby="admin-upcoming" className="lg:mt-8">
             <h2 id="admin-upcoming" className="text-lg font-semibold">
-              Próximos tachados
+              Próximos reservados
             </h2>
             {effective.upcoming.length === 0 ? (
-              <p className="mt-2 text-sm text-[var(--admin-muted)]">No hay módulos tachados desde hoy.</p>
+              <p className="mt-2 text-sm text-[var(--admin-muted)]">No hay módulos reservados desde hoy.</p>
             ) : (
               <ul className="mt-2 divide-y divide-[var(--admin-free-line)]">
                 {effective.upcoming.map((block) => (
@@ -379,7 +385,6 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
         onClose={() => setSheetOpen(false)}
       >
         {selected && dayActions(selected)}
-        {sheetOpen && undoBar && <div className="mt-4">{undoBar}</div>}
         <button
           type="button"
           onClick={() => setSheetOpen(false)}
@@ -389,8 +394,14 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
         </button>
       </BottomSheet>
 
-      {!sheetOpen && undoBar && (
-        <div className="fixed inset-x-4 bottom-4 z-10 mx-auto max-w-md pb-[env(safe-area-inset-bottom)]">{undoBar}</div>
+      {alert && (
+        <ConfirmAlert
+          key={alert.id}
+          message={alert}
+          onUndo={undoLast}
+          undoDisabled={pending}
+          onClose={() => setAlert((current) => (current?.id === alert.id ? null : current))}
+        />
       )}
     </>
   );
