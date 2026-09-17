@@ -126,6 +126,15 @@ export async function getBlocksForMonth(month: IsoMonth): Promise<Block[]> {
     .orderBy(asc(moduleBlocks.date), asc(moduleBlocks.module));
 }
 
+export async function getUpcomingBlocks(today: IsoDate, limit = 30): Promise<Block[]> {
+  return db
+    .select({ id: moduleBlocks.id, date: moduleBlocks.date, module: moduleBlocks.module })
+    .from(moduleBlocks)
+    .where(gte(moduleBlocks.date, today))
+    .orderBy(asc(moduleBlocks.date), asc(moduleBlocks.module))
+    .limit(limit);
+}
+
 function isUniqueViolation(error: unknown): boolean {
   for (let current: unknown = error; current; current = (current as { cause?: unknown }).cause) {
     if ((current as { code?: unknown }).code === "23505") return true;
