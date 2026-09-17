@@ -152,6 +152,8 @@
 | OQ-03 | Whether and when hosting and database move to client-owned accounts | `S1-15`: the client should own its accounts | Phase 2, with the domain |
 | OQ-04 | Error tracking (e.g. a free Sentry plan) in phase 1 or not | Vercel logs last 1 hour | Not in phase 1 |
 | OQ-05 | Vercel runtime support for Node 24 and Next 16.3 support for TypeScript 7 | Pinned versions in `02-STACK.md` | Verified in WU-01 |
+| OQ-06 | Whether the public calendar borrows the panel's "Mitades" cell and its "Reservado" vocabulary, or gets its own visual language | `06-UI-UX.md` §3 and the WU-08 design round | Decided in the `seccion-premium` round Mateo names for the public calendar |
+| OQ-07 | On a 1920 screen the panel sits in a centred 1152 px column, with wide margins. Mateo's general criterion for the public site is "usá el ancho" | Panel layout on his own screen | Stays centred until he says otherwise (asked 2026-09-17, unanswered) |
 
 ## Gotchas
 
@@ -176,6 +178,18 @@
 | G-017 | A Server Action only executes on routes whose page imports it. Posting its id elsewhere (`/`, `/admin/login`, a 404) returns `{}` and runs nothing (verified in WU-04). The owner actions run only on `/admin`, behind `proxy.ts` and `requireAdmin()` |
 | G-018 | `Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit" })` still prints the month without a leading zero ("21/9"). `formatDayMonth` builds "21/09" from the ISO string instead |
 | G-019 | The React Compiler lint rules (`react-hooks/refs`, `react-hooks/purity`) reject `contextSafe(fn)` called during render when `fn` reads refs, and `Date.now()` in functions defined in the component body. Wrap with `contextSafe` inside the handler; derive ids from state |
+| G-020 | Since Cache Components (`D-021`), `/admin` with an **invalid** cookie answers **HTTP 200** instead of 307: the prerendered shell (title, "Cerrar sesión", "Cargando el calendario…") is sent first and the redirect to `/admin/login?sesion=terminada` travels in the streamed part. Checked on production 2026-09-17: the body carries no calendar data and no blocks, and the response still has `Cache-Control: no-store` and `X-Robots-Tag: noindex, nofollow`. A test that asserts 307 for an invalid cookie must assert the streamed redirect instead; with **no** cookie `proxy.ts` still answers 307 |
+
+## Technical debt taken on purpose
+
+| ID | Debt | Why it was taken | When it is paid |
+|---|---|---|---|
+| TD-001 | `eslint` is pinned at 9.39.5, which npm marks as no longer supported | ESLint 10 is outside the peer range of `eslint-plugin-import` and `eslint-plugin-react` inside `eslint-config-next` 16.3.5 | When `eslint-config-next` supports ESLint 10 |
+| TD-002 | `npm audit` reports 4 moderate findings, all the esbuild `serve` advisory (GHSA-67mh-4wv8-2f99) reached through `drizzle-kit`'s `@esbuild-kit/*` loader | Dev-only CLI, never deployed, and its config loader does not start esbuild's dev server. The only offered fix downgrades `drizzle-kit` to 0.18.1 | When `drizzle-kit` drops `@esbuild-kit` |
+| TD-003 | There is no test runner in the repo. Everything built in WU-01…WU-05 was verified with one-off Node and Playwright scripts that live in the session scratchpad, not in git, so a later chat cannot re-run them | Speed during the first units; the scripts needed the real dev database and a running server | Before launch, or the first time a regression is missed. The checks worth keeping: the 44 action checks, the login limits, and the availability cache |
+| TD-004 | `typescript` stays on 6.0.3 while 7.x is released (`D-013`) | `typescript-eslint` refuses to load with TS 7, and lint blocks CI | When `typescript-eslint` supports TypeScript 7 |
+| TD-005 | The panel's teal/beige tokens in `app/admin/admin.css` are provisional and were not taken from the brand | The original logo has not arrived (`CR-03`), and colours must not be picked from screenshots | When the logo arrives: swap the token values, no layout change |
+| TD-006 | After logging in, the panel always lands on `/admin`, even when the visitor asked for another admin URL (Mateo hit this opening `/admin/prototipo` and landing on `/admin`) | Keeping the login action to the exact order of `08-SECURITY.md` §5 during WU-03 | If the owner ever needs deep links into the panel |
 
 ## Dependencies reviewed
 

@@ -19,7 +19,8 @@ Phase 2 (online booking, Mercado Pago, automated WhatsApp, the other spaces, own
 
 | You are doing | Read |
 |---|---|
-| Anything, first time | this file → `docs/00-OVERVIEW.md` → `docs/10-MEMORY.md` |
+| Anything, first time | this file → `WORKLOG.md` §1 (where the work stands) → `docs/00-OVERVIEW.md` → `docs/10-MEMORY.md` |
+| Picking up after another chat: what was built, what was verified, what is half-done | `WORKLOG.md` (§1 state, §2 the log of every chat) |
 | Salon facts: amenities, capacity, modules, prices, rules, address, contact | `docs/01-CONTEXT.md` — the only source |
 | Adding or upgrading a dependency | `docs/02-STACK.md` |
 | How the parts connect, the midnight rule, failure modes | `docs/03-ARCHITECTURE.md` |
