@@ -57,13 +57,19 @@ Additionally, on `/admin/*`: `X-Robots-Tag: noindex, nofollow` and `Cache-Contro
 
 Temporary sources: `C:\Users\mateo\Downloads\contenido-araucaria\`. Output goes to `public/media/` (phase 1). Phase 1 total budget for committed media: **≤ 25 MB**.
 
-| Source | Output | Reference command (WU-06 finalizes the values) |
-|---|---|---|
-| `IMG_9789.MOV` (HEVC, 1080×1920, 43 s, 58 MB) | `hero.mp4` (H.264, no audio, `faststart`) + `hero-poster.jpg` + `hero-poster.avif` | `ffmpeg -i IMG_9789.MOV -an -c:v libx264 -preset slow -crf 26 -vf "scale=1080:-2" -movflags +faststart hero.mp4` |
-| 6 WhatsApp videos (480p) | Short tiles, H.264, no audio, + poster each | Same command with `scale=-2:480`, trimmed to ≤ 8 s where longer |
-| Screenshots | Cropped single photos, AVIF + JPEG fallback via `next/image` | Crop to one photo per file; never upscale |
+**`scripts/build-media.sh` is the pipeline.** It wipes and rebuilds `public/media/` from the sources; when the originals arrive (`CR-01`, `CR-02`), point `SRC` at them and run it again. Requires `ffmpeg` and `ffprobe` on `PATH` (built with 8.1).
 
-HEVC does not play in every browser; every published video is H.264 (`G-001`). When the originals arrive, they go to the same pipeline. If the budget is exceeded, video moves to object storage (decided then, recorded in `10-MEMORY.md`).
+| Output | Source | Values (measured in WU-06, `D-022`) |
+|---|---|---|
+| `hero.mp4` — 720×1280, 10 s, **1.93 MB** | `IMG_9789.MOV`, 7–17 s | `-an -c:v libx264 -preset slow -crf 30 -pix_fmt yuv420p -vf "scale=720:-2,fps=30" -movflags +faststart` |
+| `hero-poster.jpg` 1080×1920 **155 KB**, `hero-poster.avif` **50 KB** | the clip's own first frame (7 s) | `-frames:v 1 -q:v 4`; AVIF with `libaom-av1 -crf 34 -still-picture 1` |
+| `galeria/*.mp4` — 6 tiles 480×848, 2–8 s, **2.85 MB** together, plus a `.jpg` poster each | 5 of the 6 WhatsApp videos | Same as the hero with `scale=480:-2` and `-crf 28` |
+| `fotos/*.jpg` — 5 stills 1080×1920 and 2 crops ~450 px, **1.19 MB** | the walkthrough; one Instagram carousel screenshot | `-frames:v 1 -q:v 4`; crops with `crop=w:h:x:y`, never upscaled |
+| `logo-araucaria.png` — 404×404, **194 KB** | the Instagram logo card | `crop=404:404:230:238`. Temporary, flat background (`CR-03`) |
+
+Measured 2026-09-17: **6.64 MB of the 25 MB budget**, 23 files.
+
+Rules that hold whatever the source is: every published video is H.264 / `yuv420p` and silent, because HEVC does not play in every browser (`G-001`); every output carries `-map_metadata -1`, because the iPhone sources embed GPS coordinates; the hero poster is the clip's own first frame, so playback does not jump; nothing is upscaled. The previous reference command (1080 at CRF 26) was measured at **14.6 MB per 8 s** — 78 MB for the hero alone — and replaced (`D-022`). If a future source blows the budget, video moves to object storage (decided then, recorded in `10-MEMORY.md`).
 
 ## Backups and restore
 

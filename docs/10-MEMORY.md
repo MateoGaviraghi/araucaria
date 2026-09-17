@@ -143,6 +143,12 @@
 **Found while verifying:** with the login form reset that React does after a failed attempt, the hidden `renderedAt` field (set on the DOM by an effect, `D-017`) came back empty, so **every attempt after the first failed as `INVALID_INPUT` without ever checking the password or counting toward the rate limit** — the owner had to reload the page to log in. Now the server passes `renderedAt` as a prop (possible because the login is dynamic) and the input is controlled. Verified in a real browser: a wrong password answers "Contraseña incorrecta." and the sixth attempt from one IP is refused.
 **Reopen if:** the public page needs fresher data than the panel's own invalidation provides.
 
+### D-022 · 2026-09-17 · Media encoding values, replacing the reference command
+**Decision:** `scripts/build-media.sh` is the pipeline, and its values are the measured ones: hero 720×1280 CRF 30 (10 s), gallery tiles 480×848 CRF 28 (≤ 8 s), stills and posters JPEG `-q:v 4`, hero poster also AVIF CRF 34, `-map_metadata -1` on everything. Total committed: 6.64 MB of the 25 MB budget.
+**Alternatives rejected:** the reference command in `07-INFRASTRUCTURE.md` (1080, CRF 26), measured at 14.6 MB per 8 s — 78 MB for the hero alone; 1080 at CRF 32 (5.9 MB per 8 s) still costs 3× the chosen recipe for a video that plays behind text; 540 px reads soft on a phone.
+**Also decided here:** the hero is 7–17 s of the walkthrough (covered gallery → grill → pool → patio), not the whole clip; the night video is not published, because guests' faces are recognisable in it; five stills come out of the 1080 walkthrough, and the two professional photos inside the "Salón usos múltiples" carousel are cropped in as well — they are a quarter of the resolution but better framed than any frame of the videos.
+**Reopen if:** the originals arrive (`CR-01`, `CR-02`) — same script, new numbers — or a design round needs a longer hero.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
@@ -179,6 +185,9 @@
 | G-018 | `Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit" })` still prints the month without a leading zero ("21/9"). `formatDayMonth` builds "21/09" from the ISO string instead |
 | G-019 | The React Compiler lint rules (`react-hooks/refs`, `react-hooks/purity`) reject `contextSafe(fn)` called during render when `fn` reads refs, and `Date.now()` in functions defined in the component body. Wrap with `contextSafe` inside the handler; derive ids from state |
 | G-020 | Since Cache Components (`D-021`), `/admin` with an **invalid** cookie answers **HTTP 200** instead of 307: the prerendered shell (title, "Cerrar sesión", "Cargando el calendario…") is sent first and the redirect to `/admin/login?sesion=terminada` travels in the streamed part. Checked on production 2026-09-17: the body carries no calendar data and no blocks, and the response still has `Cache-Control: no-store` and `X-Robots-Tag: noindex, nofollow`. A test that asserts 307 for an invalid cookie must assert the streamed redirect instead; with **no** cookie `proxy.ts` still answers 307 |
+| G-021 | The 6 WhatsApp videos are coded 848×480 with **90° rotation metadata**, so they display vertical (480×848). ffmpeg applies the rotation before the filter chain, so `scale=480:-2` sets the *displayed* width; the `scale=-2:480` of the old reference command would have produced 272×480 |
+| G-022 | `IMG_9789.MOV` is usable only between 0 and 17 s: after that it shows a corridor, a dated kitchen and a bathroom, and it ends on a **CapCut watermark** (~42 s). The filmer's shadow is visible on the floor in several frames — unavoidable with this temporary material (`CR-02`) |
+| G-023 | iPhone `.MOV` files embed GPS coordinates and timestamps. Every output of `build-media.sh` carries `-map_metadata -1`; a published file must never ship the client's location metadata |
 
 ## Technical debt taken on purpose
 

@@ -1,0 +1,3 @@
+# Mateo's Windows checkout uses core.autocrlf=true (G-015). Shell scripts must stay LF or
+# bash rejects the shebang ("/usr/bin/env\r: bad interpreter").
+*.sh text eol=lf
