@@ -111,6 +111,18 @@
 **Reasoning:** Mateo answered "sí" to the three WU-03 questions on 2026-09-17; the rest follows from verification in WU-03.
 **Reopen if:** WU-04 needs the login form elsewhere.
 
+### D-018 · 2026-09-17 · WU-04 owner panel choices
+**Decision:**
+- `blockModules` / `unblockModule` call `updateTag("availability")`, not `revalidateTag(tag, "max")`: the next visitor waits for fresh data instead of getting the stale calendar (G-003).
+- The panel is built functional first (data, actions, dialogs, toasts, minimal styling); the visual design of `/admin/login` and `/admin` is a later `seccion-premium` round named by Mateo.
+- The panel navigates from the current month to 12 months ahead, the same range where modules can be crossed out (C-08). An invalid or out-of-range `?mes=` falls back to the nearest valid month.
+- Copy not in `06-UI-UX.md` §5, approved by Mateo: "Listo, Día completo del 18/10 tachado." and "Ese módulo ya estaba liberado." (NOT_FOUND). Gender follows the module: "Mediodía … tachado/liberado", "Noche … tachada/liberada".
+- Tapping a day opens one dialog: choose what to cross out (only free options; "Día completo" only when both are free) and a "Liberar" button per crossed-out module, which asks "¿Liberar Noche del domingo 18/10?". One 44 px target per day instead of one per module.
+- Weeks start on Monday (Intl `es-AR` weekInfo `firstDay` = 1).
+**Alternatives rejected:** `revalidateTag` with the `max` profile (serves stale availability); separate tap targets per module in the grid (under 44 px at 360 px width).
+**Reasoning:** Mateo answered "sí" to the three WU-04 questions on 2026-09-17; the rest follows from G-003, C-08 and `06-UI-UX.md` §8.
+**Reopen if:** the design round changes the interaction.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
@@ -140,6 +152,8 @@
 | G-013 | `cookies().delete()` sends no `Secure`, and browsers ignore any `Set-Cookie` for a `__Host-` cookie without it, so the session cookie would survive logout. Clear it with `set(name, "", { ...SESSION_COOKIE_OPTIONS, maxAge: 0 })` |
 | G-014 | Next's Server Action origin check (C-07), verified in WU-03: a POST whose `Origin` differs from the host is aborted ("Invalid Server Actions request", HTTP 500, the action does not run). A POST with **no** `Origin` only logs a warning and runs. Browsers always send `Origin` on form POSTs, so that is not a CSRF path, and `SameSite=Strict` is the second layer. Test scripts must send a matching `Origin` |
 | G-015 | On Mateo's Windows (`core.autocrlf=true`) git checks migrations out with CRLF, so `drizzle.__drizzle_migrations.hash` for `0000_init` differs between `dev` (applied from LF, 2026-09-16) and `production` (applied from CRLF, 2026-09-17). The SQL is identical and drizzle picks pending migrations by `created_at`, so nothing re-runs. Production got `0000_init` on 2026-09-17 after the backup branch `backup-pre-0000-init` |
+| G-016 | The date examples in `05-API-CONTRACTS.md` §3 and `06-UI-UX.md` §5 ("sábado 18 de octubre de 2026", "sábado 18/10") use a wrong weekday: 18/10/2026 is a **domingo**. The code formats the real weekday with `Intl`; do not copy the example as a test expectation |
+| G-017 | A Server Action only executes on routes whose page imports it. Posting its id elsewhere (`/`, `/admin/login`, a 404) returns `{}` and runs nothing (verified in WU-04). The owner actions run only on `/admin`, behind `proxy.ts` and `requireAdmin()` |
 
 ## Dependencies reviewed
 

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, eq, gt, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, eq, gt, gte, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import {
@@ -11,10 +11,15 @@ import {
   SESSION_DAYS,
 } from "@/lib/auth/config";
 import { hashSessionToken, isWellFormedSessionToken } from "@/lib/auth/tokens";
+import type { Block, ModuleCode } from "@/components/calendar/month";
+import { addMonthsToMonth, firstDayOfMonth, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { db } from "@/lib/db/client";
-import { adminAudit, adminCredential, adminSessions, loginAttempts } from "@/lib/db/schema";
+import { adminAudit, adminCredential, adminSessions, loginAttempts, moduleBlocks } from "@/lib/db/schema";
 
 // The only module that imports the database client (docs/09-RULES.md §2).
+
+// Cache tag of the public availability read (docs/03-ARCHITECTURE.md §Rendering and caching).
+export const AVAILABILITY_TAG = "availability";
 
 export type AdminSession = { sessionId: string };
 
@@ -104,6 +109,72 @@ export async function purgeAfterLogin(): Promise<void> {
     db.delete(adminSessions).where(or(lt(adminSessions.expiresAt, sql`now()`), isNotNull(adminSessions.revokedAt))),
     db.delete(adminAudit).where(lt(adminAudit.at, sql`now() - interval '12 months'`)),
   ]);
+}
+
+// ---- Availability (owner panel). Callers run requireAdmin() first.
+
+export async function getBlocksForMonth(month: IsoMonth): Promise<Block[]> {
+  return db
+    .select({ id: moduleBlocks.id, date: moduleBlocks.date, module: moduleBlocks.module })
+    .from(moduleBlocks)
+    .where(
+      and(
+        gte(moduleBlocks.date, firstDayOfMonth(month)),
+        lt(moduleBlocks.date, firstDayOfMonth(addMonthsToMonth(month, 1))),
+      ),
+    )
+    .orderBy(asc(moduleBlocks.date), asc(moduleBlocks.module));
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  for (let current: unknown = error; current; current = (current as { cause?: unknown }).cause) {
+    if ((current as { code?: unknown }).code === "23505") return true;
+  }
+  return false;
+}
+
+// One INSERT of one or two rows plus its audit row, in one transaction: "día completo" is atomic and
+// the unique (date, module) constraint decides conflicts (D-003, G-006).
+export async function insertBlocks(input: {
+  date: IsoDate;
+  modules: ModuleCode[];
+  sessionId: string;
+  ipHash: string;
+}): Promise<"ok" | "taken"> {
+  try {
+    await db.batch([
+      db.insert(moduleBlocks).values(input.modules.map((module) => ({ date: input.date, module }))),
+      db.insert(adminAudit).values({
+        action: "block",
+        detail: { date: input.date, modules: input.modules },
+        ipHash: input.ipHash,
+        sessionId: input.sessionId,
+      }),
+    ]);
+    return "ok";
+  } catch (error) {
+    if (isUniqueViolation(error)) return "taken";
+    throw error;
+  }
+}
+
+// Delete and audit in one statement; null when the block no longer exists.
+export async function deleteBlock(input: {
+  id: string;
+  sessionId: string;
+  ipHash: string;
+}): Promise<{ date: IsoDate; module: ModuleCode } | null> {
+  const result = await db.execute<{ date: IsoDate; module: ModuleCode }>(sql`
+    with deleted as (
+      delete from ${moduleBlocks} where ${moduleBlocks.id} = ${input.id}
+      returning ${moduleBlocks.date}, ${moduleBlocks.module}
+    )
+    insert into ${adminAudit} (action, detail, ip_hash, session_id)
+    select 'unblock', jsonb_build_object('date', deleted.date, 'module', deleted.module), ${input.ipHash}, ${input.sessionId}
+    from deleted
+    returning detail ->> 'date' as date, detail ->> 'module' as module
+  `);
+  return result.rows[0] ?? null;
 }
 
 export async function revokeSession(sessionId: string, ipHash: string): Promise<void> {
