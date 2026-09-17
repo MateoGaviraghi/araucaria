@@ -143,16 +143,19 @@ function isUniqueViolation(error: unknown): boolean {
 }
 
 // One INSERT of one or two rows plus its audit row, in one transaction: "día completo" is atomic and
-// the unique (date, module) constraint decides conflicts (D-003, G-006).
+// the unique (date, module) constraint decides conflicts (D-003, G-006). Returns the new ids (for Deshacer).
 export async function insertBlocks(input: {
   date: IsoDate;
   modules: ModuleCode[];
   sessionId: string;
   ipHash: string;
-}): Promise<"ok" | "taken"> {
+}): Promise<string[] | "taken"> {
   try {
-    await db.batch([
-      db.insert(moduleBlocks).values(input.modules.map((module) => ({ date: input.date, module }))),
+    const [inserted] = await db.batch([
+      db
+        .insert(moduleBlocks)
+        .values(input.modules.map((module) => ({ date: input.date, module })))
+        .returning({ id: moduleBlocks.id }),
       db.insert(adminAudit).values({
         action: "block",
         detail: { date: input.date, modules: input.modules },
@@ -160,7 +163,7 @@ export async function insertBlocks(input: {
         sessionId: input.sessionId,
       }),
     ]);
-    return "ok";
+    return inserted.map((row) => row.id);
   } catch (error) {
     if (isUniqueViolation(error)) return "taken";
     throw error;

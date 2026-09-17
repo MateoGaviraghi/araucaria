@@ -123,6 +123,13 @@
 **Reasoning:** Mateo answered "sí" to the three WU-04 questions on 2026-09-17; the rest follows from G-003, C-08 and `06-UI-UX.md` §8.
 **Reopen if:** the design round changes the interaction.
 
+### D-019 · 2026-09-17 · Owner panel design: "Mitades" + undo instead of confirmation
+**Decision:** the owner calendar shows each day split in two (top half = Mediodía, bottom half = Noche; beige free, teal crossed out). Tapping a day opens a bottom sheet on the phone (a side panel on desktop) with two large toggles; each tap saves at once and offers "Deshacer" for 6 s. A "Próximos tachados" list under the month frees a module without searching for its day. `blockModules` returns the new ids so undo is immediate. Colors are provisional (`{{CONFIRMAR}}` until the logo, CR-03). This supersedes the confirmation dialogs of `06-UI-UX.md` §5 and the one-dialog interaction of `D-018`.
+**Sources:** `seccion-premium` round. References: Bookingmood availability calendar (split day), Airbnb host calendar (bottom sheet), Cal.com date overrides (list of blocked dates). Three variants were built on `/admin/prototipo` and tried by Mateo on the preview.
+**Mateo's words:** on the functional panel, "no me resulta una experiencia de usuario fácil y amigable" (answer "4 todo": state unreadable, too many steps, looks bad). On the winner: "1, mitades · está bien así me gusta". Undo instead of confirmation: "sí".
+**Rejected (do not retry):** the functional panel with "M"/"N" letters under each number and a dialog with radio buttons; variant **Diagonal** (triangles, Bookingmood literal); variant **Barras** (two small bars under the number); date-range forms in modals (Hospitable, Hostfully); generic date pickers (React Aria, Mobiscroll); multi-day selection (the salon rents by day).
+**Reopen if:** the owner finds it slow or confusing on the phone; the logo brings final colors (tokens change, not the design).
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

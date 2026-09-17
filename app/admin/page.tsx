@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/admin/actions";
 import { AdminCalendar } from "@/components/calendar/admin-calendar";
-import { getBlocksForMonth, requireAdmin } from "@/lib/dal";
+import { getBlocksForMonth, getUpcomingBlocks, requireAdmin } from "@/lib/dal";
 import { isValidIsoMonth, lastBookableDate, monthOf, todayInBuenosAires } from "@/lib/dates";
+import "./admin.css";
 
 export const metadata: Metadata = {
   title: "Panel de Araucaria",
   robots: { index: false, follow: false },
 };
 
-// Functional panel; the visual design is a seccion-premium round (D-018).
 export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
   const session = await requireAdmin();
   if (!session) redirect("/admin/login?sesion=terminada");
@@ -25,26 +25,32 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
   const requested = typeof mes === "string" && isValidIsoMonth(mes) ? mes : firstMonth;
   const month = requested < firstMonth ? firstMonth : requested > lastMonth ? lastMonth : requested;
 
-  const blocks = await getBlocksForMonth(month);
+  const [blocks, upcoming] = await Promise.all([getBlocksForMonth(month), getUpcomingBlocks(today)]);
 
   return (
-    <main className="mx-auto max-w-xl px-4 py-4">
-      <header className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Panel de Araucaria</h1>
-        <form action={logout}>
-          <button type="submit" className="min-h-11 rounded-md border px-4">
-            Cerrar sesión
-          </button>
-        </form>
-      </header>
-      <AdminCalendar
-        month={month}
-        blocks={blocks}
-        today={today}
-        lastBookable={lastBookable}
-        firstMonth={firstMonth}
-        lastMonth={lastMonth}
-      />
+    <main className="admin-shell">
+      <div className="mx-auto max-w-6xl px-4 pb-28 pt-6 lg:px-10 lg:pt-10">
+        <header className="flex items-center justify-between gap-4">
+          <h1 className="text-lg font-semibold tracking-tight">Panel de Araucaria</h1>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="min-h-11 rounded-full px-4 text-sm shadow-[inset_0_0_0_1px_var(--admin-free-line)]"
+            >
+              Cerrar sesión
+            </button>
+          </form>
+        </header>
+        <AdminCalendar
+          month={month}
+          blocks={blocks}
+          upcoming={upcoming}
+          today={today}
+          lastBookable={lastBookable}
+          firstMonth={firstMonth}
+          lastMonth={lastMonth}
+        />
+      </div>
     </main>
   );
 }

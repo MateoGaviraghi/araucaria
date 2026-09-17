@@ -20,7 +20,10 @@ const BlockSchema = z.object({
 
 const UnblockSchema = z.object({ id: z.uuid() });
 
-export async function blockModules(input: { date: string; choice: BlockChoice }): Promise<ActionResult> {
+export async function blockModules(input: {
+  date: string;
+  choice: BlockChoice;
+}): Promise<ActionResult<{ ids: string[] }>> {
   const session = await requireAdmin();
   if (!session) return { ok: false, code: "UNAUTHORIZED" };
 
@@ -41,7 +44,8 @@ export async function blockModules(input: { date: string; choice: BlockChoice })
     if (outcome === "taken") return { ok: false, code: "ALREADY_TAKEN" };
     // updateTag, not revalidateTag: the next visitor must not get the stale calendar (G-003, D-018).
     updateTag(AVAILABILITY_TAG);
-    return { ok: true };
+    // The new ids let the panel undo right away (D-019).
+    return { ok: true, data: { ids: outcome } };
   } catch (error) {
     console.error("blockModules: unexpected failure", error);
     return { ok: false, code: "RETRY" };

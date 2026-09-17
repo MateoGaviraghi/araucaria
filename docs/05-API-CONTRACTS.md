@@ -36,13 +36,13 @@ Expected failures are returned values. Only programmer errors throw. The UI maps
 | `login(formData)` | Anonymous | `password: string (1–200)`, `website: string` (honeypot, must be empty), `renderedAt: number` (time trap) | §5 order of `08-SECURITY.md`. Success → session + cookie + audit + purges → redirect `/admin` | `ActionResult` |
 | `logout()` | Admin | none | `requireAdmin()` → set `revoked_at` → clear cookie → audit | redirect `/admin/login` |
 | `getBlocks(month)` | Admin | `month: 'YYYY-MM'` | `requireAdmin()` → blocks of that month | `{ id; date; module }[]` |
-| `blockModules(input)` | Admin | `date: 'YYYY-MM-DD'` (today_AR ≤ date ≤ today_AR + 12 months) · `choice: 'mediodia' \| 'noche' \| 'dia-completo'` | `requireAdmin()` → one `INSERT` (1 or 2 rows) → on unique violation `ALREADY_TAKEN` → audit `block` → revalidate `availability` | `ActionResult` |
+| `blockModules(input)` | Admin | `date: 'YYYY-MM-DD'` (today_AR ≤ date ≤ today_AR + 12 months) · `choice: 'mediodia' \| 'noche' \| 'dia-completo'` | `requireAdmin()` → one `INSERT` (1 or 2 rows) → on unique violation `ALREADY_TAKEN` → audit `block` → `updateTag('availability')` (`D-018`) | `ActionResult<{ ids: string[] }>`: the new block ids, so the panel can undo at once (`D-019`) |
 | `unblockModule(input)` | Admin | `id: uuid` | `requireAdmin()` → delete by id → audit `unblock` with the date and module → revalidate `availability` | `ActionResult` |
 
 Signatures take **identifiers and changes, never whole objects**. Nothing the client sends decides identity.
 
 ```ts
-export async function blockModules(input: { date: string; choice: 'mediodia' | 'noche' | 'dia-completo' }): Promise<ActionResult>
+export async function blockModules(input: { date: string; choice: 'mediodia' | 'noche' | 'dia-completo' }): Promise<ActionResult<{ ids: string[] }>>
 export async function unblockModule(input: { id: string }): Promise<ActionResult>
 ```
 

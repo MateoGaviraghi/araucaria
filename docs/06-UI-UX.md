@@ -85,8 +85,8 @@ After submit, the form area shows:
 | Screen | Blocks | Content |
 |---|---|---|
 | `/admin/login` | `AUTH-CARD.signin` | TITLE "Panel de Araucaria" · FIELD password · SUBMIT "Entrar" · ERROR-STATE (below) · no "forgot password" (rotation is manual) |
-| `/admin` | `APP-SHELL.topbar` + `PAGE-HEADER.simple` + month calendar + `FEEDBACK.toast` | Topbar: logo and a **visible "Cerrar sesión"** · month navigation · each day shows `mediodia`/`noche` as free or crossed out |
-| Day action | `MODAL-FORM.create` / `MODAL-FORM.confirm-destructive` | Cross out: choose Mediodía · Noche · Día completo · confirm. Restore: tap a crossed-out module → "¿Liberar Noche del sábado 18/10?" → confirm |
+| `/admin` | `APP-SHELL.topbar` + month calendar + upcoming list + undo bar | Topbar: logo and a **visible "Cerrar sesión"** · month navigation · **each day split in two ("Mitades", `D-019`): top half = Mediodía, bottom half = Noche**, beige free / teal crossed out · legend "Libre · Tachado · Arriba mediodía · abajo noche" · list **"Próximos tachados"** with "Liberar" per module |
+| Day action (`D-019`, replaces the confirmation dialogs) | Bottom sheet on the phone, side panel on desktop | Tap a day → "Tocá para tachar o liberar" + the long date + two large toggles **Mediodía** / **Noche** ("Libre" / "Tachado") + "Tachar el día completo" when both are free. Each tap saves at once and shows "Listo, … · **Deshacer**" for 6 s. No confirmation step |
 
 ### Error and feedback copy
 
@@ -97,7 +97,10 @@ After submit, the form area shows:
 | `ALREADY_TAKEN` | "Ese módulo ya estaba tachado." |
 | `UNAUTHORIZED` | Redirect to login, message "Tu sesión terminó. Entrá de nuevo." |
 | `RETRY` | "Algo falló. Reintentá." |
-| Success block / unblock | "Listo, Noche del 18/10 tachada." / "Listo, Noche del 18/10 liberada." |
+| Success block / unblock | "Listo, Noche del 18/10 tachada." / "Listo, Noche del 18/10 liberada." · "Listo, Día completo del 18/10 tachado." (`D-018`) |
+| `NOT_FOUND` on unblock | "Ese módulo ya estaba liberado." (`D-018`) |
+| After "Deshacer" | "Deshecho." (`D-019`) |
+| Empty upcoming list / desktop panel with no day | "No hay módulos tachados desde hoy." / "Tocá un día del calendario para tachar o liberar." (`D-019`) |
 
 ## 6. Brand starting point
 
