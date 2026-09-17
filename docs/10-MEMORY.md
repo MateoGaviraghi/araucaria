@@ -137,6 +137,12 @@
 **Rejected (do not retry):** the bottom "Listo, … · Deshacer" bar; overshoot/bounce entrances (CodeFronts "Success Checkmark Pop"); confetti success modals; filled green circle checks; Lottie success animations (another library).
 **Reopen if:** the owner finds the alert slows down reserving several days in a row.
 
+### D-021 · 2026-09-17 · Cache Components for the public availability read
+**Decision:** `cacheComponents: true` in `next.config.ts`. `getAvailability(today)` is a `use cache` function tagged `availability` with the `hours` profile (revalidate 1 h, expire 1 day); the owner's actions call `updateTag`, so a change is visible on the next request, and the profile is only the ceiling if a row is ever edited outside the app. A failed read returns `null` instead of throwing, and the page renders with the "no pudimos cargar la disponibilidad" notice. `/admin` and `/admin/login` now read the session inside `<Suspense>`, so their shell is prerendered and the data streams. The public day states and module enablement live in `components/calendar/month.ts`.
+**Alternatives rejected:** `unstable_cache` (replaced in Next 16); no cache at all (Neon Free sleeps when idle, so the first visit after a quiet spell would wait for the database to wake up).
+**Found while verifying:** with the login form reset that React does after a failed attempt, the hidden `renderedAt` field (set on the DOM by an effect, `D-017`) came back empty, so **every attempt after the first failed as `INVALID_INPUT` without ever checking the password or counting toward the rate limit** — the owner had to reload the page to log in. Now the server passes `renderedAt` as a prop (possible because the login is dynamic) and the input is controlled. Verified in a real browser: a wrong password answers "Contraseña incorrecta." and the sixth attempt from one IP is refused.
+**Reopen if:** the public page needs fresher data than the panel's own invalidation provides.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

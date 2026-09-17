@@ -58,7 +58,7 @@ flowchart LR
 
 | Surface | Rendering | Cache |
 |---|---|---|
-| `/` | Server-rendered | Availability read is cached under the tag `availability`. Every `blockModules` / `unblockModule` revalidates that tag (Next.js 16 tag revalidation API, verified in WU-05). Content constants are static |
+| `/` | Static shell + streamed dynamic part (Cache Components, `D-021`) | `getAvailability(today)` is cached under the tag `availability` with the `hours` profile; every `blockModules` / `unblockModule` calls `updateTag("availability")`, so the change shows on the next request (verified in WU-05). Content constants are static |
 | `/admin/*` | Dynamic, per request | **No cache**. Responses carry `Cache-Control: no-store` |
 
 ## State placement

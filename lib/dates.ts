@@ -11,6 +11,11 @@ export type IsoMonth = string;
 // CI-04 default: bookable from today to today + 12 months.
 export const BOOKING_HORIZON_MONTHS = 12;
 
+/** Request time in ms. A helper because the React Compiler lint forbids Date.now() inside a component (G-019). */
+export function nowMs(): number {
+  return Date.now();
+}
+
 export function todayInBuenosAires(now: Date = new Date()): IsoDate {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: TIME_ZONE,

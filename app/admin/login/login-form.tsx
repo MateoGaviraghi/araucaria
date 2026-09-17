@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState } from "react";
 import { login } from "@/app/login-action";
 import type { ActionResult, ErrorCode } from "@/lib/action-result";
 
@@ -11,16 +11,10 @@ const MESSAGES: Partial<Record<ErrorCode, string>> = {
   RATE_LIMITED: "Demasiados intentos. Probá de nuevo más tarde.",
 };
 
-// Functional only; the panel's visual design is WU-04.
-export function LoginForm() {
+// Functional only; the panel's visual design is a seccion-premium round.
+export function LoginForm({ renderedAt }: { renderedAt: number }) {
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(login, null);
   const message = state && !state.ok ? (MESSAGES[state.code] ?? "Algo falló. Reintentá.") : null;
-  const renderedAtRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    // C-09 time trap: measured from when the form is usable in the browser until submit.
-    if (renderedAtRef.current) renderedAtRef.current.value = String(Date.now());
-  }, []);
 
   return (
     <form action={formAction}>
@@ -41,7 +35,8 @@ export function LoginForm() {
         <label htmlFor="website">Sitio web</label>
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
       </div>
-      <input ref={renderedAtRef} type="hidden" name="renderedAt" defaultValue="" />
+      {/* Controlled on purpose: React resets the form after each submit and would wipe a value set on the DOM. */}
+      <input type="hidden" name="renderedAt" value={renderedAt} readOnly />
 
       {message && (
         <p id="login-error" role="alert">

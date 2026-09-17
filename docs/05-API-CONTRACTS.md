@@ -32,7 +32,7 @@ Expected failures are returned values. Only programmer errors throw. The UI maps
 
 | Name | Who | Input (zod) | Does | Result |
 |---|---|---|---|---|
-| `getAvailability()` | Public (server read) | none | `select date, module from module_blocks where date between today_AR and today_AR + 12 months`. Cached under tag `availability` | `{ date: 'YYYY-MM-DD'; module: 'mediodia' \| 'noche' }[]` — nothing else |
+| `getAvailability(today)` | Public (server read) | `today` (Buenos Aires, computed by the caller) | `select date, module from module_blocks where date between today and today + 12 months`. Cached under tag `availability`, profile `hours` (`D-021`) | `{ date: 'YYYY-MM-DD'; module: 'mediodia' \| 'noche' }[]` — nothing else — or **`null`** when the database could not be read, so the page still renders with the notice |
 | `login(formData)` | Anonymous | `password: string (1–200)`, `website: string` (honeypot, must be empty), `renderedAt: number` (time trap) | §5 order of `08-SECURITY.md`. Success → session + cookie + audit + purges → redirect `/admin` | `ActionResult` |
 | `logout()` | Admin | none | `requireAdmin()` → set `revoked_at` → clear cookie → audit | redirect `/admin/login` |
 | `getBlocks(month)` | Admin | `month: 'YYYY-MM'` | `requireAdmin()` → blocks of that month | `{ id; date; module }[]` |

@@ -17,6 +17,12 @@ export const MODULE_WORDS: Record<BlockChoice, { label: string; crossed: string;
 
 export type Block = { id: string; date: IsoDate; module: ModuleCode };
 
+/** What the public read returns: only date and module, never ids (08-SECURITY.md C-15). */
+export type AvailabilityEntry = { date: IsoDate; module: ModuleCode };
+
+/** Stands in for the id of a public block, which has none. */
+export const TAKEN = "taken";
+
 export type DayStatus = "outside-month" | "past" | "beyond-horizon" | "open";
 
 export type DayCell = {
@@ -28,11 +34,16 @@ export type DayCell = {
 };
 
 /** Weeks start on Monday, as es-AR does (Intl weekInfo firstDay = 1). */
-export function buildMonth(month: IsoMonth, blocks: readonly Block[], today: IsoDate, lastBookable: IsoDate): DayCell[][] {
+export function buildMonth(
+  month: IsoMonth,
+  blocks: readonly (Block | AvailabilityEntry)[],
+  today: IsoDate,
+  lastBookable: IsoDate,
+): DayCell[][] {
   const byDate = new Map<IsoDate, Record<ModuleCode, string | null>>();
   for (const block of blocks) {
     const modules = byDate.get(block.date) ?? { mediodia: null, noche: null };
-    modules[block.module] = block.id;
+    modules[block.module] = "id" in block ? block.id : TAKEN;
     byDate.set(block.date, modules);
   }
 
@@ -63,4 +74,30 @@ export function buildMonth(month: IsoMonth, blocks: readonly Block[], today: Iso
 export function availableChoices(cell: DayCell): BlockChoice[] {
   const free = MODULE_ORDER.filter((module) => cell.modules[module] === null);
   return free.length === MODULE_ORDER.length ? [...free, "dia-completo"] : free;
+}
+
+// ---- Public calendar (docs/06-UI-UX.md §3). "unknown" is what a visitor sees when the availability
+// read failed: every date stays selectable and the page shows the notice (G-003 is about the opposite
+// risk — showing a taken date as free — which only the owner's discipline prevents).
+
+export type PublicDayState = "past" | "beyond-horizon" | "free" | "partial" | "full" | "unknown";
+
+export function publicDayState(cell: DayCell, availabilityLoaded: boolean): PublicDayState {
+  if (cell.status === "past") return "past";
+  if (cell.status === "beyond-horizon") return "beyond-horizon";
+  if (!availabilityLoaded) return "unknown";
+  const taken = MODULE_ORDER.filter((module) => cell.modules[module] !== null).length;
+  if (taken === 0) return "free";
+  return taken === MODULE_ORDER.length ? "full" : "partial";
+}
+
+/** A visitor can pick the day unless it is past, beyond the horizon, or fully taken. */
+export function isSelectableDay(state: PublicDayState): boolean {
+  return state === "free" || state === "partial" || state === "unknown";
+}
+
+/** Modules a visitor can ask for: each free one, plus "día completo" only when both are free. */
+export function enabledChoices(cell: DayCell, availabilityLoaded: boolean): BlockChoice[] {
+  if (!availabilityLoaded) return [...MODULE_ORDER, "dia-completo"];
+  return availableChoices(cell);
 }

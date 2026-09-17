@@ -1,7 +1,8 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, gt, gte, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, eq, gt, gte, isNotNull, isNull, lt, lte, or, sql } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import {
@@ -11,8 +12,8 @@ import {
   SESSION_DAYS,
 } from "@/lib/auth/config";
 import { hashSessionToken, isWellFormedSessionToken } from "@/lib/auth/tokens";
-import type { Block, ModuleCode } from "@/components/calendar/month";
-import { addMonthsToMonth, firstDayOfMonth, type IsoDate, type IsoMonth } from "@/lib/dates";
+import type { AvailabilityEntry, Block, ModuleCode } from "@/components/calendar/month";
+import { addMonthsToMonth, firstDayOfMonth, lastBookableDate, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { db } from "@/lib/db/client";
 import { adminAudit, adminCredential, adminSessions, loginAttempts, moduleBlocks } from "@/lib/db/schema";
 
@@ -109,6 +110,32 @@ export async function purgeAfterLogin(): Promise<void> {
     db.delete(adminSessions).where(or(lt(adminSessions.expiresAt, sql`now()`), isNotNull(adminSessions.revokedAt))),
     db.delete(adminAudit).where(lt(adminAudit.at, sql`now() - interval '12 months'`)),
   ]);
+}
+
+// ---- Availability (public read). No session: it returns only date and module (C-15).
+
+// Cached under the `availability` tag; every block/unblock calls updateTag, so a change is visible on
+// the next request (G-003). The `hours` profile is the ceiling if a row is ever edited outside the app.
+async function readAvailability(today: IsoDate): Promise<AvailabilityEntry[]> {
+  "use cache";
+  cacheTag(AVAILABILITY_TAG);
+  cacheLife("hours");
+
+  return db
+    .select({ date: moduleBlocks.date, module: moduleBlocks.module })
+    .from(moduleBlocks)
+    .where(and(gte(moduleBlocks.date, today), lte(moduleBlocks.date, lastBookableDate(today))))
+    .orderBy(asc(moduleBlocks.date), asc(moduleBlocks.module));
+}
+
+/** null when the database could not be read: the page still renders and says so (03-ARCHITECTURE.md). */
+export async function getAvailability(today: IsoDate): Promise<AvailabilityEntry[] | null> {
+  try {
+    return await readAvailability(today);
+  } catch (error) {
+    console.error("getAvailability: availability unavailable", error);
+    return null;
+  }
 }
 
 // ---- Availability (owner panel). Callers run requireAdmin() first.
