@@ -4,18 +4,18 @@
 
 ## 1. STATE
 
-**Updated:** 2026-09-22, `HERO` cerrado.
+**Updated:** 2026-09-22, `HERO` en producción y la galería esperando GO-AHEAD.
 
 | | |
 |---|---|
-| **Current task** | Phase 1 of the Araucaria site. WU-01 … WU-06 are merged to `main`. **WU-07 is under way**: the `HERO` is built and accepted; the rest of the sections wait for Mateo to name the next one |
-| **Real status** | `/` is no longer a placeholder: it is the `HERO`, with the media opening as a rectangle from the middle, two wide takes that rotate, and the site's button. `/admin` works as before. **Production has no admin credential yet**. The branch `wu-07-hero` is pushed; `main` still ends at `78ee699` until Mateo says merge |
-| **Last chat** | 2026-09-21 → 2026-09-22 (this one). Last commit on `main`: `78ee699` |
-| **Waiting on me (Claude)** | Nothing in flight |
-| **Waiting on Mateo** | (a) Merge `wu-07-hero` to `main`, and name the next section (`NAV`, gallery, amenities, prices, location, footer). (b) Answer `OQ-06` and `OQ-07`. (c) Say whether `.claude/launch.json` belongs in the repo — still untracked. (d) He holds the dev passphrase; it exists only in his password manager |
-| **Waiting on third parties** | The client owes `CI-01` (WhatsApp number), `CI-02`, `CI-03`, `CI-05` and `CR-01`…`CR-03` (original photos, videos and logo). The hero's colours and logo stay `{{CONFIRMAR}}` until the logo arrives |
-| **Next action** | Merge on Mateo's word, then the next section's `seccion-premium` round: references first, never a plan first |
-| **Do not touch** | `main` without Mateo's word · the production Neon branch (five tables, no credential; a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · `.env.local` and the Vercel environment variables · the Neon branch `backup-pre-0000-init` · **the three opening designs already rejected** (`D-023`): the frame that grew from a small visible rectangle, the two single-axis curtains, and the four panels moved with an offset |
+| **Current task** | Phase 1 of the Araucaria site. WU-01 … WU-06 and the `HERO` of WU-07 are merged to `main` and live. **The gallery round is open**: references presented, Mateo chose a mix, the three-variant plan is on the table and **he has not given the GO-AHEAD** ("aun no go"), so **no file of the gallery exists yet** |
+| **Real status** | `araucaria-multiespacio.vercel.app` serves the real `HERO`: it opens as a rectangle growing from the middle, two wide takes rotate behind the headline, and the site's button is in place. `/admin` works as before. **Production still has no admin credential**, on purpose until WU-09. `main` is at `620d18b`; the working tree is clean except `.claude/`, untracked |
+| **Last chat** | 2026-09-21 → 2026-09-22 (this one) |
+| **Waiting on me (Claude)** | Nothing. The next move is Mateo's GO-AHEAD on the gallery's three variants |
+| **Waiting on Mateo** | (a) GO-AHEAD for the gallery prototype, or a change to the plan — what moves most easily now is which pieces go in and in what order, the name of each space, or replacing variant C. (b) Name the section after the gallery. (c) Answer `OQ-06`, `OQ-07` and `OQ-08`. (d) He holds the dev passphrase; it exists only in his password manager |
+| **Waiting on third parties** | The client owes `CI-01` (WhatsApp number), `CI-02`, `CI-03`, `CI-05` and `CR-01`…`CR-03` (original photos, videos and logo). The hero's colours and logo stay `{{CONFIRMAR}}` until the logo arrives, and the two good photos of the gallery are 450 px crops until `CR-01` lands |
+| **Next action** | Wait for the GO-AHEAD, then build the three gallery variants behind the picker at `/prototipo-galeria`, measure them and show them. **Do not present a plan for another section before Mateo names it** |
+| **Do not touch** | `main` without Mateo's word · the production Neon branch (five tables, no credential; a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · `.env.local` and the Vercel environment variables · the Neon branch `backup-pre-0000-init` · **the designs already rejected** in `D-023` (three openings for the hero) and in `D-025` (the gallery references he did not pick) |
 
 ## 2. LOG
 
@@ -296,3 +296,83 @@ npm run build       → ✓ Compiled successfully; routes: ○ /  ○ /_not-foun
 ```
 
 **Follows:** Mateo merges `wu-07-hero` and names the next section. References first, then the plan and his GO-AHEAD.
+
+### 2026-09-22 · WU-07 (cont.) · merge del `HERO`, titular corregido y ronda de la galería
+
+Continuación del mismo chat que la entrada anterior, después del commit `342ea7c`.
+
+**Asked (Mateo's own words, in order):**
+
+1. **"dale vamos con eso"** — the merge of `wu-07-hero` into `main`.
+2. "el que me recomiendes pero antes cambia el titulo **espacio versátil para cumpleaños, eventos infantiles,talleres y celebraciones de todo tipo.** y abajo si con las cosas que cuenta, esta tinvetrido el titulo, la idea es atraer tood tipo de evento luego vas a contar los espacios que tiene".
+3. **"si a las dos, dale con la galería"** — commit the headline change, and start the gallery round.
+4. To the seven gallery references: **"combinaria la 1 con las difentes posciones de la 4"**.
+5. To the two questions of the variants plan: **"9 y siempre"**, and then **"aun no go"** — the decisions are taken, the build is not authorised.
+6. "Pará acá y volcá el estado al repo…" (this entry).
+
+**Done:**
+
+- **`wu-07-hero` merged into `main`** (fast-forward, 25 files) and pushed. Verified in production, not only locally.
+- **The headline was inverted and got fixed.** It used to sell the place before the event. Now the `h1` names the events and the subhead lists the spaces.
+- **`seccion-premium` round for the gallery, step 2 and 3 complete:** 12 references opened and tried, 7 presented with their captures, 5 discarded with a reason. Mateo asked for a mix, so the round moved to the prototype branch of the method: the three-variant plan was presented with its table. **He answered the two questions and explicitly withheld the GO-AHEAD**, so nothing was built.
+
+**Files (every file created or modified, with what changed):**
+
+| File | What |
+|---|---|
+| `components/hero/contenido.ts` | `TITULO` and `BAJADA` swapped roles. `TITULO` = "Espacio versátil para cumpleaños, eventos infantiles, talleres y *celebraciones de todo tipo*"; `BAJADA` = "Salón de usos múltiples con patio, pileta, parrilla y horno pizzero. Hasta 35 personas, en Güemes 3660, Santa Fe." Both come from `docs/01-CONTEXT.md` |
+| `components/hero/hero.css` | `.hero-titulo`: `max-width` 17ch → **26ch** and `font-size` `clamp(2.35rem, 6.2vw, 5.4rem)` → **`clamp(1.95rem, 4.3vw, 4rem)`**. `.hero-bajada`: `max-width` 46ch → 54ch |
+| `WORKLOG.md` | §1 rewritten; this entry appended |
+| `docs/10-MEMORY.md` | `D-024`, `D-025`, `G-029`, `G-030`, `TD-007`, `OQ-08` |
+
+**Nothing of the gallery exists yet**: no `app/prototipo-galeria/`, no `components/galeria/`, no `components/ui/visor.tsx`. The plan for those files is in this entry under "Sigue", and it is what the GO-AHEAD would authorise.
+
+**Verified (with real results):**
+
+- **The merge, in production.** Waited for the deploy and checked the served HTML: it carries `hero-telon-arriba/abajo/izq/der`, `hero-titulo`, `boton boton-en-oscuro` and the headline text. `media/hero-pileta.mp4` → 200 `video/mp4` 833,661 B · `media/hero-jardin.mp4` → 200 2,172,389 B · `media/hero-pileta-poster.jpg` → 200 `image/jpeg` 268,123 B.
+- **The opening, on the live site**, captured over CDP at 1100 / 1400 / 3000 ms, at 1440 and at 390: same behaviour as local — dark blue, the rectangle growing from the middle, then open. **Zero console errors**, no horizontal scroll, headline and button correct.
+- **The new headline, in the five sizes** (375, 390×664, 360×640, 1440, 1920) after the rescale: title 741×182 px at 1440 (three lines) and 343×92 px at 375; the button ends at 788 / 640 / 616 / 844 / 1024 px, **always inside the screen**; no horizontal scroll; zero console errors.
+- **The gallery references**: 12 opened at 1440, scrolled twice, captured three moments each; the shape of their pieces measured (width ÷ height) to know which ones take vertical material — Apple Cards 0.60, Focus Cards 0.67, Parallax Scroll 0.79, Aman and Soho House 1.00 (square), Images Slider 1.44, the GSAP demos 1.77.
+- **Focus Cards' hover, captured before and after**: the card under the pointer stays sharp and the others blur.
+
+**Sin verificar (explicitly):**
+
+- The hero on a real phone or a real network: everything was Chromium headless emulating an iPhone.
+- **Apple Cards Carousel's drag**: the automated drag did not move the cards in two attempts. The source describes it as draggable; it has not been confirmed by hand.
+- **Layout Grid's click**: the automated click scrolled the page to its pricing section instead of expanding a cell. The effect is not confirmed.
+- The three GSAP gallery demos: their URLs opened the hub's listing, so the effect was never seen (`G-029`).
+- Whether 720 px of source is enough on a 1920 screen: the hero video is still enlarged 2.7× there (`TD-007`).
+
+**Resolved along the way (root cause, not symptom):**
+
+1. **The long headline broke into five cramped lines** against the left edge, with half the screen empty. Root cause: `max-width: 17ch` plus a display size meant for a short headline. Rescaled to 26ch and a smaller clamp; three lines at 1440.
+2. **The interaction tests proved nothing at first.** Root cause: the hover and the click were aimed at the `img`, while the effect lives on its container. Aiming at the container showed the blur immediately (`G-030`).
+
+**Gates:**
+
+```
+npm run lint        → exit 0, no errors, no warnings
+npm run typecheck   → ✓ Types generated successfully (exit 0)
+npm run build       → ✓ Compiled successfully
+```
+
+Run after the headline change, before committing it. No test runner exists in the repo (`TD-003`).
+
+**Commits in this stretch:**
+
+- `342ea7c` `feat(hero): seccion HERO con apertura en rectangulo y boton propio (WU-07)` — merged to `main` fast-forward.
+- `620d18b` `fix(hero): el titular nombra el evento y la bajada cuenta los espacios` — pushed straight to `main` (class `R0`).
+
+**Sigue:** Mateo gives the GO-AHEAD (or changes the plan) and the three gallery variants get built behind the picker. The plan he has in hand:
+
+| File | What |
+|---|---|
+| `app/prototipo-galeria/` (page, prototipo, picker, picker.css) | The three variants behind the standard picker, `noindex` |
+| `components/galeria/contenido.ts` | The 9 pieces with the name of each space: El jardín · La parrilla y el horno · El patio · La pérgola · La pileta · La fachada · El salón |
+| `components/galeria/pieza.tsx` | Video or photo, poster first, the video only loads and plays when it is about to be seen |
+| `components/galeria/galeria-fila.tsx` · `-mosaico.tsx` · `-corre.tsx` | A · Fila desfasada (one draggable row, pieces of different heights, offset vertically) · B · Mosaico (irregular grid, ordinary scroll) · C · Mosaico que corre (the grid moves sideways while scrolling, pinned — flagged to him as the risky one, because he rejected scroll hijacking in Sanalys) |
+| `components/galeria/galeria.css` | Grids, sizes and captions |
+| `components/ui/visor.tsx` · `visor.css` | The "tap to see it big", shared: native `<dialog>`, closes with Escape and on the backdrop, focus trapped |
+| `next.config.ts` | `noindex` for the prototype route |
+
+Decided already and not to be asked again: **9 pieces** (the 6 videos plus 3 photos) and the caption **always visible**, never only on hover.

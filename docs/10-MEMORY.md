@@ -194,6 +194,21 @@ CDP (`G-028`).
 **Reopen if:** the originals arrive (`CR-01`, `CR-02`) with wide material, which removes the whole
 framing problem.
 
+### D-024 · 2026-09-22 · The headline names the event, the subhead names the spaces — replaces the copy of `D-023`
+**Decision:** the `HERO`'s `h1` is "Espacio versátil para cumpleaños, eventos infantiles, talleres y *celebraciones de todo tipo*" and the subhead is "Salón de usos múltiples con patio, pileta, parrilla y horno pizzero. Hasta 35 personas, en Güemes 3660, Santa Fe." Both are drawn from `docs/01-CONTEXT.md`: the uses from §Audience, the spaces and the capacity from §Amenities, the address from `D-011`.
+**Alternatives rejected:** the previous copy, "Salón de eventos con *patio, pileta y parrilla*" over a subhead that listed the uses. Mateo: *"esta tinvetrido el titulo, la idea es atraer tood tipo de evento luego vas a contar los espacios que tiene"* — the page was selling the place before the event.
+**Note:** Mateo's own list leaves out "reuniones", which `01-CONTEXT.md` does include among the uses. His wording was kept literally, and the gap was named to him; adding it is a one-word change.
+**Side effect, measured:** the longer headline broke into five cramped lines against the left edge with half the screen empty, so `.hero-titulo` went from `max-width: 17ch` / `clamp(2.35rem, 6.2vw, 5.4rem)` to `26ch` / `clamp(1.95rem, 4.3vw, 4rem)` — three lines at 1440, 741×182 px.
+**Reopen if:** the client gives its own claim, or "reuniones" has to appear in the headline.
+
+### D-025 · 2026-09-22 · Gallery: a mix of the Apple Cards Carousel with the varied positions of the Layout Grid
+**Decision:** after a `seccion-premium` round of 12 references, Mateo picked a **mix**: *"combinaria la 1 con las difentes posciones de la 4"* — reference 1, [Aceternity · Apple Cards Carousel](https://ui.aceternity.com/components/apple-cards-carousel) (a horizontal row of vertical cards, draggable, with the name of the space on top), with reference 4, [Aceternity · Layout Grid](https://ui.aceternity.com/components/layout-grid) (pieces of different sizes and positions, and tapping one opens it large). A mix goes to the prototype branch of the method: three variants built in the page behind the standard picker.
+**Also decided, answering the plan's two questions:** **9 pieces** — the 6 gallery videos plus 3 photos — and the name of each space **always visible**, never only on hover, because on a phone there is no hover.
+**Not authorised yet:** Mateo answered the questions and then wrote **"aun no go"**. No gallery file exists.
+**Alternatives rejected, with their reason:** 2 · Focus Cards (the blur lives on hover, which does not exist on a phone) · 3 · Parallax Scroll (with 13 pieces it becomes an endless column on a phone) · 5 · Aman and 6 · Soho House (square cells: the vertical videos would have to be cropped in half) · 7 · Images Slider (one piece at a time is slow for six spaces). Discarded before presenting: the three GSAP gallery demos (`G-029`), Skiper UI (404), cult-ui's 3D Carousel (only documentation rendered), Magic UI's Marquee (its example is text testimonials) and Othership (no gallery, only a hero).
+**Constraint that decided it:** the material is vertical — 6 videos at 480×848 and 5 photos at 1080×1920 — so only the references whose pieces are taller than wide use it without cropping. Measured on each reference: Apple Cards 0.60, Focus Cards 0.67, Parallax Scroll 0.79, Aman and Soho House 1.00, Images Slider 1.44, GSAP demos 1.77.
+**Reopen if:** the originals arrive (`CR-01`, `CR-02`) with horizontal material, which would put the square-cell galleries back in play.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
@@ -205,6 +220,7 @@ framing problem.
 | OQ-05 | Vercel runtime support for Node 24 and Next 16.3 support for TypeScript 7 | Pinned versions in `02-STACK.md` | Verified in WU-01 |
 | OQ-06 | Whether the public calendar borrows the panel's "Mitades" cell and its "Reservado" vocabulary, or gets its own visual language | `06-UI-UX.md` §3 and the WU-08 design round | Decided in the `seccion-premium` round Mateo names for the public calendar |
 | OQ-07 | On a 1920 screen the panel sits in a centred 1152 px column, with wide margins. Mateo's general criterion for the public site is "usá el ancho" | Panel layout on his own screen | Stays centred until he says otherwise (asked 2026-09-17, unanswered) |
+| OQ-08 | Whether `.claude/launch.json` belongs in the repo. It is the config that starts the dev server for the design rounds; it has stayed untracked through four commits because Mateo has not said | Anyone picking up the project cannot start the preview with one command | Stays untracked and gets named in every handoff |
 
 ## Gotchas
 
@@ -240,6 +256,8 @@ framing problem.
 
 | G-027 | Layers with their own `z-index` inside a wrapper that has `z-index: auto` join the PARENT stacking context, so they compete with siblings of that parent: the hero's curtains sat behind the video until the wrapper got `isolation: isolate` |
 | G-028 | Playwright's `page.screenshot` waits for `document.fonts.ready`, so a frame asked for at 200 ms can be taken hundreds of ms later. Timed frames of an entrance must be captured with `Page.captureScreenshot` over CDP, or the timing being measured is fiction |
+| G-029 | The URLs of the GSAP demo hub (`demos.gsap.com/demo/<name>`) render the hub's own listing, not the demo, so an automated capture shows a grid of cards and never the effect. Any GSAP demo has to be opened by hand, or its iframe source pulled out, before it can be called a reference |
+| G-030 | Aiming a hover or a click at the `<img>` proves nothing when the effect lives on its container: three interaction tests came back identical before and after. Aim at the wrapper — on Focus Cards the blur appeared on the first try afterwards |
 
 ## Technical debt taken on purpose
 
@@ -251,6 +269,7 @@ framing problem.
 | TD-004 | `typescript` stays on 6.0.3 while 7.x is released (`D-013`) | `typescript-eslint` refuses to load with TS 7, and lint blocks CI | When `typescript-eslint` supports TypeScript 7 |
 | TD-005 | The panel's teal/beige tokens in `app/admin/admin.css` are provisional and were not taken from the brand | The original logo has not arrived (`CR-03`), and colours must not be picked from screenshots | When the logo arrives: swap the token values, no layout change |
 | TD-006 | After logging in, the panel always lands on `/admin`, even when the visitor asked for another admin URL (Mateo hit this opening `/admin/prototipo` and landing on `/admin`) | Keeping the login action to the exact order of `08-SECURITY.md` §5 during WU-03 | If the owner ever needs deep links into the panel |
+| TD-007 | The hero video is 720 px wide, so on a 1920 screen it is enlarged 2.7×. The treatment (the brand tint plus the gradients) disguises it, and on a phone there is no enlargement at all | 1080 at CRF 26 measured 14.6 MB per 8 s, against a 25 MB budget for all media (`D-022`), and the source itself is only 1080 wide | When `CR-02` arrives with real footage, or if the budget moves to object storage |
 
 ## Dependencies reviewed
 
