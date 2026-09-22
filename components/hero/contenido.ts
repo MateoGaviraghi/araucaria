@@ -1,10 +1,16 @@
 // Contenido real del hero. Sale de docs/01-CONTEXT.md; nada se escribe de memoria.
 import type { Toma } from "./media-hero";
 
-export const TITULO = { antes: "Salón de eventos con ", destacado: "patio, pileta y parrilla" };
+// Primero el evento, después el lugar (Mateo, 2026-09-22: el titular estaba invertido; la idea
+// es atraer todo tipo de evento y recién después contar los espacios).
+export const TITULO = {
+  antes: "Espacio versátil para cumpleaños, eventos infantiles, talleres y ",
+  destacado: "celebraciones de todo tipo",
+};
 
+// Los espacios, tal como están en docs/01-CONTEXT.md §Amenities.
 export const BAJADA =
-  "Cumpleaños, eventos infantiles, reuniones, talleres y celebraciones. Hasta 35 personas, en Güemes 3660, Santa Fe.";
+  "Salón de usos múltiples con patio, pileta, parrilla y horno pizzero. Hasta 35 personas, en Güemes 3660, Santa Fe.";
 
 export const CTA = "Consultar disponibilidad";
 
