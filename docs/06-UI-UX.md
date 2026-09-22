@@ -18,7 +18,7 @@ The order below is the structure. Mateo decides which section is designed next, 
 | # | Block · variant | Job on this page | Content (from `01-CONTEXT.md`) |
 |---|---|---|---|
 | 1 | `NAV.sections` | Brand + one always-reachable action | Logo · anchors (Espacio, Módulos, Disponibilidad, Ubicación) · CTA "Consultar disponibilidad" → §5 |
-| 2 | `HERO.media-bg` | Say what this is in one screen | H1 names the event salon · SUB: the uses (cumpleaños, eventos infantiles, reuniones, talleres, celebraciones) · CTA-1 "Consultar disponibilidad" · MEDIA: the iPhone video (poster first) |
+| 2 | `HERO.media-bg` | Say what this is in one screen | Built 2026-09-21 (`D-023`). H1 "Salón de eventos con *patio, pileta y parrilla*" · SUB: the uses + capacity 35 + address · CTA-1 "Consultar disponibilidad" (shortened to "Disponibilidad" in the header under 560 px) · MEDIA: two wide takes of the walkthrough that rotate, opening from a vertical frame |
 | 3 | `MEDIA-EMBED.gallery` | Show the space: salon, patio, pool, grill | Photos + the 6 short videos as tiles; captions name the space shown |
 | 4 | `FEATURE-GRID` | What the rental includes | The 11 amenity rows, capacity 35 highlighted |
 | 5 | `PRICING-TABLE.tiers` | Make the money decision explicit | Three tiers: Mediodía · Noche · Día completo, with hours and price. LEGAL: "Incluye la limpieza del lugar" + VAT/validity `{{CONFIRMAR}}` (`CI-05`) · rule "No habilitado para previas ni fiestas nocturnas" · CTA per tier preselects that module in §6 |

@@ -6,4 +6,5 @@ import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 // client components; every animation runs inside useGSAP so it is cleaned up on unmount.
 gsap.registerPlugin(useGSAP, DrawSVGPlugin);
 
+
 export { gsap, useGSAP };

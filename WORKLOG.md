@@ -4,18 +4,18 @@
 
 ## 1. STATE
 
-**Updated:** 2026-09-17, end of the first build chat.
+**Updated:** 2026-09-22, `HERO` cerrado.
 
 | | |
 |---|---|
-| **Current task** | Phase 1 of the Araucaria site. Work units WU-01 … WU-05 of `docs/11-ROADMAP.md` are done and merged to `main`; the next unit has not started |
-| **Real status** | The app is live at `araucaria-multiespacio.vercel.app`: a placeholder public page (`/`, an `h1` with "Araucaria"), a working owner panel at `/admin` (login, month calendar, reserve/free, undo, animated alert) and the public availability read with its cache. **Production has no admin credential yet**, so nobody can enter the published panel. The public landing has no real content or design yet |
-| **Last chat** | 2026-09-16 → 2026-09-17 (this one). Last commit on `main`: `b33202a` |
-| **Waiting on me (Claude)** | Nothing in flight. The next unit starts with a plan table and Mateo's GO-AHEAD |
-| **Waiting on Mateo** | (a) Decide the next unit: WU-06 media pipeline, or naming the first public section for its `seccion-premium` round. (b) Answer `OQ-06` and `OQ-07` in `docs/10-MEMORY.md`. (c) He holds the dev passphrase (credential version 2); it exists only in his password manager |
-| **Waiting on third parties** | The client owes `CI-01` (WhatsApp number that receives inquiries), `CI-02`, `CI-03`, `CI-05` and `CR-01`…`CR-03` (original photos, videos and logo). See `docs/12-CLIENT-INPUTS.md`. The provisional teal/beige colors of the panel stay `{{CONFIRMAR}}` until the logo arrives |
-| **Next action** | Present the plan table for the next work unit and wait for the written GO-AHEAD |
-| **Do not touch** | `main` without Mateo's word (commit and push only when he says so) · the production Neon branch: it has the five tables and **no** credential; a migration there is class `R3` (backup first, applied alone) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) left by Mateo's own testing: every verification script preserves rows it did not create · `.env.local` and the Vercel environment variables (values are his) · the Neon branch `backup-pre-0000-init` (restore point taken before the production migration) |
+| **Current task** | Phase 1 of the Araucaria site. WU-01 … WU-06 are merged to `main`. **WU-07 is under way**: the `HERO` is built and accepted; the rest of the sections wait for Mateo to name the next one |
+| **Real status** | `/` is no longer a placeholder: it is the `HERO`, with the media opening as a rectangle from the middle, two wide takes that rotate, and the site's button. `/admin` works as before. **Production has no admin credential yet**. The branch `wu-07-hero` is pushed; `main` still ends at `78ee699` until Mateo says merge |
+| **Last chat** | 2026-09-21 → 2026-09-22 (this one). Last commit on `main`: `78ee699` |
+| **Waiting on me (Claude)** | Nothing in flight |
+| **Waiting on Mateo** | (a) Merge `wu-07-hero` to `main`, and name the next section (`NAV`, gallery, amenities, prices, location, footer). (b) Answer `OQ-06` and `OQ-07`. (c) Say whether `.claude/launch.json` belongs in the repo — still untracked. (d) He holds the dev passphrase; it exists only in his password manager |
+| **Waiting on third parties** | The client owes `CI-01` (WhatsApp number), `CI-02`, `CI-03`, `CI-05` and `CR-01`…`CR-03` (original photos, videos and logo). The hero's colours and logo stay `{{CONFIRMAR}}` until the logo arrives |
+| **Next action** | Merge on Mateo's word, then the next section's `seccion-premium` round: references first, never a plan first |
+| **Do not touch** | `main` without Mateo's word · the production Neon branch (five tables, no credential; a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · `.env.local` and the Vercel environment variables · the Neon branch `backup-pre-0000-init` · **the three opening designs already rejected** (`D-023`): the frame that grew from a small visible rectangle, the two single-axis curtains, and the four panels moved with an offset |
 
 ## 2. LOG
 
@@ -141,3 +141,158 @@ npm run build       → ✓ Compiled successfully; routes: ○ /  ○ /_not-foun
 Test suites: there is **no test runner in the repo**. Everything was verified with one-off Node/Playwright scripts kept in the session scratchpad (`TD-003`). Their results are the numbers quoted above.
 
 **Follows:** Mateo names the next unit — WU-06 (media pipeline) or the first public section for its `seccion-premium` round — and it starts with a plan table and his written GO-AHEAD.
+
+### 2026-09-17 → 2026-09-21 · WU-06 media pipeline
+
+**Asked (Mateo's own words, in order):**
+
+1. "ok, armá el plan de WU-06" → to the plan and its three recommendations: **"go"**.
+2. "ok, dale con commit y push".
+3. "dale el merge".
+4. "ponme en contexto que hiciste que vineie ? sigmnos la modialidad de trabajo con la que veniamos trabajandod" (four days later, resuming).
+5. "si, actualizá el worklog y arrancamos con el hero" — this entry, and `HERO` named as the first section of WU-07.
+
+**Done:**
+
+- **WU-06 · Media pipeline.** `scripts/build-media.sh` wipes and rebuilds `public/media/` from the source folder; when the originals arrive (`CR-01`, `CR-02`) the same script runs with `SRC` pointed at them. Output: the hero video and its two posters, six gallery tiles with a poster each, seven photos and a provisional logo. **6.64 MB of the 25 MB budget, 23 files.**
+- Before planning, the sources were actually inspected rather than trusted: contact sheets of the nine screenshots, four frames of each of the seven videos, and a frame-by-frame map of the hero clip. Four encoding recipes were measured on the same 8-second sample before one was chosen.
+
+**Files (every file created or modified, with what changed):**
+
+| File | What |
+|---|---|
+| `scripts/build-media.sh` | Created. The whole pipeline: `clip()` and `frame()` helpers, the hero, six tiles, five stills, two crops and the logo, ending with a listing and the byte total. `SRC` is overridable |
+| `.gitattributes` | Created. `*.sh text eol=lf`: with `core.autocrlf=true` a fresh checkout would hand bash a CRLF shebang |
+| `public/media/hero.mp4` | Created. 720×1280, 10 s (7–17 s of the walkthrough), CRF 30, silent, `+faststart`. 1,926,005 B |
+| `public/media/hero-poster.jpg` · `.avif` | Created. The clip's own first frame, 1080×1920. 154,607 B and 49,580 B |
+| `public/media/galeria/*.mp4` (6) | Created. `jardin`, `quincho`, `patio`, `pergola`, `pileta`, `fachada` — 480×848, 2.2 to 8 s, CRF 28. 2.85 MB together |
+| `public/media/galeria/*.jpg` (6) | Created. One poster per tile, 480 px wide |
+| `public/media/fotos/*.jpg` (7) | Created. Five stills at 1080×1920 (`jardin`, `quincho`, `pileta`, `salon-interior`, `salon-ventanal`) and two crops of the Instagram carousel (`pileta-cascada` 452×418, `salon-vacio` 407×418) |
+| `public/media/logo-araucaria.png` | Created. 404×404 crop of the logo card. Flat dark-blue background, no transparency (`CR-03`) |
+| `docs/07-INFRASTRUCTURE.md` | §Media pipeline rewritten: the script is the pipeline, and the table now holds the real commands and the measured weights instead of a reference command |
+| `docs/10-MEMORY.md` | `D-022` (the encoding values and what was rejected), `G-021` (90° rotation metadata), `G-022` (the usable range of the hero clip, the CapCut watermark, the filmer's shadow), `G-023` (GPS metadata in iPhone `.MOV`) |
+| `docs/12-CLIENT-INPUTS.md` | `CR-01`, `CR-02`, `CR-03`: the "consequence" column now says what actually ships meanwhile |
+| `.claude/launch.json` | Created so the dev server could be started and the videos watched in a browser. **Left untracked**: Mateo has not said whether `.claude/` belongs in the repo |
+| `WORKLOG.md` | §1 rewritten; this entry appended |
+
+**Verified (with real results):**
+
+- **Budget:** 6,636,662 B in 23 files, against a 25 MB ceiling.
+- **Codecs:** `ffprobe` on the outputs — H.264, profile High, `yuv420p`, and **no GPS or timestamp tags** (the iPhone sources carry them; every command uses `-map_metadata -1`).
+- **In a browser, served by the app** (`localhost:3000`, dev server): the hero plays (720×1280, 10.00 s, `currentTime` advancing, `video.error` null) and so do the **six tiles** (480×848, durations 8, 8, 8, 2.5, 3.9, 2.2 s). All **16 images** load, including `hero-poster.avif` at 1080×1920.
+- **Every frame that ships was looked at**, as contact sheets, before it was kept.
+- **In production, after the merge:** `hero.mp4` → 200 `video/mp4` 1,926,005 B · `hero-poster.avif` → 200 `image/avif` 49,580 B · `galeria/quincho.mp4` → 200 `video/mp4` 574,971 B · `fotos/pileta-cascada.jpg` → 200 `image/jpeg` 44,626 B.
+- **Line endings:** `scripts/build-media.sh` is LF both on disk and in the committed blob (checked byte by byte with `od -c`), and `git check-attr` reports `text: set, eol: lf`.
+
+**Not verified (explicitly):**
+
+- The media on a real device or a real network: everything was watched in the app's own browser on localhost.
+- `hero-poster.avif` as an actual `poster` attribute in Safari — the file decodes, but no markup consumes it yet (WU-07 decides whether the poster is an `<img>` through `next/image` or the attribute).
+- Any perceptual quality judgement beyond Claude's own eye: Mateo has seen the contact sheet, not the videos playing.
+- Whether 720 px wide is enough for the hero on a 1920 screen — decidable only once the `HERO` section exists.
+
+**Resolved along the way (root cause, not symptom):**
+
+1. **The reference command in `docs/07-INFRASTRUCTURE.md` was unusable.** Root cause: 1080×1920 handheld walking footage at CRF 26 costs ~14.6 MB per 8 s — 78 MB for the 43-second clip, against a 25 MB budget for *all* media. Measured four recipes and chose 720 at CRF 30 (`D-022`).
+2. **The six WhatsApp videos are not horizontal.** Root cause: they are coded 848×480 with 90° rotation metadata, which ffmpeg applies before the filter chain. The doc's `scale=-2:480` would have produced 272×480 (`G-021`).
+3. **The hero clip cannot be used whole.** Root cause: after 17 s it shows a corridor, a dated kitchen and a bathroom, and it ends on a **CapCut watermark**. Mapped the clip every 1.5 s and cut 7–17 s (`G-022`).
+4. **The iPhone sources embed GPS coordinates.** `-map_metadata -1` on every output (`G-023`).
+5. **A committed `.sh` would have been handed to bash with CRLF.** Root cause: `core.autocrlf=true` and no `.gitattributes` (same family as `G-015`). Added `*.sh text eol=lf`.
+6. **A false alarm of Claude's own:** `git show | grep -c $'\r'` reported 88 CR in the committed script. Checking the actual bytes with `od -c` showed LF on both sides; the grep was the artefact, not the file.
+
+**Changed from the approved plan (and why):**
+
+- The hero is **7–17 s**, not 0–12 s: the first six seconds are only lawn, while 7–17 is one continuous move through covered gallery, grill, pool and patio. It also weighs less (1.93 MB for 10 s).
+- Descriptive file names (`jardin`, `quincho`, …) instead of `g1…g6`.
+- **Two stills dropped, one added.** One frame had a cut, out-of-focus table in front; another was 60 % floor. A frame of the grill with the clay oven was added.
+- `-map_metadata -1` was not in the plan; it is not optional for a public file.
+- `.claude/launch.json` was created to be able to watch the videos in a browser.
+- The night video stayed out, as recommended and accepted with the "go": the guests' faces are recognisable.
+
+**Gates (run on `main` at `78ee699`, 2026-09-21):**
+
+```
+npm run typecheck   → ✓ Types generated successfully (exit 0)
+npm run lint        → exit 0, no errors, no warnings
+npm run build       → ✓ Compiled successfully in 6.1s; routes: ○ /  ○ /_not-found  ◐ /admin  ◐ /admin/login  (ƒ Proxy)
+```
+
+**Follows:** `WU-07` begins with the **`HERO`**, through `seccion-premium`: references first, Mateo picks, the plan table and his GO-AHEAD, then it is built on the running site and looked at at 375, 1440 and 1920 before anything is reported.
+
+### 2026-09-21 → 2026-09-22 · WU-07 · `HERO`
+
+**Asked (Mateo's own words, in order):**
+
+1. "si, actualizá el worklog y arrancamos con el hero".
+2. To the seven references: **"1 - 1 y 2 con la animcion del 5 · 2 - fondo"** — a mix, so it went to a prototype round.
+3. To the three variants' plan: **"1 largo 2 arriba go"**, then **"1, pileta"** (variant Recorrido, starting on the pool take).
+4. "go, y tambine revisa n detalle hay todos viudeos muy muy hecho cerca en dektop y los botonoes no me gustan nada **no me haz dado inspiracion** y relamente no me gusta, los bootnes es tanto dektop comom moible".
+5. To the seven button references: **"7 . igual"** (hover.dev · Neu, and the header button behaves the same).
+6. "la transcion esta malisima se ve muy mal".
+7. "es desde cerrada no desde una parte aparece en el azul y se va abriendo en vertical enmobiel en horzionatal en desktop".
+8. "pero dije que se abra como un rectnaguo desde el medio vertical par mobile y como un rectangulo acostado desde dektop desde el medio · ademas el gsap no esta nada fluido todo suoper horbboile, porfavor devuelveme algo serio y a la altura de esto usa las habildades de /diseno profavor se serio".
+9. "levana el proyecto que se cayo" · **a hand drawing**: a small rectangle inside the screen, standing on the phone and lying down on desktop · "ahi lo vi y sigue igual seguis sin enteder la refercia... es dese todo el fondo y va creciendo ese rectangulo desde el medio".
+10. **"ahora si, dale commit y push"**.
+
+**Done:**
+
+- **`seccion-premium` round for the `HERO`.** 14 sites opened and tried at 1440 and 375, with their entrances captured frame by frame; 7 presented, 7 discarded with a reason. Mateo asked for a mix, so three variants were built behind the standard picker at `/prototipo-hero` — Recorrido, Ficha and Barra — and he chose **Recorrido**.
+- **Promotion.** The variant became `components/hero/hero.tsx`, `/` stopped being the placeholder, and the prototype was deleted file by file.
+- **Second round, for the buttons**, which he rejected outright: 8 galleries opened, 11 concrete buttons hovered and captured at 0 / 130 / 280 / 560 ms, 7 presented. He chose hover.dev's **Neu** (the button lifts and a solid edge grows), translated to the brand — the edge is beige over the dark hero, never the original's black.
+- **Four rounds of corrections on the opening**, ending in the one he drew: the screen starts entirely dark blue and a **rectangle grows from the middle**, keeping the screen's proportion, so it stands on a phone and lies down on a desktop.
+
+**Files (every file created or modified, with what changed):**
+
+| File | What |
+|---|---|
+| `app/page.tsx` | The home renders the `HERO` instead of the `h1` placeholder |
+| `app/layout.tsx` | Instrument Serif for headlines (`next/font`, variable `--fuente-titulo`), the button and hero stylesheets, and the pre-paint script |
+| `app/globals.css` | `html` gets the dark blue so the scroll bounce never shows white |
+| `components/hero/hero.tsx` | The `HERO`: the media, the provisional bar, the text and the button |
+| `components/hero/media-hero.tsx` | The opening (four panels moving together), the take change (curtain), play/pause by visibility, and the per-take framing |
+| `components/hero/entrada-texto.tsx` | The text entrance, tied to the opening: starts at 0.55 s, staggered 0.09 s. `fromTo`, because the initial state comes from a stylesheet |
+| `components/hero/hero-apertura.tsx` | Script that runs **before the first paint**: closes the panels and hides the text. As an injected stylesheet, not an attribute on `<html>`, and it removes itself after 3 s |
+| `components/hero/contenido.ts` | The hero's real content and the two takes with their framing |
+| `components/hero/hero-nav.tsx` | Provisional bar: logo and button. The real `NAV` has its own round |
+| `components/hero/hero.css` | Hero tokens (provisional colours), the media layers, the treatment, the panels, the text |
+| `components/ui/boton.css` | The site's button: solid edge, lifts on hover, sinks on tap. `.boton-en-oscuro` for dark backgrounds |
+| `scripts/build-media.sh` · `public/media/hero-pileta*` · `hero-jardin*` | Two wide takes cut from the walkthrough (12–17 s and 1–5 s), replacing `hero.mp4`, which started up against the gallery |
+| `next.config.ts` | `devIndicators: false`, so the dev badge stops landing in every design capture |
+| `docs/06-UI-UX.md` · `docs/10-MEMORY.md` · `WORKLOG.md` | The `HERO` row, `D-023` with every rejection, `G-024`…`G-028`, and this entry |
+| Deleted | `app/prototipo-hero/` (4 files) and the three variants `hero-recorrido.tsx`, `hero-ficha.tsx`, `hero-barra.tsx` |
+
+**Verified (with real results, on the production build unless stated):**
+
+- **Smoothness, counting every frame:** the opening runs at **60 fps**, median 16.7 ms, worst 16.8 ms, **zero frames over 32 ms**, at 1440 and at 390. The take change: **59 fps**, 2 slow frames.
+- **Shape, frame by frame** at 300 / 700 / 1000 / 1250 / 1500 / 2200 ms: dark blue, then a small rectangle in the middle, growing with a margin on all four sides, standing at 390 and lying down at 1440.
+- **Five sizes** (375, 390×664, 360×640, 1440, 1920): no horizontal scroll, **zero console errors**, the button always inside the screen, 235×52 px.
+- **Reduced motion:** panels already out and video paused, from the first frame.
+- **The button:** desktop hover lifts it 4 px and grows the edge from 0 to 8 px in 0.85 s; on a phone the edge is there from the start (4 px) and sinks to 0 in 0.12 s when tapped.
+- Gates: `npm run lint`, `npm run typecheck` and `npm run build` all pass.
+
+**Not verified (explicitly):**
+
+- Any real phone or real network: everything was Chromium headless emulating an iPhone.
+- The hero in production at `araucaria-multiespacio.vercel.app`: the branch is pushed but not merged.
+- Whether 720 px of source is enough on a 1920 screen: the video is still enlarged 2.7× there, disguised by the treatment. It goes away with `CR-02`.
+
+**Resolved along the way (root cause, not symptom):**
+
+1. **"Todos los videos muy cerca en desktop."** Root cause: a vertical video cropped to a wide screen turns any close shot into a close-up, and no `object-position` fixes it. Only the two stretches filmed wide are used now (`G-024`).
+2. **The curtains were invisible.** Root cause: the take layers carry `z-index: 1/2` and their wrapper did not isolate them, so they competed with the panels in the parent's stacking context and the video covered them (`G-027`).
+3. **Every timed frame was late.** Root cause: `page.screenshot` waits for `document.fonts.ready`. The captures moved to `Page.captureScreenshot` over CDP (`G-028`). Claude had drawn a wrong conclusion from those frames and corrected it.
+4. **The opening "ate" its own movement.** Root cause: `expo.out` spends 90 % of the travel in the first 30 % of the time. A claim that GSAP was skipping frames was wrong and was withdrawn after measuring; the curve was the cause.
+5. **The take change dropped 30 frames.** Root cause: both videos were playing at once so the outgoing one would not freeze. With a curtain that covers instead of a crossfade, only the active take plays: 30 dropped frames → 2.
+6. **The solid edge of the button was invisible.** Root cause: it has to contrast with the **background**, not with the button (`G-025`).
+7. **The header button broke into two lines on a phone** and crushed the logo. Under 560 px it reads "Disponibilidad", and no button ever wraps.
+8. **A hydration warning** appeared when the pre-paint script touched the `style` attribute of `<html>`; it injects a stylesheet instead.
+
+**Gates (on `wu-07-hero`, 2026-09-22):**
+
+```
+npm run typecheck   → ✓ Types generated successfully (exit 0)
+npm run lint        → exit 0, no errors, no warnings
+npm run build       → ✓ Compiled successfully; routes: ○ /  ○ /_not-found  ◐ /admin  ◐ /admin/login
+```
+
+**Follows:** Mateo merges `wu-07-hero` and names the next section. References first, then the plan and his GO-AHEAD.

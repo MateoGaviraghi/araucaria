@@ -9,6 +9,8 @@ const ADMIN_HEADERS = [
 const nextConfig: NextConfig = {
   // Stops `next dev` from appending its own block to CLAUDE.md (G-011).
   agentRules: false,
+  // El indicador flotante de `next dev` se mete en cada captura de las rondas de diseño.
+  devIndicators: false,
   // Cache Components: `use cache` + cacheTag for the public availability read (D-021).
   cacheComponents: true,
   async headers() {

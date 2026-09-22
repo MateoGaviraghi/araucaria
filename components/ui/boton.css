@@ -1,0 +1,97 @@
+/* El botón de todo el sitio. Elegido por Mateo el 2026-09-21 sobre la referencia
+   hover.dev · Neu Follow Button: el botón se levanta y aparece una sombra sólida que crece.
+   Traducido a la marca: el canto es el azul petróleo, no el negro brutalista del original. */
+
+.boton {
+  --boton-canto: oklch(0.16 0.03 236); /* {{CONFIRMAR}} hasta que llegue el logo (CR-03) */
+  --boton-fondo: var(--ar-beige, oklch(0.91 0.028 78));
+  --boton-tinta: oklch(0.24 0.04 236);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 26px;
+  border: 1.5px solid var(--boton-canto);
+  background: var(--boton-fondo);
+  color: var(--boton-tinta);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  /* En el teléfono no hay hover: el canto está puesto desde el principio, si no el botón
+     se vería plano justo donde entra casi toda la gente. */
+  box-shadow: 4px 4px 0 var(--boton-canto);
+  transform: translate(0, 0);
+  transition:
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Con mouse arranca al ras y el canto crece al pasar por encima. */
+@media (hover: hover) {
+  .boton {
+    box-shadow: 0 0 0 var(--boton-canto);
+  }
+
+  .boton:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 8px 8px 0 var(--boton-canto);
+  }
+}
+
+/* Al apretar se hunde, rápido: es la respuesta al dedo o al click. */
+.boton:active {
+  transform: translate(0, 0);
+  box-shadow: 0 0 0 var(--boton-canto);
+  transition-duration: 0.12s;
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--boton-fondo);
+  outline-offset: 4px;
+}
+
+/* Sobre un fondo oscuro —como el hero— el canto azul no se ve: tiene que contrastar con el
+   FONDO, no con el botón. Ahí el canto va claro. */
+.boton-en-oscuro {
+  --boton-canto: var(--ar-beige-vivo, oklch(0.84 0.06 74));
+}
+
+.boton-chico {
+  min-height: 42px;
+  padding: 0 18px;
+  font-size: 0.92rem;
+}
+
+.boton-ancho {
+  width: 100%;
+}
+
+/* El mismo botón con dos largos de texto: en el teléfono "Consultar disponibilidad" ocupaba
+   el header entero y se partía en dos renglones encima del logo. */
+.boton .solo-angosto {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .boton .solo-ancho {
+    display: none;
+  }
+
+  .boton .solo-angosto {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton {
+    transition-duration: 0.01ms;
+  }
+}

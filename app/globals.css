@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* El rebote del scroll no puede mostrar una franja blanca debajo del hero. */
+html {
+  background: oklch(0.19 0.038 236); /* {{CONFIRMAR}} azul petróleo, hasta que llegue el logo (CR-03) */
+}

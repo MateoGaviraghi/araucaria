@@ -1,0 +1,219 @@
+/* HERO. Los colores son PROVISORIOS: el logo original (CR-03) todavía no llegó y docs/06-UI-UX.md §6
+   prohíbe sacarlos de una captura. Valores declarados a ojo, marcados {{CONFIRMAR}}. */
+
+.hero {
+  --ar-azul: oklch(0.28 0.045 232); /* {{CONFIRMAR}} azul petróleo profundo */
+  --ar-azul-hondo: oklch(0.19 0.038 236); /* {{CONFIRMAR}} */
+  --ar-beige: oklch(0.91 0.028 78); /* {{CONFIRMAR}} beige cálido */
+  --ar-beige-vivo: oklch(0.84 0.06 74); /* {{CONFIRMAR}} */
+  --ar-tinta: oklch(0.99 0.004 90);
+
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: clip;
+  background: var(--ar-azul-hondo);
+  color: var(--ar-tinta);
+}
+
+/* ---- La media que se abre ---- */
+
+.hero-marco {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  transform-origin: center center;
+  will-change: transform;
+  background: var(--ar-azul-hondo);
+}
+
+/* isolation: las capas de adentro usan z-index 1 y 2; sin aislarlas competirían con el telón
+   dentro del mismo contexto y el video quedaría por encima de él. */
+.hero-contra {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  isolation: isolate;
+}
+
+/* Cada toma es una cortina: entra tapando a la anterior. No hay fundido cruzado. */
+.hero-capa {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.hero-capa[data-activa] {
+  z-index: 2;
+}
+
+.hero-capa-dentro {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.hero-poster,
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+/* El tratamiento: tiñe el material con el azul de la marca y asienta el texto.
+   También es lo que hace que la ampliación del video en pantallas grandes no cante. */
+.hero-trato {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, oklch(0.16 0.03 236 / 0.92) 0%, oklch(0.16 0.03 236 / 0.35) 38%, transparent 68%),
+    linear-gradient(to bottom, oklch(0.16 0.03 236 / 0.55) 0%, transparent 34%),
+    color-mix(in oklab, var(--ar-azul) 28%, transparent);
+}
+
+/* ---- Los telones ----
+   El hero arranca cerrado, todo del azul de la marca, y se abre como un rectángulo que crece
+   desde el medio: acostado en escritorio, parado en el teléfono. Cuatro paneles, uno por lado;
+   la ventana es lo que queda entre ellos.
+   Acá están en su posición ABIERTA (fuera de la pantalla): quien los cierra para el primer cuadro
+   es la hoja de hero-apertura.tsx, así que sin JavaScript el hero se ve abierto y nunca tapado. */
+
+.hero-telon {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* por encima de .hero-contra, que está aislado, y del tratamiento */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-telon span {
+  position: absolute;
+  display: block;
+  background: var(--ar-azul-hondo);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.hero-telon-arriba,
+.hero-telon-abajo {
+  left: -1px;
+  right: -1px;
+  height: 50.5%;
+}
+
+.hero-telon-arriba {
+  top: 0;
+  transform: translate3d(0, -101%, 0);
+}
+
+.hero-telon-abajo {
+  bottom: 0;
+  transform: translate3d(0, 101%, 0);
+}
+
+.hero-telon-izq,
+.hero-telon-der {
+  top: -1px;
+  bottom: -1px;
+  width: 50.5%;
+}
+
+.hero-telon-izq {
+  left: 0;
+  transform: translate3d(-101%, 0, 0);
+}
+
+.hero-telon-der {
+  right: 0;
+  transform: translate3d(101%, 0, 0);
+}
+
+/* ---- Barra provisoria (el NAV real se diseña en su propia ronda) ---- */
+
+.hero-barra-sup {
+  position: absolute;
+  inset: max(18px, env(safe-area-inset-top)) clamp(16px, 4vw, 56px) auto;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero-marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.hero-marca img {
+  width: clamp(38px, 4.4vw, 52px);
+  height: auto;
+  border-radius: 50%;
+}
+
+.hero-marca span {
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero-marca small {
+  display: block;
+  font-size: 0.62em;
+  letter-spacing: 0.34em;
+  opacity: 0.72;
+  text-transform: lowercase;
+}
+
+/* ---- Texto ---- */
+
+.hero-cuerpo {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(16px, 4vw, 56px);
+  padding-bottom: max(clamp(24px, 4vw, 56px), env(safe-area-inset-bottom));
+  gap: clamp(14px, 2vw, 22px);
+}
+
+.hero-titulo {
+  max-width: 17ch;
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: clamp(2.35rem, 6.2vw, 5.4rem);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.hero-titulo em {
+  font-style: italic;
+  color: var(--ar-beige-vivo);
+}
+
+.hero-bajada {
+  max-width: 46ch;
+  margin: 0;
+  font-size: clamp(0.97rem, 1.35vw, 1.12rem);
+  line-height: 1.5;
+  color: oklch(0.97 0.005 90 / 0.84);
+  text-wrap: pretty;
+}
+
+/* ---- Movimiento reducido ---- */
+
+

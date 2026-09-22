@@ -36,16 +36,20 @@ frame() {
 }
 
 # ---- Hero -------------------------------------------------------------------
-# 7-17 s of the walkthrough: covered gallery -> grill -> pool -> patio, one continuous move.
-# Before 6 s it is only lawn; after 17 s the source goes into a corridor, a dated kitchen,
-# a bathroom and ends on a CapCut watermark, so none of that is ever used.
-# The poster is the clip's own first frame, so there is no jump when playback starts.
-# 1080 @ CRF 26 (the old reference command) measured 14.6 MB per 8 s: over budget.
+# Dos tomas, las dos en PLANO GENERAL y las dos de 720: recortado a horizontal, un plano corto
+# se lee como un primer plano borroso (Mateo, 2026-09-21: "todos los videos muy cerca en
+# desktop"). Del recorrido solo 1-6 s y 12-17 s están filmados de lejos; entre medio la cámara
+# va pegada a la galería, y después de 17 s vienen un pasillo, una cocina vieja, un baño y la
+# marca de agua de CapCut. Los tiles de WhatsApp no sirven acá: son de 480 de ancho y en una
+# pantalla de 1920 se amplían 4 veces.
+# El póster es el primer cuadro de la primera toma, así no hay salto al arrancar.
 HERO="$VID/IMG_9789.MOV"
-clip  "$HERO" 7 10 720 30 "$OUT/hero.mp4"
-frame "$HERO" 7 1080 "$OUT/hero-poster.jpg"
-ffmpeg -y -v error -ss 7 -i "$HERO" -frames:v 1 -map_metadata -1 \
-  -c:v libaom-av1 -crf 34 -cpu-used 6 -still-picture 1 "$OUT/hero-poster.avif"
+clip  "$HERO" 12 5 720 30 "$OUT/hero-pileta.mp4"
+frame "$HERO" 12 1080 "$OUT/hero-pileta-poster.jpg"
+ffmpeg -y -v error -ss 12 -i "$HERO" -frames:v 1 -map_metadata -1   -c:v libaom-av1 -crf 34 -cpu-used 6 -still-picture 1 "$OUT/hero-pileta-poster.avif"
+
+clip  "$HERO" 1 4 720 30 "$OUT/hero-jardin.mp4"
+frame "$HERO" 1 1080 "$OUT/hero-jardin-poster.jpg"
 
 # ---- Gallery tiles ----------------------------------------------------------
 # Vertical 480x848. The sources are 848x480 with 90 deg rotation metadata, which ffmpeg

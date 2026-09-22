@@ -149,6 +149,51 @@
 **Also decided here:** the hero is 7–17 s of the walkthrough (covered gallery → grill → pool → patio), not the whole clip; the night video is not published, because guests' faces are recognisable in it; five stills come out of the 1080 walkthrough, and the two professional photos inside the "Salón usos múltiples" carousel are cropped in as well — they are a quarter of the resolution but better framed than any frame of the videos.
 **Reopen if:** the originals arrive (`CR-01`, `CR-02`) — same script, new numbers — or a design round needs a longer hero.
 
+### D-023 · 2026-09-21 · HERO: media que se abre, tomas en plano general y botón con canto
+**Decision:** the `HERO` is `HERO.media-bg` and it starts **closed** —the whole screen is the brand's dark
+blue— and opens as a **rectangle growing from the middle**: lying down on desktop, standing on the
+phone (Mateo: "que se abra como un rectángulo desde el medio, vertical para mobile y acostado en
+desktop"). Four panels slide out, one per side, and the window is what is left between them. All four
+move **together** with the same curve, so the window keeps the screen's own proportion while it
+grows: that is what makes it lying down on a desktop and standing on a phone, with a margin on all
+four sides the whole way. 0.3 s hold, then 1.5 s `expo.inOut`. Only `transform` moves, on four flat elements: the video is never
+scaled, counter-scaled or clipped. The text enters at 0.55 s, staggered 0.09 s. Behind the fixed headline the takes rotate every 8.25 s, and the new
+take enters as a **curtain** (1.25 s, `expo.inOut`): it slides up over the previous one while its
+own content slides the opposite way, so the image stays still and only the edge that uncovers it
+moves. The outgoing take keeps playing until the curtain covers it. Mateo picked reference 1 (SHA, fixed headline + rotating takes) + 2 (Auberge,
+availability always reachable) with the opening of reference 5 (Lanserhof), and "fondo" over "marco".
+The button is reference 7 (hover.dev · Neu): it lifts and a solid edge grows, 0.85 s; translated to
+the brand, the edge is beige on dark, never the original's black. The header button behaves the same.
+**Also decided here:** the hero uses only the two stretches of the walkthrough filmed **wide**
+(12–17 s and 1–5 s), both 720 px; the tiles are out of the hero because they are 480 px wide.
+Typography: Instrument Serif for the headline (`next/font`), italic for the highlighted half.
+**Rejected, not to be retried:** the crossfade between takes ("la transición está malísima, se ve
+muy mal"): two different wide shots dissolved into each other read as a double exposure, and the
+criterion already said it — nothing appears out of nowhere, it opens. Variant "Ficha" (the floating module card) and variant "Barra" (the
+three modules pinned at the bottom); the untreated video as background; the tile of the pool as the
+first take; and the hero taken from 7–17 s, which reads as a close-up once cropped to a wide screen
+("hay todos videos muy muy cerca en desktop").
+**Rejected before this, in order:** a frame that grew from a small vertical rectangle (it started
+from something already visible instead of from closed, and counter-scaling the media made it look
+enlarged and soft while it moved); two curtains opening on a single axis; and the same four panels moved with a
+0.34 s offset between pairs, which opened a band from edge to edge instead of a rectangle. Mateo
+settled it with a drawing: a small rectangle in the middle, margin on every side, growing.
+**Smoothness, measured on the production build:** the opening runs at **60 fps**, median frame
+16.7 ms, worst 16.8 ms, zero frames over 32 ms, on both 1440 and 390. The take change first
+measured 50 fps with 30 dropped frames because both videos were playing at once; with only the
+active one playing it is 59 fps and 2 slow frames.
+**Measured, not guessed:** `expo.out` spends 90 % of the travel in the first 30 % of the time, so a
+1.4 s move reads as a 0.4 s jolt with an invisible tail — "nada rápido de arranque" in the criterion.
+With `power2.inOut` the same 1.4 s is still moving at 900 ms. The opening's first frame is set by a
+script that runs before paint (`hero-apertura.tsx`), because doing it from React showed the image
+full-screen first and then snapped back to the small frame.
+**Two traps found building it:** the curtains were painted *behind* the video, because the take
+layers use `z-index: 1/2` and their wrapper did not isolate them (`G-027`); and `page.screenshot`
+waits for `document.fonts.ready`, so every timed frame came out late until the captures moved to
+CDP (`G-028`).
+**Reopen if:** the originals arrive (`CR-01`, `CR-02`) with wide material, which removes the whole
+framing problem.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
@@ -188,6 +233,13 @@
 | G-021 | The 6 WhatsApp videos are coded 848×480 with **90° rotation metadata**, so they display vertical (480×848). ffmpeg applies the rotation before the filter chain, so `scale=480:-2` sets the *displayed* width; the `scale=-2:480` of the old reference command would have produced 272×480 |
 | G-022 | `IMG_9789.MOV` is usable only between 0 and 17 s: after that it shows a corridor, a dated kitchen and a bathroom, and it ends on a **CapCut watermark** (~42 s). The filmer's shadow is visible on the floor in several frames — unavoidable with this temporary material (`CR-02`) |
 | G-023 | iPhone `.MOV` files embed GPS coordinates and timestamps. Every output of `build-media.sh` carries `-map_metadata -1`; a published file must never ship the client's location metadata |
+
+| G-024 | A **vertical** video cropped to a wide screen turns any close shot into a blurry close-up, and no `object-position` fixes it: only material filmed wide survives the crop. On a phone the same file shows its whole frame and the setting does nothing, because the crop happens horizontally |
+| G-025 | A solid-edge button (the "Neu" hover) has to contrast with the **background**, not with the button: the dark-blue edge was invisible over the hero. On dark backgrounds the edge goes light (`.boton-en-oscuro`) |
+| G-026 | With Cache Components, reading `searchParams` in a page breaks the prerender ("uncached or runtime data") unless the part that reads it lives inside `<Suspense>`, exactly like the admin pages (`D-021`) |
+
+| G-027 | Layers with their own `z-index` inside a wrapper that has `z-index: auto` join the PARENT stacking context, so they compete with siblings of that parent: the hero's curtains sat behind the video until the wrapper got `isolation: isolate` |
+| G-028 | Playwright's `page.screenshot` waits for `document.fonts.ready`, so a frame asked for at 200 ms can be taken hundreds of ms later. Timed frames of an entrance must be captured with `Page.captureScreenshot` over CDP, or the timing being measured is fiction |
 
 ## Technical debt taken on purpose
 
