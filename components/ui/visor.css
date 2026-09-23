@@ -1,0 +1,164 @@
+/* El visor: la pieza en grande sobre un fondo apagado. Colores PROVISORIOS, los mismos que el
+   hero, hasta que llegue el logo original (CR-03) y la paleta suba a :root. */
+
+.visor {
+  width: min(100vw, 100%);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.visor::backdrop {
+  background: oklch(0.14 0.025 236 / 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .visor[open]::backdrop {
+    animation: visor-fondo 260ms ease-out;
+  }
+
+  .visor[open] .visor-caja {
+    animation: visor-entra 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes visor-fondo {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes visor-entra {
+  from {
+    opacity: 0;
+    transform: scale(0.965);
+  }
+}
+
+.visor-caja {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: clamp(12px, 3vw, 40px);
+}
+
+.visor-pieza {
+  display: flex;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.visor-media {
+  display: block;
+  max-width: min(100%, calc((100dvh - 160px) * 0.5625));
+  max-height: calc(100dvh - 160px);
+  border-radius: 10px;
+  object-fit: contain;
+  background: oklch(0.19 0.038 236);
+  box-shadow: 0 24px 70px oklch(0.1 0.02 236 / 0.55);
+}
+
+.visor-pie {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: oklch(0.97 0.005 90 / 0.92);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.visor-pie small {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}
+
+/* ---- Mandos ---- */
+
+.visor-cerrar,
+.visor-paso {
+  position: absolute;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-items: center;
+  border: 1px solid oklch(0.97 0.005 90 / 0.22);
+  border-radius: 50%;
+  background: oklch(0.16 0.03 236 / 0.55);
+  color: oklch(0.97 0.005 90 / 0.92);
+  cursor: pointer;
+  transition:
+    background 200ms ease-out,
+    border-color 200ms ease-out;
+}
+
+.visor-cerrar:hover,
+.visor-paso:hover {
+  background: oklch(0.16 0.03 236 / 0.85);
+  border-color: oklch(0.97 0.005 90 / 0.45);
+}
+
+.visor-cerrar:focus-visible,
+.visor-paso:focus-visible {
+  outline: 2px solid oklch(0.84 0.06 74);
+  outline-offset: 3px;
+}
+
+.visor-cerrar svg,
+.visor-paso svg {
+  width: 17px;
+  height: 17px;
+}
+
+.visor-cerrar {
+  top: clamp(12px, 3vw, 28px);
+  right: clamp(12px, 3vw, 28px);
+}
+
+.visor-paso {
+  top: 50%;
+  margin-top: -22px;
+}
+
+.visor-paso-antes {
+  left: clamp(8px, 2vw, 28px);
+}
+
+.visor-paso-despues {
+  right: clamp(8px, 2vw, 28px);
+}
+
+/* En el teléfono los pasos van abajo, donde llega el pulgar, y no encima de la imagen. */
+@media (max-width: 640px) {
+  .visor-media {
+    max-height: calc(100dvh - 200px);
+  }
+
+  .visor-paso {
+    top: auto;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    margin-top: 0;
+  }
+
+  .visor-paso-antes {
+    left: calc(50% - 64px);
+  }
+
+  .visor-paso-despues {
+    right: calc(50% - 64px);
+  }
+}
