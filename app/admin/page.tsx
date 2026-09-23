@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function AdminPage({ searchParams }: PageProps<"/admin">) {
   return (
     <main className="admin-shell">
-      <div className="mx-auto max-w-6xl px-4 pb-28 pt-6 lg:px-10 lg:pt-10">
+      <div className="px-4 pb-28 pt-6 lg:px-10 lg:pt-10">
         <header className="flex items-center justify-between gap-4">
           <h1 className="text-lg font-semibold tracking-tight">Panel de Araucaria</h1>
           <form action={logout}>
