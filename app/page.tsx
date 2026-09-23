@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { Disponibilidad, DisponibilidadEsperando } from "@/components/calendario/disponibilidad";
 import { Galeria } from "@/components/galeria/galeria";
 import { Hero } from "@/components/hero/hero";
 import { ScrollSuave } from "@/components/scroll-suave";
@@ -15,6 +17,16 @@ document.head.appendChild(s);
 setTimeout(function(){s.remove();},3000);
 }catch(e){}})();`;
 
+// Lo mismo para el calendario (D-033): el título, los números y el mes de la foto esperan abajo en
+// su máscara, las luces apagadas y los sellos sin caer, hasta que la sección llega a la pantalla.
+const GUION_CALENDARIO = `(function(){try{
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var s=document.createElement('style');
+s.textContent='.cal-encabezado .cal-linea,.cal-grilla-cabeza .cal-linea,.cal-num,.cal-foto-texto .cal-linea{transform:translateY(110%)}.cal .cal-dia .cal-luz,.cal .cal-dia .cal-sello{opacity:0}';
+document.head.appendChild(s);
+setTimeout(function(){s.remove();},3000);
+}catch(e){}})();`;
+
 export default function HomePage() {
   return (
     <>
@@ -22,6 +34,10 @@ export default function HomePage() {
       <Hero />
       <script dangerouslySetInnerHTML={{ __html: GUION_GALERIA }} />
       <Galeria />
+      <script dangerouslySetInnerHTML={{ __html: GUION_CALENDARIO }} />
+      <Suspense fallback={<DisponibilidadEsperando />}>
+        <Disponibilidad />
+      </Suspense>
     </>
   );
 }

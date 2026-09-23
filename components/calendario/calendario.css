@@ -1,0 +1,626 @@
+/* CALENDARIO público (docs/06-UI-UX.md §3, D-033): "La foto se cambia" + "Sello con luces".
+   Mismos colores y misma tipografía que el hero y la galería. Los colores son PROVISORIOS hasta
+   que llegue el logo (CR-03), igual que en hero.css y galeria.css. */
+
+.cal {
+  --ar-azul: oklch(0.28 0.045 232); /* {{CONFIRMAR}} */
+  --ar-azul-hondo: oklch(0.19 0.038 236); /* {{CONFIRMAR}} */
+  --ar-beige: oklch(0.91 0.028 78); /* {{CONFIRMAR}} */
+  --ar-beige-vivo: oklch(0.84 0.06 74); /* {{CONFIRMAR}} */
+  --ar-tinta: oklch(0.99 0.004 90);
+
+  --cal-borde: clamp(16px, 4vw, 56px);
+  --cal-celda: clamp(40px, 6.2svh, 64px);
+
+  --c-texto: var(--ar-tinta);
+  --c-celda: color-mix(in oklch, var(--ar-tinta) 7%, transparent);
+  --c-acento: var(--ar-beige);
+  --c-sobre-acento: var(--ar-azul-hondo);
+  --c-linea: color-mix(in oklch, var(--ar-tinta) 18%, transparent);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.6svh, 32px);
+  min-height: 100svh;
+  padding: clamp(32px, 6svh, 80px) var(--cal-borde);
+  background: var(--ar-azul-hondo);
+  color: var(--c-texto);
+}
+
+/* ---- Máscara: lo que se abre desde abajo (el mismo recurso que la galería) ---- */
+
+.cal-mascara {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.cal-linea {
+  display: block;
+}
+
+/* ---- Encabezado ---- */
+
+.cal-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 32px;
+}
+
+.cal-titulo {
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: clamp(1.75rem, 3.4vw, 3rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+.cal-bajada {
+  max-width: 44ch;
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.72;
+}
+
+.cal-cuerpo {
+  display: grid;
+  gap: clamp(20px, 2.4vw, 40px);
+  flex: 1;
+}
+
+/* ---- Grilla del mes ---- */
+
+.cal-grilla {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cal-grilla-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cal-grilla-titulo {
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+  line-height: 1.1;
+}
+
+.cal-grilla-anio {
+  opacity: 0.55;
+}
+
+.cal-flechas {
+  display: flex;
+  gap: 8px;
+}
+
+.cal-flecha {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--c-linea);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition:
+    border-color 0.4s ease,
+    background-color 0.4s ease;
+}
+
+.cal-flecha:hover:not(:disabled) {
+  border-color: var(--c-acento);
+}
+
+.cal-flecha:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.cal-semana,
+.cal-dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.cal-semana {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+/* En el escritorio la grilla llena el alto de su columna: sin espacio muerto debajo del mes.
+   En el celular cada fila queda en su mínimo. */
+.cal-dias {
+  flex: 1;
+  grid-auto-rows: minmax(var(--cal-celda), 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cal-dias > li {
+  display: grid;
+}
+
+.cal-dia {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  min-height: var(--cal-celda);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 6px;
+  background: var(--c-celda);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+.cal-dia:hover:not(:disabled, [aria-disabled]) {
+  box-shadow: inset 0 0 0 1px var(--c-acento);
+}
+
+.cal-dia:focus-visible {
+  outline: 2px solid var(--c-acento);
+  outline-offset: 2px;
+}
+
+.cal-num-mascara {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.cal-num {
+  display: block;
+  font-size: clamp(0.95rem, 1.15vw, 1.15rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-dia[data-hoy] .cal-num::after {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 4px;
+  margin: 2px auto 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cal-dia[data-elegido] {
+  background: var(--c-acento);
+  color: var(--c-sobre-acento);
+}
+
+.cal-dia[data-estado="full"] {
+  cursor: not-allowed;
+}
+
+.cal-dia[data-estado="full"] .cal-num {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.cal-dia[data-estado="past"],
+.cal-dia[data-estado="beyond-horizon"] {
+  background: transparent;
+  opacity: 0.28;
+  cursor: default;
+}
+
+.cal-leyenda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Lo que queda libre en un día con un solo módulo tomado. */
+.cal-nota {
+  position: relative;
+  z-index: 2;
+  font-size: clamp(0.56rem, 0.72vw, 0.72rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+/* En el celular la celda mide ~40 px: "solo" arriba y el módulo abajo, para que no se corte. */
+@media (max-width: 599px) {
+  .cal-nota {
+    font-size: 0.5rem;
+  }
+
+  .cal-nota > span {
+    display: block;
+  }
+}
+
+.cal-num-mascara {
+  z-index: 2;
+}
+
+/* ---- Luces ----
+   Libre: la celda encendida con luz cálida. A media luz si queda un módulo. Reservado: apagada,
+   solo un filo y el número tachado. Los pasados ni siquiera tienen filo. */
+
+.cal .cal-dia {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--c-linea);
+}
+
+.cal-luz {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(120% 90% at 50% 20%, oklch(0.97 0.05 85), var(--ar-beige-vivo) 70%);
+  box-shadow: 0 0 22px color-mix(in oklch, var(--ar-beige-vivo) 45%, transparent);
+  transition: box-shadow 0.6s ease;
+}
+
+/* Cuánta luz tiene cada día (GSAP la enciende desde 0 al llegar; esto es donde termina). */
+.cal-luz[data-nivel="0"] {
+  opacity: 0;
+}
+
+.cal-luz[data-nivel="0.5"] {
+  opacity: 0.5;
+}
+
+.cal .cal-dia[data-estado="free"],
+.cal .cal-dia[data-estado="partial"] {
+  color: var(--ar-azul-hondo);
+  box-shadow: none;
+}
+
+.cal .cal-dia[data-estado="partial"] {
+  color: var(--ar-tinta);
+}
+
+.cal .cal-dia:hover .cal-luz {
+  box-shadow: 0 0 40px color-mix(in oklch, var(--ar-beige-vivo) 70%, transparent);
+}
+
+.cal .cal-dia[data-elegido] {
+  background: transparent;
+  outline: 2px solid var(--ar-tinta);
+  outline-offset: 2px;
+}
+
+.cal .cal-dia[data-estado="past"],
+.cal .cal-dia[data-estado="beyond-horizon"] {
+  box-shadow: none;
+}
+
+.cal-leyenda-luz {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--c-linea);
+}
+
+.cal-leyenda-luz[data-nivel="1"] {
+  margin-left: 0;
+  background: var(--ar-beige-vivo);
+  box-shadow: 0 0 10px color-mix(in oklch, var(--ar-beige-vivo) 50%, transparent);
+}
+
+.cal-leyenda-luz[data-nivel="0.5"] {
+  background: color-mix(in oklch, var(--ar-beige-vivo) 50%, transparent);
+}
+
+.cal-leyenda-sello {
+  margin-left: 8px;
+  padding: 0.2em 0.5em;
+  border: 1px solid var(--ar-beige-vivo);
+  border-radius: 3px;
+  color: var(--ar-beige-vivo);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(-6deg);
+}
+
+/* La base no respondió (D-021): todos los días quedan elegibles y se avisa. */
+.cal-aviso {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--c-linea);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* ---- Sello ----
+   Sobre el día reservado, la palabra en un recuadro fino, cruzada como un sello de goma. */
+
+.cal-sello {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  margin: -0.62em 0 0 -3.1em;
+  width: 6.2em;
+  padding: 0.18em 0;
+  border: 1px solid var(--ar-beige-vivo);
+  border-radius: 3px;
+  color: var(--ar-beige-vivo);
+  font-size: clamp(0.5rem, 0.68vw, 0.7rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(-10deg);
+  background: color-mix(in oklch, var(--ar-azul-hondo) 70%, transparent);
+}
+
+/* El sello puede pasarse del borde del día, como uno de goma: en el celular la celda es más
+   angosta que la palabra. */
+.cal .cal-dia {
+  overflow: visible;
+}
+
+.cal .cal-dia[data-estado="full"] .cal-num {
+  text-decoration: none;
+  opacity: 0.25;
+}
+
+/* ---- Detalle del día ---- */
+
+.cal-det {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2svh, 20px);
+  min-width: 0;
+}
+
+.cal-det-fecha {
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+}
+
+.cal-det-semana {
+  font-family: inherit;
+  font-size: 1.1rem;
+  text-transform: capitalize;
+  opacity: 0.7;
+}
+
+.cal-det-numero {
+  font-size: clamp(3.8rem, 7svh + 2vw, 7rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.cal-det-resto {
+  font-size: clamp(1.2rem, 1.6vw, 1.6rem);
+}
+
+.cal-modulos {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cal-modulo {
+  display: grid;
+  grid-template-areas:
+    "nombre precio"
+    "horario precio";
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 16px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--c-linea);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease,
+    border-color 0.5s ease;
+}
+
+.cal-modulo:hover:not(:disabled) {
+  border-color: var(--c-acento);
+}
+
+.cal-modulo:focus-visible {
+  outline: 2px solid var(--c-acento);
+  outline-offset: 2px;
+}
+
+.cal-modulo[aria-pressed="true"] {
+  border-color: var(--c-acento);
+  background: var(--c-acento);
+  color: var(--c-sobre-acento);
+}
+
+.cal-modulo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cal-modulo:disabled .cal-modulo-nombre {
+  text-decoration: line-through;
+}
+
+.cal-modulo-nombre {
+  grid-area: nombre;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.cal-modulo-horario {
+  grid-area: horario;
+  font-size: 0.85rem;
+  opacity: 0.72;
+}
+
+.cal-modulo-precio {
+  grid-area: precio;
+  font-size: 1rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* El canto del botón (4 px) no puede quedar recortado por la máscara. */
+.cal-seguir {
+  padding: 0 6px 6px 0;
+}
+
+.cal-seguir .boton {
+  width: 100%;
+}
+
+.cal-seguir .boton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Foto con el mes en grande ---- */
+
+.cal-foto {
+  position: relative;
+  min-height: 24svh;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--ar-azul);
+}
+
+.cal-foto-capa {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.cal-foto-velo {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(to top, color-mix(in oklch, var(--ar-azul-hondo) 78%, transparent), transparent 60%);
+}
+
+.cal-foto-texto {
+  position: absolute;
+  left: clamp(16px, 2vw, 28px);
+  bottom: clamp(14px, 2vw, 28px);
+  z-index: 4;
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  color: var(--ar-tinta);
+}
+
+.cal-foto-mes {
+  font-size: clamp(2.8rem, 5.6vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.cal-foto-anio {
+  font-size: clamp(1.1rem, 1.6vw, 1.6rem);
+  opacity: 0.8;
+}
+
+@media (min-width: 1000px) {
+  .cal-cuerpo {
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+/* ---- Las dos mitades: la foto (que la cortina tapa con el día) y el mes ---- */
+
+.cal-panel {
+  position: relative;
+  min-height: clamp(460px, 64svh, 560px);
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.cal-panel-foto {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+}
+
+.cal-telon {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  padding: clamp(18px, 2.4vw, 36px);
+  overflow-y: auto;
+  background: var(--ar-azul);
+  transform: translateX(-101%);
+}
+
+.cal-telon .cal-det {
+  flex: 1;
+}
+
+/* En el celular primero la grilla: el panel (foto, y después el día) va debajo. */
+.cal-grilla {
+  order: -1;
+}
+
+@media (min-width: 1000px) {
+  .cal-cuerpo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .cal-grilla {
+    order: 0;
+  }
+
+  .cal-panel {
+    min-height: 0;
+  }
+}

@@ -1,0 +1,136 @@
+"use client";
+
+import { useMemo, useRef, useState } from "react";
+import { buildMonth, type AvailabilityEntry, type BlockChoice, type DayCell } from "@/components/calendar/month";
+import { addMonthsToMonth, monthOf, type IsoDate, type IsoMonth } from "@/lib/dates";
+import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { ABRE, CURVA, ESCONDIDO, Mascara, quieto } from "./comun";
+import { Detalle } from "./detalle";
+import { Foto } from "./foto";
+import { Grilla } from "./grilla";
+import "@/components/ui/boton.css";
+import "./calendario.css";
+
+// CALENDARIO público (docs/06-UI-UX.md §3, D-033). Dos mitades: a un lado la foto del lugar con el
+// mes en grande, al otro el mes. Al elegir un día, una cortina tapa la foto con ese día y sus
+// módulos ("La foto se cambia"). Lo reservado se cuenta con luces y sellos (grilla.tsx).
+//
+// LA ENTRADA pasa cuando la sección llega al 70 % de la pantalla, no al cargar la página: hasta ahí
+// los números, las luces y los sellos esperan escondidos (el guion de app/page.tsx los esconde
+// antes del primer pintado, y después GSAP). Nada se mueve solo.
+//
+// `entradas` null: la base no respondió. Todos los días quedan elegibles y se avisa (D-021).
+
+const CORTINA = 1.1; // s, power3.inOut: la misma cortina de las historias de la galería
+
+export type Datos = { today: IsoDate; lastBookable: IsoDate; entradas: readonly AvailabilityEntry[] | null };
+
+function useEstado({ today, lastBookable, entradas }: Datos) {
+  const primero = monthOf(today);
+  const ultimo = monthOf(lastBookable);
+  const [mes, setMes] = useState<IsoMonth>(primero);
+  const [sentido, setSentido] = useState(1);
+  const [dia, setDia] = useState<DayCell | null>(null);
+  const [modulo, setModulo] = useState<BlockChoice | null>(null);
+  const semanas = useMemo(() => buildMonth(mes, entradas ?? [], today, lastBookable), [mes, entradas, today, lastBookable]);
+
+  function mover(n: 1 | -1) {
+    const nuevo = addMonthsToMonth(mes, n);
+    if (nuevo < primero || nuevo > ultimo) return;
+    setSentido(n);
+    setMes(nuevo);
+  }
+
+  function elegir(celda: DayCell) {
+    setDia(celda);
+    setModulo(null);
+  }
+
+  return {
+    today,
+    cargada: entradas !== null,
+    mes,
+    sentido,
+    semanas,
+    dia,
+    modulo,
+    setModulo,
+    elegir,
+    mover,
+    hayAntes: mes > primero,
+    hayDespues: mes < ultimo,
+  };
+}
+
+export type Estado = ReturnType<typeof useEstado>;
+
+export function Calendario(datos: Datos) {
+  const cal = useEstado(datos);
+  const raiz = useRef<HTMLElement>(null);
+  const [llego, setLlego] = useState(false);
+  const abierto = cal.dia !== null;
+
+  useGSAP(
+    () => {
+      const titulo = ".cal-encabezado .cal-linea";
+      if (!quieto()) {
+        gsap.set(titulo, { y: 0, yPercent: 0 });
+        setLlego(true);
+        return;
+      }
+      gsap.set(titulo, { y: 0, yPercent: ESCONDIDO });
+      ScrollTrigger.create({
+        trigger: raiz.current,
+        start: "top 70%",
+        once: true,
+        onEnter: () => {
+          gsap.to(titulo, { y: 0, yPercent: 0, duration: ABRE, ease: CURVA, stagger: 0.1 });
+          setLlego(true);
+        },
+      });
+    },
+    { scope: raiz },
+  );
+
+  useGSAP(
+    () => {
+      if (!abierto) return;
+      // x: 0 explícito: GSAP lee el translateX(-101%) de la hoja como x en px y lo dejaría puesto.
+      gsap.fromTo(
+        ".cal-telon",
+        { x: 0, xPercent: -101 },
+        { x: 0, xPercent: 0, duration: quieto() ? CORTINA : 0, ease: "power3.inOut" },
+      );
+    },
+    { scope: raiz, dependencies: [abierto] },
+  );
+
+  return (
+    <section ref={raiz} id="disponibilidad" className="cal" aria-labelledby="cal-titulo">
+      <header className="cal-encabezado">
+        <h2 id="cal-titulo" className="cal-titulo">
+          <Mascara>Disponibilidad</Mascara>
+        </h2>
+        <p className="cal-bajada">
+          <Mascara>Elegí el día y el módulo para tu evento.</Mascara>
+        </p>
+      </header>
+
+      {cal.cargada ? null : (
+        <p className="cal-aviso" role="status">
+          No pudimos cargar la disponibilidad. Elegí la fecha igual y te confirmamos por WhatsApp.
+        </p>
+      )}
+
+      <div className="cal-cuerpo">
+        <div className="cal-panel">
+          <Foto mes={cal.mes} llego={llego} className="cal-panel-foto" />
+          <div className="cal-telon">
+            <Detalle cal={cal} />
+          </div>
+        </div>
+        <Grilla cal={cal} llego={llego} />
+      </div>
+    </section>
+  );
+}
