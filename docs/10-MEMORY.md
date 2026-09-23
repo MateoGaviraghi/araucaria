@@ -259,6 +259,13 @@ framing problem.
 **Removed:** the desktop arrows and counter beside the text (the row has no text column; clicks go on the take).
 **Reopen if:** more spaces are added (five or more columns get narrow), or the originals arrive filmed wide.
 
+### D-031 · 2026-09-23 · On the phone the takes follow the finger
+**What he asked, in his words** (approving `D-030` and the commit `3a0989f`): *"en mobile me gustaria que vos tengas para deslizar con el dedo entre el carosuel de las imagenes y no esperar"*. Plan answered *"go"*.
+**Decision:** on the phone (the stack, below 1000 px) the take follows the finger. Dragging left, the next take enters from the right edge as the same curtain, but in the hand — the window follows the finger and the image inside stays still; dragging right brings back the previous one. On release it completes if it travelled more than 25 % of the width, or if the last 80 ms of the gesture went faster than 0.4 px/ms (a flick); otherwise it goes back. Completing or going back takes 0.45 s scaled by what is left, `power3.out`. The vertical gesture stays with the page (`touch-action: pan-y` on the frame, native touch scroll — Lenis does not smooth touch). While the finger is on it the auto-advance waits, and it resumes on its own ("solas" still holds). A drag never counts as a tap. On the phone taps and the auto-advance also change takes sideways, in the same direction as the finger; the desktop row keeps the vertical curtain approved in `D-030` and has no drag (clicks).
+**Measured with real touch events (CDP `Input.dispatchTouchEvent`) at 375:** 9 of 9 — 40 % to the left passes, 10 % slowly returns with nothing left peeking, 40 % to the right goes back, a 21 % flick passes by speed alone, a vertical gesture scrolls the page 285 px without changing the take, the tap still works, 0 of 346 frames over 33 ms during four drags with the real GPU, one video at most, no console errors or warnings. The desktop row still passes its 10 checks.
+**Trap found testing it:** synthetic touch events over CDP arrive 30–50 ms apart, so a "fast" scripted flick actually moved at 0.24 px/ms — slower than a real finger. The velocity is measured on the last 80 ms of the gesture, not from the first touch, which also counted the pause before moving.
+**Reopen if:** a real phone shows the drag fighting the page scroll, or the thresholds feel wrong in the hand.
+
 
 ## Open questions
 

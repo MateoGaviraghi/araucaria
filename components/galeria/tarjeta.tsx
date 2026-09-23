@@ -109,6 +109,7 @@ export function Tarjeta({
           actual={vista.actual}
           anterior={vista.anterior}
           sentido={vista.sentido}
+          eje={fila ? "y" : "x"}
           corre={fila ? activa : activa && !encima}
           repetir={!fila}
           onFinToma={fila ? onFinToma : undefined}

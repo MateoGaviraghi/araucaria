@@ -237,9 +237,12 @@
   container-type: size;
 }
 
+/* touch-action: pan-y deja el gesto vertical a la página y el de costado a la galería, que lo
+   sigue con el dedo (D-031). */
 .gal-historia {
   position: relative;
   height: min(100cqh, calc(100cqw * 16 / 9));
+  touch-action: pan-y;
   aspect-ratio: 9 / 16;
   overflow: hidden;
   border-radius: var(--gal-canto);
@@ -454,6 +457,7 @@
 
   .gal-historia {
     height: min(calc(100cqw * 16 / 9), calc(100svh - var(--reserva)));
+    touch-action: auto;
   }
 
   .gal-tarjeta-cabeza {
