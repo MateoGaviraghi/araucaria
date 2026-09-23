@@ -4,18 +4,18 @@
 
 ## 1. STATE
 
-**Updated:** 2026-09-22, `HERO` en producción y la galería esperando GO-AHEAD.
+**Updated:** 2026-09-23, la galería construida, aprobada y commiteada en `main` (sin push): falta que Mateo la mire en su pantalla y en un teléfono real.
 
 | | |
 |---|---|
-| **Current task** | Phase 1 of the Araucaria site. WU-01 … WU-06 and the `HERO` of WU-07 are merged to `main` and live. **The gallery round is open**: references presented, Mateo chose a mix, the three-variant plan is on the table and **he has not given the GO-AHEAD** ("aun no go"), so **no file of the gallery exists yet** |
-| **Real status** | `araucaria-multiespacio.vercel.app` serves the real `HERO`: it opens as a rectangle growing from the middle, two wide takes rotate behind the headline, and the site's button is in place. `/admin` works as before. **Production still has no admin credential**, on purpose until WU-09. `main` is at `620d18b`; the working tree is clean except `.claude/`, untracked |
-| **Last chat** | 2026-09-21 → 2026-09-22 (this one) |
-| **Waiting on me (Claude)** | Nothing. The next move is Mateo's GO-AHEAD on the gallery's three variants |
-| **Waiting on Mateo** | (a) GO-AHEAD for the gallery prototype, or a change to the plan — what moves most easily now is which pieces go in and in what order, the name of each space, or replacing variant C. (b) Name the section after the gallery. (c) Answer `OQ-06`, `OQ-07` and `OQ-08`. (d) He holds the dev passphrase; it exists only in his password manager |
-| **Waiting on third parties** | The client owes `CI-01` (WhatsApp number), `CI-02`, `CI-03`, `CI-05` and `CR-01`…`CR-03` (original photos, videos and logo). The hero's colours and logo stay `{{CONFIRMAR}}` until the logo arrives, and the two good photos of the gallery are 450 px crops until `CR-01` lands |
-| **Next action** | Wait for the GO-AHEAD, then build the three gallery variants behind the picker at `/prototipo-galeria`, measure them and show them. **Do not present a plan for another section before Mateo names it** |
-| **Do not touch** | `main` without Mateo's word · the production Neon branch (five tables, no credential; a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · `.env.local` and the Vercel environment variables · the Neon branch `backup-pre-0000-init` · **the designs already rejected** in `D-023` (three openings for the hero) and in `D-025` (the gallery references he did not pick) |
+| **Current task** | Phase 1 of the Araucaria site. WU-01 … WU-06 and the `HERO` of WU-07 are live. **The gallery (block 3 of WU-07) is built and approved** (`D-028` → `D-031`): one story per space; on the phone a stack of cards driven by the scroll, swiped with the finger; from 1000 px the four spaces side by side in one screen. The next section is Mateo's to name |
+| **Real status** | `main` is at `ac178ed`, **2 commits ahead of `origin/main` (`5744c80`) and not pushed**: production (`araucaria-multiespacio.vercel.app`) still serves only the `HERO`. `/admin` works as before. **Production still has no admin credential**, on purpose until WU-09. This `WORKLOG.md` update is uncommitted; `.claude/` stays untracked (`OQ-08`). The dev server on :3000 has the gallery under the hero |
+| **Last chat** | 2026-09-22 → 2026-09-23 (this one; the second half began with `/retomar`) |
+| **Waiting on me (Claude)** | Nothing |
+| **Waiting on Mateo** | (a) Look at the gallery on his own 1920 × 911 screen and on a real phone — the finger thresholds (25 % of the width, 0.4 px/ms) only prove themselves in the hand. (b) Say "push" to deploy the two gallery commits to production. (c) Whether this `WORKLOG.md` update gets committed. (d) Name the next section. (e) Answer `OQ-06`, `OQ-07` and `OQ-08`. (f) Whether the scratchpad copies of rejected gallery code can be dropped (`TD-008`, `TD-009`). (g) He holds the dev passphrase; it exists only in his password manager |
+| **Waiting on third parties** | The client owes `CI-01` (WhatsApp number), `CI-02`, `CI-03`, `CI-05` and `CR-01`…`CR-03` (original photos, videos and logo). The hero's and the gallery's colours stay `{{CONFIRMAR}}` until the logo arrives. **If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
+| **Next action** | Wait for Mateo: corrections to the gallery, "push", or the name of the next section. On "push": `git push origin main` (Vercel deploys `main` to production), then look at the gallery in production at 375, 1440 and 1920 |
+| **Do not touch** | Pushing `main` without Mateo's word · the production Neon branch (five tables, no credential; a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · `.env.local` and the Vercel environment variables · the Neon branch `backup-pre-0000-init` · **the designs already rejected**: `D-023` (three openings for the hero), `D-025` (the gallery references he did not pick), `D-027` (pieces of different sizes or positions, any landscape crop of the vertical material, and the three carousels A · Fila, B · Calma, C · Una por vez), `D-029` (takes of one fixed size scattered inside a large card), `D-030` (a single vertical take inside a landscape card on the desktop) |
 
 ## 2. LOG
 
@@ -376,3 +376,200 @@ Run after the headline change, before committing it. No test runner exists in th
 | `next.config.ts` | `noindex` for the prototype route |
 
 Decided already and not to be asked again: **9 pieces** (the 6 videos plus 3 photos) and the caption **always visible**, never only on hover.
+
+### 2026-09-22 → 2026-09-23 · WU-07 (cont.) · la galería: tres variantes, rechazo entero, y el carrusel ordenado
+
+Same chat as the previous entry, picking up right after the commit `5744c80`.
+
+**Asked (Mateo's own words, in order):**
+
+1. **"vamos con el goheads ? recurdalo bien antes de empezar"** — the GO-AHEAD for the three-variant gallery prototype of `D-025`, with the plan restated first.
+2. **"me gusta el de corre, pero me gustaria mas si lo dividmos mejor en secciones tipo patio, slon asi, y que luego cundo vaymos correindo vya haciendo una animacion degsap para ir mostrando los diofenrets espacio y mostrar esa exprecia inmersiva y fluida"**.
+3. **"el jardin y el patio es lo mimso y tambien la parte de la pergola es dentro del patio, dejalo en salon, patio, parrilla, y pileta"** — answering the chapter split.
+4. **"re dseña las tre opcione s prique no me ha gustado ninguna, relamente no le encuntro la forma yt no me gusta el desorden ese genrado ya que todas son vertcales, busca inspiraciones nuevas de carosueles y haz tres opcines profesinales"** — all three thrown out.
+5. **"paradas, la 1 y la 3"** — answering the new reference round: upright pieces, Nobu Barcelona plus Habitas Tulum.
+6. "/cerrar" (this entry).
+
+**Done, in three passes:**
+
+- **Pass 1 — the three variants of `D-025`.** `/prototipo-galeria` built with the standard picker: A · Fila desfasada, B · Mosaico, C · Mosaico que corre (pinned). Nine pieces, captions always visible, the shared viewer. Shown at 375 / 1440 / 1920.
+- **Pass 2 — C turned into a walkthrough (`D-026`).** He picked C and asked for chapters. The nine pieces were grouped into **four spaces** (El salón 2 · El patio 4 · La parrilla 1 · La pileta 2), each chapter opening with a cover that travels with the track, the pieces rising as they cross the right edge through GSAP's `containerAnimation`, the covers lagging 120 px, and four marks under the track saying which space you are in. Below 900 px and under reduced motion the chapters stack.
+- **Pass 3 — everything redesigned (`D-027`).** He rejected all three. Second reference round, **carousels only**: 13 candidates opened, 7 presented with their captures and the crop cost of each shape; he chose upright, Nobu + Habitas. The three variants were rebuilt from scratch on one rule — **every piece identical** — as **A · Fila**, **B · Calma** and **C · Una por vez**.
+
+**Files (every file created or modified, with what changed):**
+
+| File | What |
+|---|---|
+| `app/prototipo-galeria/page.tsx` | **New.** Server component. `metadata.robots` noindex/nofollow, and `searchParams` read inside a `<Suspense>` so the first HTML already carries the chosen variant (Cache Components, `G-026`) |
+| `app/prototipo-galeria/prototipo.tsx` | **New.** Holds the variant index and a remount counter, writes `?v=` with `history.replaceState`. Rewired in pass 3 to Fila / Calma / Una |
+| `app/prototipo-galeria/picker.tsx` | **New.** The `prototype` skill's picker expressed in React, same behaviour contract. Two additions of its own: it ignores keys while a `dialog[open]` exists, and (pass 3) while `e.defaultPrevented` (`G-038`) |
+| `app/prototipo-galeria/picker.css` | **New.** Copied **verbatim** from `PICKER.md` §Styles. Not restyled |
+| `components/galeria/contenido.ts` | **New.** `TITULO` "Conocé el espacio", `BAJADA` "Un recorrido por el salón, el patio, la parrilla con horno pizzero y la pileta.", `ESPACIOS` (the four, with their pieces) and `PIEZAS` derived flat. The nine pieces with their real `alt`, written after looking at 9 posters and 18 video frames on a contact sheet — **not** from the file names |
+| `components/galeria/pieza.tsx` | **New.** Poster first, `<video>` mounted 400 px before entering and played only when 15 % visible, entrance with GSAP, click opens the viewer. Props `epigrafe` ("encima" \| "debajo"), `entradaPropia`, `retraso` |
+| `components/galeria/galeria-fila.tsx` | **New, rewritten in pass 3.** A · Fila: native horizontal scroll with mandatory snap, mouse drag on top, `01 — 09` counter and arrows in the header, name over the photo. Three cards in view and the fourth peeking |
+| `components/galeria/galeria-calma.tsx` | **New (pass 3).** B · Calma: same rail, smaller pieces (five in view), no arrows or dots, a 1 px progress rule, name **below** the photo, centred heading |
+| `components/galeria/galeria-una.tsx` | **New (pass 3), rewritten once.** C · Una por vez: two-column card — name, counter, arrows and a strip of nine thumbnails on the left; the take on the right inside a track that measures one piece plus the peek. Moved with GSAP, keyboard arrows, `ResizeObserver` to re-centre |
+| `components/galeria/galeria.css` | **New, rewritten twice.** Tokens (provisional, mirroring the hero), section heading, the shared piece (`--alto` + `aspect-ratio: 9/16`), shared controls (`.gal-cuenta`, `.gal-flecha`), and the three variants. 524 lines |
+| `components/ui/visor.tsx` | **New.** The "see it big": native `<dialog>` + `showModal()`, arrows to move, Escape and backdrop to close |
+| `components/ui/visor.css` | **New.** Full-screen viewer, blurred backdrop, controls moved to thumb reach below 640 px |
+| `components/galeria/galeria-mosaico.tsx` · `galeria-corre.tsx` | **Created in passes 1–2 and DELETED in pass 3.** Copies kept at `…/scratchpad/variantes-viejas/` (`TD-008`) |
+| `lib/gsap.ts` | **Modified.** Registers `ScrollTrigger` alongside `useGSAP` and `DrawSVGPlugin`. It was needed by the pinned variant, which no longer exists — worth revisiting |
+| `next.config.ts` | **Modified.** `PROTOTIPO_HEADERS` (`X-Robots-Tag: noindex, nofollow`) applied to `/prototipo-galeria` and `/prototipo-galeria/:path*` |
+| `docs/10-MEMORY.md` | **Modified.** `D-026`, `D-027`, `G-031`…`G-039`, `TD-008`, `OQ-09` |
+| `WORKLOG.md` | **Modified.** §1 rewritten; this entry appended |
+
+**Verified (with real results):**
+
+- **The three current variants at 375 / 1440 / 1920** — nine combinations, all nine pieces present, **zero console errors and zero horizontal overflow** in every one. Section heights: Fila 769 / 946 / 990 px · Calma 637 / 922 / 924 · Una 831 / 990 / 1018.
+- **The rule of `D-027`, measured** — one single piece size per variant: **324×576** in A, **263×468** in B, **344×612** in C, the nine of them. All 9:16, so no take is cropped.
+- **17 of 17 interaction checks** (`scratchpad/probar-galeria.cjs`): drag moves the rail in A and B (scrollLeft 0 → 344 and → 286, the progress rule at `scaleX(0.244)`); a drag does **not** open the viewer but a click does; Escape closes; in C the arrow advances and the track shifts (x 173 → −194) with the active take centred to **0 px of error**, the thumbnail jumps to its take (also 0 px), the keyboard moves; under `prefers-reduced-motion` in all three nothing is hidden (every opacity 1) and no video plays; with JavaScript off the HTML already carries the nine pieces.
+- **Captions of B, read from the DOM:** El salón · El salón · El patio · El patio · El patio · El patio · La parrilla · La pileta · La pileta (`OQ-09`).
+- **The `HERO` after touching `lib/gsap.ts`** — checked at 1440 and 375: headline, curtain transformed out, button, one video playing, no overflow, **zero console errors**.
+- **The pass-2 walkthrough, before it was rejected** (kept because the numbers cost work): the run was **2898 px of scroll at 1440** and 2959 at 1920, the section pinned at `top: 0` throughout, the indicator going El salón → El patio → La parrilla → La pileta, 3–4 videos playing at a time.
+- **The reference round:** 13 carousels opened at 1440, scrolled through up to six screen heights each, made to advance with a button or a drag, and the shape of their pieces measured to compute the crop cost of each one.
+
+**Sin verificar (explicitly):**
+
+- None of this on a **real phone or a real network** — everything is Chromium headless emulating one.
+- **Nothing of the gallery has been seen in production**; it has never been deployed.
+- Whether the videos' **first frame decodes fast enough** on a slow connection for the poster-to-video swap to stay invisible; it was only checked on localhost.
+
+**Resolved along the way (root cause, not symptom):**
+
+1. **The viewer never opened.** The `<video>` carried `z-index: 1` and painted above the click layer. It already covers the poster by document order, so the `z-index` came off and both media got `pointer-events: none` (`G-032`).
+2. **Everything measured 0×0** while the screenshot showed a rendered page. Next streams the `<Suspense>` content into a `<div hidden>` before moving it into place (`G-033`).
+3. **The entrances looked frozen half-way.** The app's Browser pane was hidden, which stops `requestAnimationFrame` (`G-031`). Every measurement moved to the project's own headless shell.
+4. **Clicking the backdrop did not close the viewer.** The box covers the dialog edge to edge, so `e.target === dialog` never matched (`G-034`).
+5. **The first chapter cover ate its own first letter.** The parallax hung off each cover's crossing, and the first one is born inside the screen (`G-039`).
+6. **The pinned mosaic did not fit the screen** and its captions fell below the fold; the section now measures exactly 1440×900 and 1920×1080, and the caption moved over the piece.
+7. **The phone went wider than the screen in C.** A `1fr` grid column takes the min-content of the rail, which is all nine pieces (`G-035`).
+8. **The picker stole the arrow keys** from variant C's carousel (`G-038`).
+9. **Two reference series were deleted** by a `rm -f a*.png` meant for temporaries (`G-036`). Recaptured.
+
+**Gates:**
+
+```
+npm run lint        → exit 0, no errors, no warnings
+npm run typecheck   → ✓ Types generated successfully (exit 0)
+npm run build       → ✓ Compiled successfully · /prototipo-galeria as ◐ Partial Prerender
+```
+
+Run at the end of each pass. No test runner exists in the repo (`TD-003`); the gallery's own checks live in the scratchpad, not in git.
+
+**Commits in this stretch:** none. Everything above is uncommitted in the working tree (12 new files, 3 modified, 2 deleted-but-copied-out).
+
+**Verification scripts of this stretch**, all in the session scratchpad, none in git (`TD-003`):
+
+| Script | What it does |
+|---|---|
+| `mirar-galeria.cjs` | The three variants × 375 / 1440 / 1920: CDP captures, piece geometry, console errors, horizontal overflow |
+| `probar-galeria.cjs` | The 17 interaction checks |
+| `mirar-recorrido.cjs` | The pass-2 walkthrough step by step (still points at the deleted variant) |
+| `refs-carruseles.cjs` · `refs-carr2.cjs` | The two reference rounds: opens each site, scrolls looking for a carousel, measures the shape of its pieces |
+| `revisar-hero.cjs` | That the `HERO` still works after `lib/gsap.ts` changed |
+
+**Sigue:** Mateo picks A, B or C — or says what to change. Then the winner is promoted into `/` as block 3 of `docs/06-UI-UX.md` §2, `app/prototipo-galeria/` is deleted whole, and `lib/gsap.ts` is checked for whether `ScrollTrigger` is still needed now that the pinned variant is gone.
+
+### 2026-09-23 · WU-07 (cont.) · la galería: cuarta ronda, tarjetas apiladas, historias, la fila de escritorio y el dedo
+
+Same chat as the previous entry, after a `/compact`; it restarted with `/retomar`, which found the record and the code matching (`main` at `5744c80`, no open PRs, the three `D-027` variants on :3000).
+
+**Asked (Mateo's own words, in order):**
+
+1. "/retomar".
+2. **"no me gusto ninguna opcion asi que quiero que redsieemos toda la galeria traeme nuevas animaciones seria, utiliza las habiliades de /diseno se serio con lo que devuelkves todo porfavor estamos perdiendo mucho tiempo"** — the three carousels of `D-027` rejected whole.
+3. **"me encantaron mucho todas pero voy a quedar con la 1, porfavor quiero que sea con scroll animacion, gsap, lo ms fluido inmersivo y profesioal posible"** — reference 1, Olivier Larose · Cards Parallax.
+4. **"1 - si 2 - vaya 3 - go"** — smooth scroll on the landing, the `01-CONTEXT` line on each card, GO-AHEAD.
+5. **"no me gusto ya que hay muhcos espacios libre tanto en mobile como desktop no termina siendo una carousel, creoq ue tambien me estas dando ejemplos de desktop y esto esta mas ligado a telfono entonces necesitamos que busques inspraciones mas enfocadas a lo que es mobile, o hacer esto pero de una manera resposive que quede bien que se pueda ver todo como corresponde, no digo que el diseño sea feo me enanta pero no le cuentra la manera facil snecilla y linda de mostrar esto, necesito que sea algo claro que sea vea bien y sea porfsional pero la faicldiad de la perosna de concoer cada uno de los espacios y buscar esa atraccion"** — with two phone captures (El salón, La parrilla).
+6. **"1 - forma 2 - solas 3 - go"** — the stories inside each card, photos advancing on their own, GO-AHEAD.
+7. **"no me gusta el de desktop que al ser en verticl haya tantos espacios no me cierra"**.
+8. **"1 - solos 2 - go"** — the four spaces side by side on the desktop, passing the turn on their own, GO-AHEAD.
+9. **"1 - si 2 - si pero en mobile me gustaria que vos tengas para desklizar con el dedo entre el carosuel de las imagenes y no esperar"** — approved, commit yes, and the finger on the phone.
+10. **"go"** — GO-AHEAD for the finger.
+11. **"si y /cerrar"** — commit the finger, then this entry.
+
+**Done, in five passes:**
+
+- **Pass 1 — fourth reference round, searching for the motion.** 25 candidates opened in the project's headless shell, scrolled with the wheel at 1440 and 375 and captured in 9 frames each (`refs-anim*.cjs`); 5 presented with one sheet each: Olivier Larose · Cards Parallax, White Desert "Our camps" (Awwwards SOTD 2026-09-11), Codrops · SVG Mask Scroll Transitions, Codrops · Sticky Grid Scroll, Codrops · One Element Scroll. My pick was 1; Mateo picked 1. The 20 discarded, with reasons, are in `D-028`.
+- **Pass 2 — the stack (`D-028`).** Four cards, one per space, each a sticky capa of `100svh`; GSAP scrubbed with 1 s of smoothing (takes rising, image 1.3× → 1×, cards shrinking 3 % and darkening 14 % per card above), texts opening from masks (1.2 s `power3.out`). Lenis on the landing only. The three `D-027` variants and `app/prototipo-galeria/` deleted after copying them out; `next.config.ts` back to `5744c80`. Measured the frame drops down to their cause: several videos decoding at once (`G-041`, measured with the real GPU, `G-042`) → one video at a time, taking turns.
+- **Pass 3 — the stories (`D-029`).** Mateo's correction: empty space. Each card shows its takes one at a time at full size, like Instagram stories: bars, tap left/right, a photo advances after 6 s and a video when it ends, a vertical curtain between takes (0.9 s), the same take blurred under 55 % of the card's colour behind. `pieza.tsx` replaced by `historia.tsx`.
+- **Pass 4 — the desktop row (`D-030`).** From 1000 px the four spaces sit side by side as four stories of one size, edge to edge, the whole section in one screen, name and line over each take on a gradient. One video at a time across the row: the turn passes left to right when a take ends; the mouse takes it. The row rises and opens from the bottom, scrubbed, and finishes when its top passes 60 % of the screen.
+- **Pass 5 — the finger (`D-031`).** On the phone the take follows the finger; on release it completes past 25 % of the width or with a flick (0.4 px/ms on the last 80 ms), otherwise it goes back. On the phone taps and the auto-advance also change sideways; the desktop keeps its vertical curtain.
+
+**Files (every file created, modified or deleted, final state):**
+
+| File | What |
+|---|---|
+| `app/page.tsx` | **Modified.** Mounts `<ScrollSuave />`, `<Hero />`, an inline pre-paint script that keeps every `.gal-linea` at `translateY(125%)` until GSAP takes over (removed by itself after 3 s; does nothing under reduced motion), and `<Galeria />` |
+| `components/galeria/galeria.tsx` | **New.** The section `#espacio`: title, the four spaces, the viewer. All the motion in one `useGSAP` with `gsap.matchMedia()`: stack below 1000 px, row from 1000 px, nothing under reduced motion. The turn: `activa` (stack: the card on top, by a ScrollTrigger at `top 60%`; row: left to right on each `onFinToma`), `fijo` (the column under the mouse) |
+| `components/galeria/tarjeta.tsx` | **New.** One space: number `0N — 04`, name, line; the blurred background; the story. Holds `{ actual, anterior, sentido }` together so a change is one state update. `modo` pila/fila decides what the mouse does and the curtain's axis |
+| `components/galeria/historia.tsx` | **New.** The story: layers (only the current and the leaving one visible), bars, tap zones, expand button, auto-advance (photo tween of 6 s, video `ended`), one video at a time, the curtain on `x` or `y`, and the finger drag (`touch-action: pan-y`, pointer capture, last-80-ms velocity, click suppressed after a drag) |
+| `components/galeria/contenido.ts` | **Modified.** The `Pieza` type moved here from `pieza.tsx`; `detalle` per space, verbatim rows of `01-CONTEXT` §Amenities |
+| `components/galeria/galeria.css` | **Rewritten.** Tokens (provisional, `{{CONFIRMAR}}`), masks, the sticky stack (`flow-root`, `G-040`), the phone card (`--margen` 4svh, `--apilado` 10 px, 16 px padding), the blurred background, the story frame (`min(100cqh, 100cqw·16/9)`), bars, the row from 1000 px, reduced motion |
+| `components/galeria/pieza.tsx` | **Deleted** (copy in `variantes-viejas/ronda-d028/`) |
+| `components/galeria/galeria-fila.tsx` · `galeria-calma.tsx` · `galeria-una.tsx` | **Deleted** (copies in `variantes-viejas/ronda-d027/`) |
+| `app/prototipo-galeria/page.tsx` · `prototipo.tsx` · `picker.tsx` · `picker.css` | **Deleted** (copies in `variantes-viejas/ronda-d027/prototipo-galeria/`) |
+| `components/scroll-suave.tsx` | **New.** Lenis on the landing only (not on `/admin`): lerp 0.075, `syncTouch: false`, `anchors: true`, `autoRaf: false` with `gsap.ticker` driving it and `ScrollTrigger.update` on scroll, `lagSmoothing(0)`; not mounted under reduced motion (`useSyncExternalStore`, server snapshot = not mounted) |
+| `components/ui/visor.tsx` | **Modified.** Stops Lenis while open (`useLenis`), `data-lenis-prevent`; imports `Pieza` from `contenido.ts` |
+| `next.config.ts` | **Reverted** to `5744c80` (`PROTOTIPO_HEADERS` gone with the route) |
+| `lib/gsap.ts` | Unchanged in this stretch: `ScrollTrigger`, registered in the previous one, is now used |
+| `docs/10-MEMORY.md` | **Modified.** `D-028` … `D-031`, `G-040` … `G-046`, `TD-009`, `OQ-09` closed |
+| `docs/06-UI-UX.md` | **Modified.** §2 row 3 marked built, with its real shape |
+| `WORKLOG.md` | **Modified.** §1 rewritten; this entry |
+
+**Verified (with real results):**
+
+- **Final shape, six sizes plus two**, zero console errors and zero horizontal overflow in all: phone stack — frame 311×553 at 375×812 (70 % of the card), 238×424 at 390×664, 226×402 at 360×640, one size per screen in the four cards; desktop row — 319×567 at 1440×900 (row from y=279 to y=846), 416×740 at 1920×1080 (y=275 → 1015), 225×400 at 1366×650 (y=223 → 623), 243×432 at 1100×800; 999 px is still the stack.
+- **Frame times with the real GPU** (flags of `G-042`): stack with three videos at once 110 of 530 frames over 33 ms → one at a time 0 of 619; stories on the wheel 0 of 599 (2 of 663 with CPU ×4); desktop row arrival 0 of 433 (0 of 431 with CPU ×4); four finger drags 0 of 346.
+- **Turns, second by second:** stack — El patio 8 s / 8 s / 2.5 s, La pileta alternating, La parrilla looping, never two at once; row — El salón 6 s → El patio 8 s → La parrilla 8 s → La pileta 2.2 s → again.
+- **Interaction:** stories 13 of 13 (tap both ways, photos every 6 s, videos on end, mouse pauses, viewer pauses the card and it resumes after, reduced motion); row 10 of 10 (the mouse takes and keeps the turn, click advances, viewer stops the row, reduced motion); finger 9 of 9 with real touch events (40 % passes both ways, 10 % returns with nothing peeking, a 21 % flick passes by speed, a vertical gesture scrolls 285 px without changing the take, tap still works).
+- **Texts:** hidden lines leave 0 px inside their masks (1440 and 360); reloading parked on the third card the name goes 117 → 44 → 11 → 1 → 0 px, never seen written before opening; the name opening frame by frame 123 → 103 → 59 → 22 → 4 → 0 px over 1.3 s.
+- **Lenis:** active on the landing, off under reduced motion; one wheel notch settles in about 1.17 s; with the viewer open the wheel does not move the page, and after Escape it does.
+
+**Sin verificar (explicitly):**
+
+- **A real phone.** Everything was emulated: the finger thresholds, `touch-action: pan-y` against iOS Safari's own gestures, and the auto-advance in the hand.
+- **Mateo's own screen, 1920 × 911** (measured 1920 × 1080).
+- **Production.** Nothing of the gallery is deployed: `main` is 2 commits ahead of `origin/main` and was not pushed.
+- **A real network:** how fast the first frame of each video decodes on a slow connection.
+
+**Resolved along the way (root cause, not symptom):**
+
+1. **All the cards stuck at the same height, no edges behind.** The card's top margin collapsed through the sticky capa (`G-040`) → `display: flow-root` on the capa.
+2. **The name stopped 96 px short.** The pre-paint `translateY(110%)` was parsed into GSAP's `y`, so `yPercent` ended at 0 with `y` still set → `fromTo` with `y: 0` on both ends.
+3. **El salón's takes were smaller than the others' (261×464 vs 275×489).** Its line wraps to two rows and ate height → two rows reserved; first on the mask (with `border-box` the padding counted), then on the line, because a mask taller than its text let a one-line caption stay visible when "hidden" (`G-043`).
+4. **5 px of the name visible while hidden.** The mask's bottom padding for descenders → texts hide at 125 %, not 110 % (`G-043`).
+5. **Up to half the frames at 33 ms.** Not the transforms: several videos decoding at once, isolated case by case with the real GPU (`G-041`, `G-042`) → one video at a time, in turns.
+6. **Two faulty tests, not faulty code:** a sticky element measured where it was stuck (`G-044`); the viewer's own video counted as a card video.
+7. **The desktop row could rest with columns at different heights** if the scroll stopped mid-arrival → the arrival finishes at 60 % of the screen instead of 35 %.
+8. **The row's names never opened in the resting position at 1440×900** — the trigger asked for y=828 and the row ends at 846 → trigger on the row's bottom edge entering the screen.
+9. **The flick test failed** because CDP touch events arrive 30–50 ms apart and the speed was measured from the first touch (`G-046`) → speed over the last 80 ms, and a genuinely fast test gesture.
+10. **The CodePen video-scrub demo could not be opened** — a Cloudflare human check, not bypassed (`G-045`).
+
+**Gates:**
+
+```
+npm run lint        → eslint . --max-warnings 0, exit 0
+npm run typecheck   → ✓ Types generated successfully (exit 0)
+npm run build       → ✓ Compiled successfully · / as ○ (static)
+```
+
+Run after every pass. No test runner exists (`TD-003`); the checks live in the scratchpad.
+
+**Commits in this stretch** (on `main`, the project's usual branch; **not pushed**):
+
+- `3a0989f` feat(galeria): un espacio por historia, pila en el celular y fila en escritorio (WU-07) — 12 files, the gallery with `D-028` … `D-030` and the docs.
+- `ac178ed` feat(galeria): en el celular las tomas se deslizan con el dedo — `historia.tsx`, `tarjeta.tsx`, `galeria.css`, `10-MEMORY.md` (`D-031`).
+
+**Verification scripts of this stretch**, in the session scratchpad, none in git (`TD-003`):
+
+| Script | What it does |
+|---|---|
+| `refs-anim.cjs` · `refs-anim2.cjs` · `refs-anim3.cjs` · `pen-scrub.cjs` · `hoja.sh` · `lamina.sh` | The fourth reference round: captures by wheel, fine passes, contact sheets and one sheet per option |
+| `mirar-pila.cjs` · `hoja-pila.sh` | The phone stack at six sizes, every card change at 100/75/50/25/0 %, geometry, scales, veils, playing videos |
+| `mirar-fila.cjs` | The desktop row: arrival frames, sizes, fits-one-screen, and the turn second by second (`turno`) |
+| `probar-pila.cjs` · `probar-turnos.cjs` · `probar-historia.cjs` · `probar-visor.cjs` · `probar-fila.cjs` · `probar-dedo.cjs` | Interaction checks: openings, Lenis, reload, viewer, reduced motion, turns, taps, row, finger (real touch events) |
+| `perf-pila.cjs` · `perf-gpu*.cjs` · `gpu.cjs` | Frame times, first software then with the real GPU, isolating videos, layers and transforms |
+| `dbg-cabeza.cjs` · `dbg-oculta.cjs` · `dbg-flick.cjs` | One-off probes: header heights per card, text leaking out of masks, touch-event timing |
+
+**Sigue:** Mateo looks at the gallery on his 1920 × 911 screen and on his phone, and either corrects it or says "push" — then `git push origin main` and a look at production at 375, 1440 and 1920. After that, he names the next section.
