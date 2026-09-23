@@ -4,17 +4,17 @@
 
 ## 1. STATE
 
-**Updated:** 2026-09-23, la galería construida, aprobada y commiteada en `main` (sin push): falta que Mateo la mire en su pantalla y en un teléfono real.
+**Updated:** 2026-09-23, la galería en producción y verificada ahí: falta que Mateo la mire en su pantalla y en un teléfono real, y que nombre la próxima sección.
 
 | | |
 |---|---|
-| **Current task** | Phase 1 of the Araucaria site. WU-01 … WU-06 and the `HERO` of WU-07 are live. **The gallery (block 3 of WU-07) is built and approved** (`D-028` → `D-031`): one story per space; on the phone a stack of cards driven by the scroll, swiped with the finger; from 1000 px the four spaces side by side in one screen. The next section is Mateo's to name |
-| **Real status** | `main` is at `ac178ed`, **2 commits ahead of `origin/main` (`5744c80`) and not pushed**: production (`araucaria-multiespacio.vercel.app`) still serves only the `HERO`. `/admin` works as before. **Production still has no admin credential**, on purpose until WU-09. This `WORKLOG.md` update is uncommitted; `.claude/` stays untracked (`OQ-08`). The dev server on :3000 has the gallery under the hero |
+| **Current task** | Phase 1 of the Araucaria site. WU-01 … WU-06, the `HERO` and **the gallery** (block 3) of WU-07 are live. The gallery (`D-028` → `D-031`): one story per space; on the phone a stack of cards driven by the scroll, swiped with the finger; from 1000 px the four spaces side by side in one screen. The next section is Mateo's to name |
+| **Real status** | `main` = `origin/main` = `792a1b6`, pushed 2026-09-23 on Mateo's word; Vercel served the gallery in production ~40 s later. **Verified in production** (`araucaria-multiespacio.vercel.app`): 319×567 at 1440, 416×740 at 1920, 311×553 at 375, zero console errors and zero overflow, the turn one video at a time, the finger 9 of 9 with real touch events. `/admin` works as before. **Production still has no admin credential**, on purpose until WU-09. This last `WORKLOG.md` update is uncommitted; `.claude/` stays untracked (`OQ-08`) |
 | **Last chat** | 2026-09-22 → 2026-09-23 (this one; the second half began with `/retomar`) |
 | **Waiting on me (Claude)** | Nothing |
-| **Waiting on Mateo** | (a) Look at the gallery on his own 1920 × 911 screen and on a real phone — the finger thresholds (25 % of the width, 0.4 px/ms) only prove themselves in the hand. (b) Say "push" to deploy the two gallery commits to production. (c) Whether this `WORKLOG.md` update gets committed. (d) Name the next section. (e) Answer `OQ-06`, `OQ-07` and `OQ-08`. (f) Whether the scratchpad copies of rejected gallery code can be dropped (`TD-008`, `TD-009`). (g) He holds the dev passphrase; it exists only in his password manager |
+| **Waiting on Mateo** | (a) Look at the gallery on his own 1920 × 911 screen and on a real phone — the finger thresholds (25 % of the width, 0.4 px/ms) only prove themselves in the hand. (b) Whether this last `WORKLOG.md` update gets committed. (c) Name the next section. (d) Answer `OQ-06`, `OQ-07` and `OQ-08`. (e) Whether the scratchpad copies of rejected gallery code can be dropped (`TD-008`, `TD-009`). (f) He holds the dev passphrase; it exists only in his password manager |
 | **Waiting on third parties** | The client owes `CI-01` (WhatsApp number), `CI-02`, `CI-03`, `CI-05` and `CR-01`…`CR-03` (original photos, videos and logo). The hero's and the gallery's colours stay `{{CONFIRMAR}}` until the logo arrives. **If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
-| **Next action** | Wait for Mateo: corrections to the gallery, "push", or the name of the next section. On "push": `git push origin main` (Vercel deploys `main` to production), then look at the gallery in production at 375, 1440 and 1920 |
+| **Next action** | Wait for Mateo: corrections to the gallery from his screen or phone, or the name of the next section — then `seccion-premium` from its first step (references before plans) |
 | **Do not touch** | Pushing `main` without Mateo's word · the production Neon branch (five tables, no credential; a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · `.env.local` and the Vercel environment variables · the Neon branch `backup-pre-0000-init` · **the designs already rejected**: `D-023` (three openings for the hero), `D-025` (the gallery references he did not pick), `D-027` (pieces of different sizes or positions, any landscape crop of the vertical material, and the three carousels A · Fila, B · Calma, C · Una por vez), `D-029` (takes of one fixed size scattered inside a large card), `D-030` (a single vertical take inside a landscape card on the desktop) |
 
 ## 2. LOG
@@ -573,3 +573,15 @@ Run after every pass. No test runner exists (`TD-003`); the checks live in the s
 | `dbg-cabeza.cjs` · `dbg-oculta.cjs` · `dbg-flick.cjs` | One-off probes: header heights per card, text leaking out of masks, touch-event timing |
 
 **Sigue:** Mateo looks at the gallery on his 1920 × 911 screen and on his phone, and either corrects it or says "push" — then `git push origin main` and a look at production at 375, 1440 and 1920. After that, he names the next section.
+
+### 2026-09-23 · WU-07 (cont.) · push de la galería y verificación en producción
+
+Same chat, right after the previous entry. **Asked:** "1 - si 2 - si" — commit the record, and push.
+
+**Done:** loaded `/deploy` (route: the project is on Vercel's git integration, `main` → production). Committed the record as `792a1b6` and pushed `5744c80..792a1b6` to `origin/main`. Production (`araucaria-multiespacio.vercel.app`) served the gallery ~40 s after the push (`id="espacio"` in the HTML, HTTP 200).
+
+**Verified in production** (same scripts as local, pointed at the production URL with `BASE`): 1440 — four stories of 319×567, row from y=279 to y=846, names open, zero console errors, zero overflow, the turn one video at a time (El salón → El patio → La parrilla → La pileta); 1920 — 416×740, y=275 → 1015, zero errors; 375 — frame 311×553, the stack's final scales 0.91 / 0.94 / 0.97 / 1, zero errors; the finger at 375 — 9 of 9 with real touch events, 0 of 349 frames over 33 ms.
+
+**Sin verificar:** a real phone and Mateo's own 1920 × 911 screen.
+
+**Sigue:** Mateo's corrections, or the name of the next section.
