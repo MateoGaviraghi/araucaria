@@ -11,8 +11,8 @@ import { ABRE, CURVA, ENTRE_LINEAS, ESCONDIDO, Mascara, partesDelDia, quieto } f
 // de docs/01-CONTEXT.md). Lo que no se puede pedir queda tachado y dice por qué. Cada vez que se
 // elige otro día, las líneas se abren desde su máscara, una detrás de otra.
 //
-// "Seguir con mis datos" lleva al formulario (bloque 6), que todavía no existe: hasta entonces el
-// botón no hace nada, y por eso el calendario no sale a producción sin el formulario (Mateo, 2026-09-23).
+// "Seguir con mis datos" lleva al formulario (bloque 6) con el día y el módulo elegidos. El
+// calendario no sale a producción sin el formulario (Mateo, 2026-09-23).
 
 function noDisponible(codigo: BlockChoice) {
   if (codigo === "dia-completo") return "No disponible";
@@ -20,7 +20,7 @@ function noDisponible(codigo: BlockChoice) {
   return palabra.charAt(0).toUpperCase() + palabra.slice(1);
 }
 
-export function Detalle({ cal }: { cal: Estado }) {
+export function Detalle({ cal, onSeguir }: { cal: Estado; onSeguir: () => void }) {
   const raiz = useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -67,7 +67,7 @@ export function Detalle({ cal }: { cal: Estado }) {
 
       <div className="cal-mascara cal-seguir">
         <span className="cal-linea">
-          <button type="button" className="boton boton-en-oscuro" disabled={!cal.modulo}>
+          <button type="button" className="boton boton-en-oscuro" disabled={!cal.modulo} onClick={onSeguir}>
             Seguir con mis datos
           </button>
         </span>

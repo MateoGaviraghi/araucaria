@@ -22,7 +22,7 @@ The order below is the structure. Mateo decides which section is designed next, 
 | 3 | `MEDIA-EMBED.gallery` | Show the space: salon, patio, pool, grill | Built 2026-09-23 (`D-028`, `D-029`, `D-030`). One story per space (El salón · El patio · La parrilla · La pileta), each with its number, name, one line from `01-CONTEXT` and its takes (the 6 short videos + 3 photos) shown one at a time at full size: tap to move, advances on its own, a button opens the viewer. On the phone, a stack of four cards driven by the scroll; from 1000 px, the four side by side in one screen, passing the turn left to right |
 | 4 | `FEATURE-GRID` | What the rental includes | The 11 amenity rows, capacity 35 highlighted |
 | 5 | `PRICING-TABLE.tiers` | Make the money decision explicit | Three tiers: Mediodía · Noche · Día completo, with hours and price. LEGAL: "Incluye la limpieza del lugar" + VAT/validity `{{CONFIRMAR}}` (`CI-05`) · rule "No habilitado para previas ni fiestas nocturnas" · CTA per tier preselects that module in §6 |
-| 6 | `LEAD-FORM.qualifying` with the availability calendar | Turn intent into a complete inquiry | §4 below. **The calendar is built** (2026-09-23, `D-033`) as its own section right after the gallery, `id="disponibilidad"`; it stays local until the form exists |
+| 6 | `LEAD-FORM.qualifying` with the availability calendar | Turn intent into a complete inquiry | §4 below. **The calendar and the form are built** (2026-09-23, `D-033`, `D-034`) as one section right after the gallery, `id="disponibilidad"`: the form continues inside the calendar panel |
 | 7 | `MAP-LOCATION.static-image+link` | Physical trust and how to arrive | ADDRESS Güemes 3660 · TRANSPORT "a una cuadra de Bv. Gálvez, cerca de la Estación Belgrano" · HOURS = module hours · PHONE · CTA "Cómo llegar" (Google Maps link, no iframe) |
 | 8 | `FOOTER.minimal` | Contact of last resort | Logo · phones · email · Instagram · © Araucaria |
 
@@ -57,14 +57,16 @@ The calendar is animated and professional; its visual and motion design was deci
 |---|---|---|---|
 | Nombre | text | required, 1–60 | "Escribí tu nombre" |
 | Apellido | text | required, 1–60 | "Escribí tu apellido" |
-| Teléfono | tel | required, 8–15 digits after removing spaces and dashes | "Revisá el teléfono" |
-| Tipo de evento | select | one of the six options | "Elegí el tipo de evento" |
-| Cantidad de personas | number | integer 1–35 | "La capacidad máxima es de 35 personas" |
+| Teléfono | tel with a fixed `+54` | required, exactly 10 digits after removing the `+54`, the mobile 9 and a leading 0 (`D-034`) | "Revisá el teléfono" |
+| Tipo de evento | options with a sliding light | one of the six options | "Elegí el tipo de evento" |
+| ¿Qué evento es? | text, opens when "Otro" is chosen | required with "Otro", 1–60 (`D-034`) | "Contanos qué vas a festejar" |
+| Cantidad de personas | counter: editable number + up/down buttons | integer 1–35 | "La capacidad máxima es de 35 personas" |
 | Fecha + módulo | calendar + module choice | a selectable date and an enabled module | "Elegí una fecha y un módulo disponibles" |
 | Forma de pago | radio | Efectivo · Transferencia | "Elegí cómo pagarías" |
 
 ### 4.2 Behaviour
 
+- Built as "Sigue en la cortina" (`D-034`): the form continues inside the calendar panel in three steps (who · the event · payment). Each step validates its own fields on "Siguiente".
 - Validation runs on blur and on submit. The first invalid field receives focus on submit.
 - Choosing a tier in §2 block 5 preselects its module here.
 - A summary line before the button shows date, module and price as they will be sent.

@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { buildMonth, type AvailabilityEntry, type BlockChoice, type DayCell } from "@/components/calendar/month";
 import { addMonthsToMonth, monthOf, type IsoDate, type IsoMonth } from "@/lib/dates";
+import { Formulario } from "@/components/formulario/formulario";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { ABRE, CURVA, ESCONDIDO, Mascara, quieto } from "./comun";
 import { Detalle } from "./detalle";
@@ -24,6 +25,9 @@ import "./calendario.css";
 const CORTINA = 1.1; // s, power3.inOut: la misma cortina de las historias de la galería
 
 export type Datos = { today: IsoDate; lastBookable: IsoDate; entradas: readonly AvailabilityEntry[] | null };
+
+/** Lo que el calendario le pasa al formulario al tocar "Seguir con mis datos". */
+export type Seleccion = { fecha: IsoDate; modulo: BlockChoice };
 
 function useEstado({ today, lastBookable, entradas }: Datos) {
   const primero = monthOf(today);
@@ -66,6 +70,15 @@ export type Estado = ReturnType<typeof useEstado>;
 
 export function Calendario(datos: Datos) {
   const cal = useEstado(datos);
+  const [siguiendo, setSiguiendo] = useState<Seleccion | null>(null);
+  // Si después eligen otro día, lo que seguía queda atrás.
+  const sigue = siguiendo && siguiendo.fecha === cal.dia?.date ? siguiendo : null;
+
+  // "Seguir con mis datos": el formulario sigue adentro del panel, sobre el día elegido (D-034).
+  function seguir() {
+    if (!cal.dia || !cal.modulo) return;
+    setSiguiendo({ fecha: cal.dia.date, modulo: cal.modulo });
+  }
   const raiz = useRef<HTMLElement>(null);
   const [llego, setLlego] = useState(false);
   const abierto = cal.dia !== null;
@@ -126,7 +139,12 @@ export function Calendario(datos: Datos) {
         <div className="cal-panel">
           <Foto mes={cal.mes} llego={llego} className="cal-panel-foto" />
           <div className="cal-telon">
-            <Detalle cal={cal} />
+            <Detalle cal={cal} onSeguir={seguir} />
+            {sigue ? (
+              <div className="cal-continua">
+                <Formulario sel={sigue} volver={() => setSiguiendo(null)} />
+              </div>
+            ) : null}
           </div>
         </div>
         <Grilla cal={cal} llego={llego} />

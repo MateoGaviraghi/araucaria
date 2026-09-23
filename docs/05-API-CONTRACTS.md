@@ -78,8 +78,8 @@ Forma de pago: {formaPago}
 | Placeholder | Source | Format |
 |---|---|---|
 | `{nombre}` `{apellido}` | Form | Trimmed, as typed |
-| `{telefono}` | Form | As typed, digits and spaces |
-| `{tipoEvento}` | Form select | One of: Cumpleaños · Evento infantil · Reunión · Taller · Celebración · Otro |
+| `{telefono}` | Form | `+54` followed by the 10 national digits, no 0 or 15, e.g. "+54 3425162081" (`D-034`) |
+| `{tipoEvento}` | Form choice | One of: Cumpleaños · Evento infantil · Reunión · Taller · Celebración · Otro. "Otro" carries what the visitor wrote: "Otro (Bautismo)" (`D-034`) |
 | `{personas}` | Form | Integer 1–35 |
 | `{fechaLarga}` | Calendar | `es-AR` long date with weekday, e.g. "sábado 18 de octubre de 2026" |
 | `{moduloEtiqueta}` | Module choice | "Mediodía (10:00 a 17:00 hs)" · "Noche (19:00 a 02:00 hs)" · "Día completo (10:00 a 02:00 hs)" |
@@ -92,7 +92,7 @@ Forma de pago: {formaPago}
 Hola Araucaria! Quiero consultar por el salón para un evento.
 
 Nombre: Laura Gómez
-Teléfono: 342 555 1234
+Teléfono: +54 3425551234
 Tipo de evento: Cumpleaños
 Cantidad de personas: 25
 Fecha: sábado 18 de octubre de 2026

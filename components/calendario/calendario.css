@@ -601,6 +601,15 @@
   transform: translateX(-101%);
 }
 
+/* El formulario que sigue adentro del panel ("Sigue en la cortina", D-034). */
+.cal-continua {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow-y: auto;
+  background: var(--ar-azul);
+}
+
 .cal-telon .cal-det {
   flex: 1;
 }
