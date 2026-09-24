@@ -631,27 +631,40 @@
   color: var(--suave);
 }
 
-.pie-contorno {
-  display: block;
-  width: 100%;
-  max-height: min(30svh, 330px);
-  margin: clamp(4px, 1svh, 12px) auto -0.6%;
-  overflow: visible;
-}
-
-.pie-contorno text {
+/* ARAUCARIA: dos capas de la misma palabra, una arriba de la otra. Abajo el relleno tenue (14 % del
+   beige vivo) y arriba el contorno (texto transparente con -webkit-text-stroke). La letra se mide contra
+   el ancho de la tarjeta (container query) con las mismas proporciones que el SVG de antes (letra de
+   196 en un ancho de 1000, estirada a lo ancho): en Instrument Serif, "ARAUCARIA" a 100 px mide 414 px,
+   así que a 19.6cqw ocupa el 81 % y un scaleX de 1.22 la lleva de lado a lado. */
+.pie-araucaria {
+  display: grid;
+  container-type: inline-size;
+  margin: clamp(10px, 1.6svh, 18px) 0 0;
+  padding-bottom: clamp(6px, 1.4cqw, 16px);
+  overflow: hidden;
   font-family: var(--fuente-titulo), Georgia, serif;
-  font-size: 196px;
-  letter-spacing: 0.02em;
-  fill: none;
-  stroke-linejoin: round;
+  line-height: 0.9;
+  white-space: nowrap;
+  text-align: center;
 }
 
-.pie-contorno-letras {
-  stroke: var(--ar-beige-vivo);
-  stroke-width: 1.8;
-  fill: var(--ar-beige-vivo) !important;
-  fill-opacity: 0.14;
+.pie-araucaria-relleno,
+.pie-araucaria-trazo {
+  grid-area: 1 / 1;
+  font-size: 19.6cqw;
+  letter-spacing: 0.02em;
+  /* Que la palabra quede centrada: el espaciado de la última letra no cuenta. */
+  margin-right: -0.02em;
+  transform: scaleX(1.22);
+}
+
+.pie-araucaria-relleno {
+  color: color-mix(in oklab, var(--ar-beige-vivo) 14%, transparent);
+}
+
+.pie-araucaria-trazo {
+  color: transparent;
+  -webkit-text-stroke: max(1px, 0.18cqw) var(--ar-beige-vivo);
 }
 
 /* ---- La tarjeta sube montada sobre el beige de debajo del mapa ---- */

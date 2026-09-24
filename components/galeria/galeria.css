@@ -93,12 +93,15 @@
 }
 
 /* ---- La tarjeta: celular primero ----
-   Arriba el número, el nombre y la línea; abajo la escena, que es la toma a todo el ancho. */
+   Arriba el número, el nombre y la línea; abajo la escena, que es la toma a todo el ancho.
+   Márgenes, cantos y relleno ajustados para que la toma crezca un poco en el celular (D-038, Mateo:
+   "que sean más grandes las imágenes y videos, ya que se ve muy chico; no tanto, un poco nomás, no
+   rompamos la estética"): en 390 × 664 pasó de 250 × 444. El escritorio pisa todo esto. */
 
 .gal-tarjeta {
-  --margen: 4svh; /* arriba de la primera tarjeta y abajo de la última */
-  --apilado: 10px; /* el canto que se ve de cada tarjeta de atrás */
-  --relleno: 16px;
+  --margen: 2.5svh; /* arriba de la primera tarjeta y abajo de la última */
+  --apilado: 8px; /* el canto que se ve de cada tarjeta de atrás */
+  --relleno: 14px;
   --alto-tarjeta: calc(100svh - 2 * var(--margen) - 3 * var(--apilado));
 
   position: relative;
@@ -107,7 +110,7 @@
   margin-top: calc(var(--margen) + var(--i, 0) * var(--apilado));
   padding: var(--relleno);
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 14px;
+  gap: 10px;
   overflow: hidden;
   border-radius: var(--gal-canto-tarjeta);
   background: var(--fondo);
@@ -204,7 +207,7 @@
 .gal-tarjeta-nombre {
   margin: 4px 0 0;
   font-family: var(--fuente-titulo), Georgia, serif;
-  font-size: clamp(2.2rem, min(7.2vw, 13svh), 9rem);
+  font-size: clamp(2rem, min(7.2vw, 13svh), 9rem);
   font-weight: 400;
   line-height: 0.95;
   letter-spacing: -0.02em;

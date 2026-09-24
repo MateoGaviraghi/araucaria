@@ -379,6 +379,31 @@ Mateo, looking at the calendar on a phone: *"cuando elegís un día deslice haci
 
 **Trap met again:** `G-047`. The pre-paint `translateY(120%)` was read by GSAP as `y: 22px`, and the lines ended up hidden under their masks on the real page (the prototype had no pre-paint script, so it did not show there). Fixed with `y: 0` at both ends of the tween.
 
+### D-038 · 2026-09-24 · Phone corrections: the day panel fills the screen, ARAUCARIA as CSS text, a slightly larger gallery take
+
+Mateo looked at production on his iPhone and sent three screenshots: *"hay detalles que mejorar, más que nada en mobile"*.
+
+1. *"Cuando toco un día el scroll me lleva, y si ves el formulario aparece cortado o corto, entonces te quita la experiencia; ver lo del mapa… hacelo que se vea completo ese form, si no se ve feo."*
+   - **Measured** at 390 × 664 (an iPhone with Safari's bars): after the tap the panel sat 16 px from the top but was 460 px tall, so 188 px of the map showed below it. The form (484 px) did not fit and scrolled inside the panel.
+   - **Fix** (`components/calendario/calendario.css`): below 1000 px, `.cal-panel` has `min-height: max(460px, calc(100svh - 32px))`, so the panel fills the screen (16 px above and below). The step button of each state (`.cal-telon .cal-seguir`, `.cal-continua .fo-c-botones`) goes to the bottom of the panel with `margin-top: auto`, near the thumb, like an app sheet.
+   - **Result:** 632 px panel at 390 × 664 and 780 at 375 × 812; the form fits whole (no inner scroll). Desktop is untouched: from 1000 px the panel keeps `min-height: 0`.
+2. *"El footer de mobile, el Araucaria abajo no se ve directamente."*
+   - On his iPhone the ARAUCARIA outline at the bottom of the footer card was blank. It was an SVG `<text>` drawn with `stroke-dasharray` / `stroke-dashoffset`.
+   - **Fix** (`components/cierre/cierre.tsx` `Contorno`, `cierre.css` `.pie-araucaria*`, `GUION_CIERRE` in `app/page.tsx`): the outline is now plain HTML text. Two stacked layers: the faint fill (`color-mix(… beige-vivo 14%, transparent)`) and the outline (`color: transparent; -webkit-text-stroke: max(1px, 0.18cqw)`).
+   - **Sizing:** it keeps the old SVG's proportions, `font-size: 19.6cqw` of the card plus `scaleX(1.22)`, measured so the desktop card is the same height as before (233 px at 1440).
+   - **Entrance:** the outline is uncovered left to right with `clip-path: inset(0 100% 0 0) → inset(0)` (1.6 s), then the fill fades in (0.9 s). The old one-letter-at-a-time drawing is gone.
+   - A small bottom padding stops the letters' feet from being cut by the card's edge.
+3. *"Las tarjetas de la galería, me gustaría que sean más grandes las imágenes y videos, ya que se ve muy chico; no tanto, un poco nomás, no rompamos la estética y el diseño."*
+   - **Fix** (`components/galeria/galeria.css`, phone only; desktop overrides all of it):
+     - `--margen` 4svh → 2.5svh;
+     - `--apilado` 10 → 8 px;
+     - `--relleno` 16 → 14 px;
+     - the card's `gap` 14 → 10 px;
+     - the name's minimum 2.2rem → 2rem.
+   - **Result:** the take grew about 9 % at 390 × 664 (238 × 424 → 259 × 461). At 375 × 812 it is width-bound, so only 311 × 553 → 315 × 560. On desktop it stays 319 × 567.
+
+**Not verified:** Mateo's real iPhone. WebKit on Windows (Playwright 1.56) rendered BOTH the old SVG and the new text, so the iPhone failure was never reproduced here; see `G-057`.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
@@ -455,6 +480,7 @@ Mateo, looking at the calendar on a phone: *"cuando elegís un día deslice haci
 | G-054 | Chrome's autofill paints filled inputs light blue with its own text colour, covering the design (it hid the fixed "+54"). Neutralise with `:-webkit-autofill` → `-webkit-text-fill-color` + a very long `background-color` transition, and `:autofill { background: transparent }`. It cannot be triggered from a script, so it is checked by eye |
 | G-055 | A `.cie-linea` that GSAP animated on entry keeps an inline `transform`, which beats any `:hover { transform }` on the same element: the contact logos, which were also the mask line, never jumped. Put the hover movement on an inner wrapper (`.pie-logo-cuerpo`). A value exported from a `"use client"` module (like a CSS string) arrives in a server component as a client reference, not as text: keep such literals in the server file |
 | G-056 | Lenis with `syncTouch: false` ignores `scrollTo` while a finger is on the screen; on touch devices use `window.scrollTo({ behavior: "smooth" })`. A programmatic scroll also stops at the page end: with the calendar as the last section, "go to the panel" fell 237 px short until the closing section existed below it |
+| G-057 | The footer's ARAUCARIA (an SVG `<text>` drawn with `stroke-dasharray`/`stroke-dashoffset`, `textLength` + `lengthAdjust="spacingAndGlyphs"`) was blank on Mateo's iPhone but fine in Chromium, and also fine in Playwright's WebKit on Windows. That build does not share iOS's graphics stack, so the cause was **not reproduced** (suspected: iOS Safari and dashed strokes on SVG text). Do not rely on stroke-dash tricks on SVG `<text>` for anything that must be seen: use HTML text with `-webkit-text-stroke` and reveal it with `clip-path`. And a WebKit pass on Windows does not prove iOS: a real phone does |
 
 ## Technical debt taken on purpose
 

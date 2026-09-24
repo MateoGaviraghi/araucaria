@@ -4,18 +4,18 @@
 
 ## 1. STATE
 
-**Updated:** 2026-09-24. The closing section (location map + footer card) is in production and was checked there. **Next: what the rental includes, summarised inside the gallery.**
+**Updated:** 2026-09-24. **The public page is complete and in production.** Block 4, "lo que incluye el alquiler", went live as a short band after the gallery (`D-037`). **Next: the `/admin` redesign.**
 
 | | |
 |---|---|
-| **Current task** | Phase 1 of the Araucaria site, public page. Live, in order: `HERO` · gallery (block 3) · availability calendar with the inquiry form (block 6) · **the closing "Dónde nos encontramos" + footer card** (blocks 7 + 8, `D-036`, `id="ubicacion"`). By `D-036` there is no `NAV` (block 1: the hero keeps its top bar) and no `PRICING-TABLE` (block 5: prices live in the calendar's day panel). **The one public piece left is block 4, `FEATURE-GRID`: "lo que incluye el alquiler", summarised INSIDE the gallery**, not as its own section |
-| **Real status** | `main` = `origin/main` = `0034e25` (pushed 2026-09-24; Vercel served it ~30 s later). **Verified in production** (`araucaria-multiespacio.vercel.app`): the footer at 1440 × 900 and 375 × 812 (card 502 / 736 px tall, 0 px horizontal overflow, 0 console errors); on a 390 × 844 phone, tapping a calendar day scrolls the day panel to 16 px from the top, and on 1440 nothing moves. The branches `wu-08-calendario-y-formulario` and `wu-09-cierre` are both inside `main` and can be deleted (Mateo has not answered). **Uncommitted:** this `WORKLOG.md` (the `/cerrar` record); `docs/10-MEMORY.md` already went in `0034e25` with `D-035`, `D-036`, `G-055`, `G-056`. The WhatsApp number in Vercel is still Mateo's test number (the footer's WhatsApp logo uses it too) |
-| **Last chat** | 2026-09-23 → 2026-09-24 (began with `/retomar`, resumed once more with `/retomar` after an internet cut) |
+| **Current task** | Phase 1 of the Araucaria site. The public page is finished; live, in order: `HERO` · gallery (block 3) · **"Lo que incluye el alquiler"** (block 4, `D-037`, `id="incluye"`) · availability calendar with the inquiry form (block 6) · the closing "Dónde nos encontramos" + footer card (blocks 7 + 8, `D-036`, `id="ubicacion"`). By `D-036` there is no `NAV` (block 1) and no `PRICING-TABLE` (block 5). **Next piece of work: the owner panel `/admin` redesign** |
+| **Real status** | `main` = `origin/main` = `f72b155` (pushed 2026-09-24; Vercel served it ~50 s later). **Verified in production** (`araucaria-multiespacio.vercel.app`) at 1440 × 900, 375 × 812 and 1920 × 1080: the band is 690 / 847 / 715 px tall, 0 px horizontal overflow, 0 console errors; reloading parked on the band, the lines start hidden (`translateY` 22.46 px) and end at 0. Only branch: `main`, locally and on GitHub (the old `wu-02` … `wu-09` branches were deleted this chat after checking each was inside `origin/main`). Then the phone corrections of `D-038` were committed and pushed together with this record (see the last §2 entry). The WhatsApp number in Vercel is still Mateo's test number |
+| **Last chat** | 2026-09-24 (began with `/retomar`) |
 | **Waiting on me (Claude)** | Nothing |
-| **Waiting on Mateo** | (a) Whether to commit (and push) this `/cerrar` record. (b) A look on a real phone at the closing section and at the calendar's auto-scroll. (c) Whether the branches `wu-08-calendario-y-formulario` and `wu-09-cierre` can be deleted. (d) **The `/admin` redesign**, asked for "luego", after the public page: *"quiero que modifiquemos todo el dashboard admin porque no me gustó nada, y que implementemos /diseno, /web-distintiva y los mejores criterios para dashboard de `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`, usando animación de alertas, GSAP, etc."* |
+| **Waiting on Mateo** | (a) Whether to commit (and push) this `/cerrar` record. (b) **On his iPhone, in production: whether the footer's ARAUCARIA now shows** (`D-038`, `G-057` — never reproduced here), whether the day panel now fills the screen with the form whole, and the slightly larger gallery take. (c) **The `/admin` redesign**, asked for "luego", after the public page: *"quiero que modifiquemos todo el dashboard admin porque no me gustó nada, y que implementemos /diseno, /web-distintiva y los mejores criterios para dashboard de `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`, usando animación de alertas, GSAP, etc."* |
 | **Waiting on third parties** | The client owes `CI-01` (WhatsApp number — until then production uses Mateo's test number, in the form AND in the footer's WhatsApp logo), `CI-02`, `CI-03`, `CI-05` (VAT and price validity, still `{{CONFIRMAR}}`) and `CR-01`…`CR-03` (original photos, videos and logo). All colours stay `{{CONFIRMAR}}` until the logo arrives. `CR-04` (Instagram says 3650). **If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
-| **Next action** | **On `/retomar`: ask whether to commit this record, then start block 4 — "lo que incluye el alquiler" summarised inside the gallery (`D-036`)** — as a `seccion-premium` round from step 1: name it literally, then 5 to 7 references of that component tested with links and screenshots, **uiverse.io and 21st.dev first** (memory `referencias-uiverse-21st`), always through `/diseno`. Content: the 11 amenity rows of `docs/01-CONTEXT.md`, capacity 35. Nothing invented. Where it sits inside the gallery (per space card, or a strip after the four spaces) is a question for Mateo in that round. **After that: the `/admin` redesign** (item (d) above) |
-| **Do not touch** | Pushing `main` without Mateo's word · `.env.local` — **not even to count or grep a variable** · the Vercel environment variables · the production Neon branch (a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · the Neon branch `backup-pre-0000-init` · `components/cierre/mapa-datos.ts` by hand (it is generated from OpenStreetMap; the generator lives only in the session scratchpad and is described in `D-036`) · **the designs already rejected**: `D-023`, `D-025`, `D-027`, `D-029`, `D-030`, `D-033`, `D-034` and `D-036` (see each entry's "Rejected" list) |
+| **Next action** | **On `/retomar`: ask whether to commit this record, then start the `/admin` redesign** (item (c)). Before touching anything: read `docs/08-SECURITY.md` and load `/seguridad` (every Server Action is a public endpoint; `requireAdmin()` first), `docs/06-UI-UX.md` for the panel, `D-032` (panel full width) and the panel decisions in `docs/10-MEMORY.md` (`D-018`; `D-019` "Mitades" + undo; `D-020` the Apple-style confirmation alert with the GSAP tick — Mateo liked it: *"genial, está perfecto"*), then Mateo's `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`. Run it as a `seccion-premium` round through `/diseno`, uiverse.io and 21st.dev first (memory `referencias-uiverse-21st`). **Ask Mateo which screen of the panel he wants first** — he names the section, never propose it |
+| **Do not touch** | Pushing `main` without Mateo's word · `.env.local` — **not even to count or grep a variable** · the Vercel environment variables · the production Neon branch (a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · the Neon branch `backup-pre-0000-init` · `components/cierre/mapa-datos.ts` by hand (generated from OpenStreetMap; see `D-036`) · **the designs already rejected**: `D-023`, `D-025`, `D-027`, `D-029`, `D-030`, `D-033`, `D-034`, `D-036` and `D-037` (see each entry's "Rejected" list) |
 
 ## 2. LOG
 
@@ -637,3 +637,69 @@ Then Mateo: **"commitea eso primero y deja anotado para cuando yo te pida el com
 **Gates:** `npm run typecheck` ✓ · `npm run lint` ✓ · `npm run build` ✓ (`/` partial prerender) · no test runner in the repo (`TD-003`).
 
 **Sigue:** block 4 — what the rental includes, summarised inside the gallery (`D-036`), a `seccion-premium` round with uiverse/21st references first. Then the `/admin` redesign.
+
+### 2026-09-24 · WU-10 · "Lo que incluye el alquiler" (block 4), a producción — the public page is complete
+
+**Asked (Mateo's words, in order):** `/retomar` → (after the branches were deleted from GitHub in the previous chat) the plan: block 4 as a band after the four spaces or inside each card → *"1 - la b 2 - go"* (a band after the gallery; go for references) → 7 references from 21st.dev → *"la 1 o 2"* → prototype plan → **"go"** → *"quiero algo más sencillo, que sea fácil de ver, fácil de entender, pero que sea profesional, serio y prolijo y siga con la estética de esto; hacelo vos a los tres ejemplos, buscá las inspiraciones que creas necesarias, podés ir variando y adaptando en mobile y desktop, revisalas y sé autocrítico al construir, no me traigas cualquier pavada, necesito terminar con esto"* → *"no puedo verlo"* (the local dev server had died; restarted) → *"me gustó el b pero me gustaría que tenga viñetas, algo más prolijo y lindo, siempre respetando el GSAP y eso porque si no parece desorganizado"* → promotion plan → **"go"** → *"si commit y push"* → `/cerrar`.
+
+**Done:**
+- **References** (`seccion-premium`, through `/diseno`): uiverse.io searched first (lista, checklist, marquee, info card, tags, stats) — only pricing cards with ticks and loose icon grids, nothing of this component; it also blocks headless Chromium (Cloudflare), so it was browsed in the app's browser pane. 21st.dev: 22 components captured with Playwright at 1440 × 900 and 390 × 844, 7 sent (Hover Image Preview · Cinematic List · Stats Bold · Text Marquee · Pill Marquee · Infinite Ribbon · Marquee Along SVG Path).
+- **Prototype round 1** on `/prototipo-incluye` (A · Frase with a photo card on hover · B · Filas that open with the photo · C · Mezcla, card following the mouse): rejected whole.
+- **Prototype round 2**, everything visible, no hover (A · Ficha with a giant 35 · B · Columnas · C · Con foto): Mateo picked B and asked for bullets; bullets added (6 px blue dot on the first line, 9 px between items, a `back.out(2)` pop before each line).
+- **Promoted B** (`D-037`, commit `f72b155`, pushed to `main`):
+  - `components/incluye/incluye.tsx` (new) — `Incluye`: `section.inc#incluye`; head "Lo que incluye el alquiler" + "Para hasta 35 personas." / "La limpieza del lugar está incluida."; `GRUPOS` 01 El salón (Salón de usos múltiples, Baño, Espacio de lavado con pileta) · 02 El patio (Patio exterior con pileta, 8 sillones y livings de exterior) · 03 La parrilla (Asador, Horno pizzero grande) · 04 Para la mesa (30 sillas, 3 mesas plegables, Vajilla y vasos para 30), all from `docs/01-CONTEXT.md`; helpers `L` (mask) and `Hilo` (hairline). Entrance in one `useGSAP` timeline at `top 75%`, `once`: `.inc-hilo` scaleX 0 → 1 (0.9 s, `power3.inOut`, 0.06 s apart) · `.inc-linea` `{ y: 0, yPercent: 120 }` → `{ y: 0, yPercent: 0 }` (0.9 s, `power3.out`, 0.045 s apart, from 0.1 s) · `.inc-vineta` scale 0 → 1 (0.5 s, `back.out(2)`, 0.07 s apart, from 0.45 s). Reduced motion: no tween.
+  - `components/incluye/incluye.css` (new) — provisional tokens (same as gallery), `.inc` beige band (`padding clamp(64px, 9vw, 136px)` top), masks, `.inc-hilo`, `.inc-titulo`, `.inc-cabeza`, `.inc-bajada` (title face `clamp(1.9rem, 3.6vw, 3.4rem)`, second line muted), `.inc-columnas` / `.inc-columna` (phone: grid `2.6em 1fr`, one group per row; ≥ 900 px: four columns, gap `clamp(20px, 2.4vw, 40px)`), `.inc-columna-items li` (grid `6px 1fr`), `.inc-vineta` (6 px dot, `--ar-azul`, `margin-top: calc(0.725em - 3px)`).
+  - `app/page.tsx` — import `Incluye`; `GUION_INCLUYE` (pre-paint: `.inc-linea{transform:translateY(120%)}.inc-hilo{transform:scaleX(0)}.inc-vineta{transform:scale(0)}`, removed after 3 s, skipped with reduced motion); `<Incluye />` right after `<Galeria />`.
+  - `docs/06-UI-UX.md` §2 row 4 — built, with its content.
+  - `docs/10-MEMORY.md` — `D-037` (both rounds, Mateo's words, the rejected list).
+- `app/prototipo-incluye/` (page) deleted; the prototype variants and the picker were removed from the component and the CSS.
+
+**Verified:**
+- Locally on the real page (`/`) with headless Chromium at 1440 × 900, 375 × 812 (touch, dpr 2) and 1920 × 1080, reaching the band by scrolling in 150 px steps: the band is 690 / 847 / 715 px tall; 0 px horizontal overflow; 0 console errors. Reloaded parked on the band: first frame `.inc-linea` at `translateY(22.46px)` (hidden), after the entrance at 0. Reduced motion at 1440: everything shown at once.
+- The same run in production after the push: the same heights, 0 overflow, 0 errors, the same reload behaviour.
+
+**Sin verificar:** a real phone.
+
+**Resolved on the way (causes):**
+- On the real page the lines never showed: the pre-paint `translateY(120%)` was read by GSAP as `y: 22.46px` and kept under `yPercent`. The prototype had no pre-paint script, so it did not show there. This is `G-047` again, fixed with `y: 0` at both ends.
+- Round 1, A · Frase: the floating card covered the sentence, because animating the card made GSAP write `translate: none` over the CSS `translate: -50% calc(-100% - 12px)`. Fixed with a positioning wrapper `.inc-flota`, with GSAP animating only the inner card.
+- Round 1, A · Frase: "la parrilla con horno pizzero" jumped whole to the next line, because a `<button>` does not break across lines. Fixed with `span role="button"`.
+- Round 2, A: a separator in `::after` on a block mask broke onto its own line; it goes on `.inc-linea::after`.
+- (All of round 1 and round 2's A and C are now deleted.)
+- The local dev server had died and Mateo could not see the prototype; restarted with `preview_start`.
+
+**Gates:** `npm run lint` ✓ · `npm run typecheck` ✓ · `npm run build` ✓ (`/` partial prerender) · no test runner in the repo (`TD-003`).
+
+**Sigue:** the `/admin` redesign, as a `seccion-premium` round; Mateo names which panel screen goes first.
+
+### 2026-09-24 · WU-10 (cont.) · correcciones del celular (D-038)
+
+**Asked (Mateo's words):** three screenshots from his iPhone in production and *"hay detalles que mejorar, más que nada en mobile: cuando toco un día el scroll me lleva, si ves el formulario aparece cortado o corto, entonces te quita la experiencia, ver lo del mapa, hacelo que se vea completo ese form completo, si no se ve feo · el footer de mobile, el Araucaria abajo no se ve directamente · y las tarjetas de la galería me gustaría que sean más grandes las imágenes y videos ya que se ve muy chico, no tanto, un poco nomás, no rompamos la estética y el diseño"* → plan → **"go y si"** (go, and yes to installing Playwright's WebKit) → *"si commit y push"*.
+
+**Done** (`D-038`, `G-057`):
+- `components/calendario/calendario.css` — `.cal-panel` `min-height: max(460px, calc(100svh - 32px))` (was `clamp(460px, 64svh, 560px)`). New `@media (max-width: 999px)` block: `.cal-telon .cal-seguir`, `.cal-continua .fo-c-botones` → `margin-top: auto`; `.cal-continua .fo-c-paso` → `flex: 1`.
+- `components/cierre/cierre.tsx` — `Contorno` is now `<p class="pie-araucaria">` with two spans, `.pie-araucaria-relleno` and `.pie-araucaria-trazo` (no SVG). In `Pie`'s timeline the trace goes `clipPath inset(0% 100% 0% 0%) → inset(0%)` (1.6 s, `power2.inOut`, at 0.3 s) and the fill `opacity 0 → 1` (0.9 s, at 1.6 s). Comments updated.
+- `components/cierre/cierre.css` — `.pie-contorno*` replaced by `.pie-araucaria` (grid, `container-type: inline-size`, `line-height: 0.9`, `padding-bottom: clamp(6px, 1.4cqw, 16px)`) and its two layers (`font-size: 19.6cqw`, `letter-spacing: 0.02em`, `transform: scaleX(1.22)`; fill `color-mix(… beige-vivo 14%, transparent)`; trace `-webkit-text-stroke: max(1px, 0.18cqw)`).
+- `app/page.tsx` — `GUION_CIERRE` hides `.pie-araucaria-trazo{clip-path:inset(0% 100% 0% 0%)}.pie-araucaria-relleno{opacity:0}` instead of the old SVG dash rule.
+- `components/galeria/galeria.css` — phone card: `--margen` 2.5svh, `--apilado` 8px, `--relleno` 14px, `gap` 10px, name `clamp(2rem, …)`; comment with Mateo's words.
+- `docs/10-MEMORY.md` — `D-038`, `G-057`.
+- Tooling: Playwright 1.56 WebKit installed in the session scratchpad (`node node_modules/playwright-core/cli.js install webkit`), not in the repo.
+
+**Verified** (headless Chromium, plus WebKit for the footer):
+- **Calendar**, tapping a day then "Seguir con mis datos":
+  - at 390 × 664 the panel is 632 px, 16 px from both edges (it was 460 px with 188 px of map showing); the form is 632 px with no inner scroll (it was 484 px inside a 460 px panel);
+  - at 375 × 812 the panel is 780 px.
+- **Gallery takes:**
+  - 390 × 664: 238 × 424 → 259 × 461;
+  - 375 × 812: 311 × 553 → 315 × 560;
+  - 1440: 319 × 567, unchanged.
+- **Footer**, in WebKit and Chromium:
+  - 390 × 664: ARAUCARIA visible and whole;
+  - 1440: the band is 233 px tall, the same as production.
+- 0 px overflow and 0 page errors everywhere.
+
+**Sin verificar:** the iPhone. WebKit on Windows rendered the OLD footer correctly too, so the original failure was never reproduced (`G-057`).
+
+**Gates:** `npm run lint` ✓ · `npm run typecheck` ✓ · `npm run build` ✓.
+
+**Sigue:** Mateo checks these on his iPhone; then the `/admin` redesign.

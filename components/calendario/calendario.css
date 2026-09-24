@@ -577,9 +577,13 @@
 
 /* ---- Las dos mitades: la foto (que la cortina tapa con el día) y el mes ---- */
 
+/* En el celular el panel mide al menos una pantalla menos los 16 px de arriba y de abajo: al tocar un
+   día la página lo deja a 16 px del borde (D-035) y ocupa toda la pantalla, sin que asome el mapa de
+   abajo, y el formulario entra entero (D-038). Mateo: "si ves el formulario aparece cortado o corto…
+   hacelo que se vea completo". */
 .cal-panel {
   position: relative;
-  min-height: clamp(460px, 64svh, 560px);
+  min-height: max(460px, calc(100svh - 32px));
   overflow: hidden;
   border-radius: 10px;
 }
@@ -617,6 +621,23 @@
 /* En el celular primero la grilla: el panel (foto, y después el día) va debajo. */
 .cal-grilla {
   order: -1;
+}
+
+/* En el celular el panel mide una pantalla (D-038): el botón de cada paso ("Seguir con mis datos",
+   "Siguiente", "Enviar…") baja al pie del panel, cerca del pulgar, y el aire queda entre el contenido y
+   el botón en vez de un hueco vacío abajo. */
+@media (max-width: 999px) {
+  .cal-telon .cal-seguir {
+    margin-top: auto;
+  }
+
+  .cal-continua .fo-c-paso {
+    flex: 1;
+  }
+
+  .cal-continua .fo-c-botones {
+    margin-top: auto;
+  }
 }
 
 @media (min-width: 1000px) {

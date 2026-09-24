@@ -45,7 +45,7 @@ setTimeout(function(){s.remove();},3000);
 const GUION_CIERRE = `(function(){try{
 if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
 var s=document.createElement('style');
-s.textContent='.cie-linea{transform:translateY(130%)}.mp-etq,.mp-lugar,.mp-pin,.mp-rotulo{opacity:0}.pie-contorno text{stroke-dasharray:1600;stroke-dashoffset:1600;fill-opacity:0}.pie-marco .pie{transform:translateY(140px)}';
+s.textContent='.cie-linea{transform:translateY(130%)}.mp-etq,.mp-lugar,.mp-pin,.mp-rotulo{opacity:0}.pie-araucaria-trazo{clip-path:inset(0% 100% 0% 0%)}.pie-araucaria-relleno{opacity:0}.pie-marco .pie{transform:translateY(140px)}';
 document.head.appendChild(s);
 setTimeout(function(){s.remove();},3000);
 }catch(e){}})();`;

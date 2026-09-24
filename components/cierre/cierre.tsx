@@ -160,7 +160,7 @@ function useEntrada(raiz: React.RefObject<HTMLElement | null>, armar: (el: HTMLE
 // Mateo: "la 2" (21st · Hover Footer) "hacelo dinámico, más premium; combinalo con los botones". Una
 // tarjeta azul con columnas que sube montada sobre el beige de debajo del mapa (1,3 s) y se inclina
 // apenas con el mouse; el contacto son los logos originales y cada logo es el link; abajo, ARAUCARIA
-// gigante en contorno, toda la palabra del mismo color: el contorno se dibuja (1,6 s) y después aparece
+// gigante en contorno, toda la palabra del mismo color: el contorno se descubre de izquierda a derecha (1,6 s) y después aparece
 // su relleno tenue (0,9 s).
 
 const SALON_LINKS = [
@@ -172,16 +172,17 @@ const SALON_LINKS = [
 
 /**
  * ARAUCARIA en contorno, toda la palabra del mismo color (Mateo: "dejalo del mismo color a toda la
- * palabra, como en CA, porque si no queda feo solo una parte"). Al llegar, el contorno se dibuja.
+ * palabra, como en CA, porque si no queda feo solo una parte"). Texto común con contorno CSS
+ * (`-webkit-text-stroke`) y, debajo, la misma palabra con el relleno tenue. Antes era un <text> de SVG
+ * dibujado con stroke-dasharray, y en el iPhone no se veía nada (D-038, Mateo: "el Araucaria abajo no
+ * se ve directamente"; G-057).
  */
 function Contorno() {
-  const texto = { x: 500, y: 172, textAnchor: "middle" as const, textLength: 990, lengthAdjust: "spacingAndGlyphs" as const };
   return (
-    <svg className="pie-contorno" viewBox="0 0 1000 190" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-      <text className="pie-contorno-letras" {...texto}>
-        ARAUCARIA
-      </text>
-    </svg>
+    <p className="pie-araucaria" aria-hidden="true">
+      <span className="pie-araucaria-relleno">ARAUCARIA</span>
+      <span className="pie-araucaria-trazo">ARAUCARIA</span>
+    </p>
   );
 }
 
@@ -246,14 +247,15 @@ function Pie() {
     () => {
       const el = tarjeta.current;
       if (!el) return;
-      const trazos = el.querySelectorAll(".pie-contorno text");
+      const trazo = el.querySelector(".pie-araucaria-trazo");
+      const relleno = el.querySelector(".pie-araucaria-relleno");
       if (!quieto()) return;
       const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: "top 80%", once: true } });
       tl.fromTo(el, { y: 140 }, { y: 0, duration: 1.3, ease: "expo.out" }, 0);
       lineas(tl, el, ".cie-linea", 0.1);
-      tl.fromTo(trazos, { strokeDasharray: 1600, strokeDashoffset: 1600 }, { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut" }, 0.3);
-      // Cuando termina de dibujarse, el relleno tenue aparece.
-      tl.fromTo(trazos, { fillOpacity: 0 }, { fillOpacity: 0.14, duration: 0.9, ease: "power2.out" }, 1.6);
+      // El contorno se descubre de izquierda a derecha y, cuando termina, aparece el relleno tenue.
+      tl.fromTo(trazo, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.6, ease: "power2.inOut" }, 0.3);
+      tl.fromTo(relleno, { opacity: 0 }, { opacity: 1, duration: 0.9, ease: "power2.out" }, 1.6);
     },
     { scope: tarjeta },
   );
