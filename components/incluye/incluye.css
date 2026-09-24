@@ -1,0 +1,153 @@
+/* LO QUE INCLUYE EL ALQUILER (bloque 4, D-037). Sigue al beige de la galería, con sus mismos colores
+   y tipografía; PROVISORIOS hasta que llegue el logo (CR-03), igual que en galeria.css. Todo a la vista:
+   nada depende del mouse ni de un toque. */
+
+.inc {
+  --ar-azul: oklch(0.28 0.045 232); /* {{CONFIRMAR}} */
+  --ar-azul-hondo: oklch(0.19 0.038 236); /* {{CONFIRMAR}} */
+  --ar-beige: oklch(0.91 0.028 78); /* {{CONFIRMAR}} */
+  --ar-beige-vivo: oklch(0.84 0.06 74); /* {{CONFIRMAR}} */
+  --ar-tinta: oklch(0.99 0.004 90);
+
+  --inc-borde: clamp(16px, 4vw, 56px);
+  --texto: var(--ar-azul-hondo);
+  --suave: color-mix(in oklab, var(--texto) 62%, transparent);
+  --linea: color-mix(in oklab, var(--texto) 22%, transparent);
+
+  position: relative;
+  padding: clamp(64px, 9vw, 136px) var(--inc-borde) clamp(72px, 10vw, 148px);
+  background: var(--ar-beige);
+  color: var(--texto);
+}
+
+.inc-mascara {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.inc-linea {
+  display: block;
+}
+
+/* El filete: se dibuja de izquierda a derecha en la entrada. */
+.inc-hilo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--linea);
+  transform-origin: 0 50%;
+}
+
+.inc-titulo {
+  margin: 0 0 clamp(16px, 2.4vw, 28px);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--suave);
+}
+
+/* ---- La cabeza: la capacidad y la limpieza ---- */
+
+.inc-cabeza {
+  margin-bottom: clamp(32px, 4.4vw, 64px);
+}
+
+.inc-bajada {
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: clamp(1.9rem, 3.6vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+}
+
+.inc-bajada .inc-mascara + .inc-mascara {
+  color: var(--suave);
+}
+
+/* ---- Los cuatro grupos, 01 a 04: en fila en el escritorio, uno por renglón en el celular ---- */
+
+.inc-columnas {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inc-columna {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.6em minmax(0, 1fr);
+  column-gap: 12px;
+  padding: 16px 0 22px;
+}
+
+.inc-columna-numero {
+  grid-row: 1 / 3;
+  padding-top: 0.55em;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--suave);
+}
+
+.inc-columna-nombre {
+  margin: 0 0 10px;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: clamp(1.6rem, 2.3vw, 2.2rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.inc-columna-items {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: clamp(0.98rem, 1.05vw, 1.06rem);
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--texto) 86%, transparent);
+}
+
+/* Cada cosa con su viñeta: un punto azul chico, centrado en el primer renglón (si el texto se parte en
+   dos, el punto queda arriba, junto al comienzo). Mateo: "que tenga viñetas, algo más prolijo". */
+.inc-columna-items li {
+  display: grid;
+  grid-template-columns: 6px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+}
+
+.inc-vineta {
+  width: 6px;
+  height: 6px;
+  margin-top: calc(0.725em - 3px);
+  border-radius: 50%;
+  background: var(--ar-azul);
+}
+
+@media (min-width: 900px) {
+  .inc-columnas {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: clamp(20px, 2.4vw, 40px);
+  }
+
+  .inc-columna {
+    display: block;
+    padding: clamp(16px, 1.6vw, 22px) 0 0;
+  }
+
+  .inc-columna-numero {
+    display: block;
+    padding: 0;
+    margin-bottom: clamp(14px, 1.6vw, 24px);
+  }
+
+  .inc-columna-nombre {
+    margin-bottom: 14px;
+  }
+}

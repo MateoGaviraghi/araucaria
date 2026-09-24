@@ -3,6 +3,7 @@ import { Disponibilidad, DisponibilidadEsperando } from "@/components/calendario
 import { Cierre } from "@/components/cierre/cierre";
 import { Galeria } from "@/components/galeria/galeria";
 import { Hero } from "@/components/hero/hero";
+import { Incluye } from "@/components/incluye/incluye";
 import { ScrollSuave } from "@/components/scroll-suave";
 
 // Los textos de la galería se abren desde su máscara cuando llega cada tarjeta. Este guion los deja
@@ -14,6 +15,16 @@ const GUION_GALERIA = `(function(){try{
 if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
 var s=document.createElement('style');
 s.textContent='.gal-linea{transform:translateY(125%)}';
+document.head.appendChild(s);
+setTimeout(function(){s.remove();},3000);
+}catch(e){}})();`;
+
+// Lo que incluye el alquiler (D-037): los textos esperan abajo en su máscara, los filetes sin dibujar y
+// las viñetas en cero hasta que la franja llega a la pantalla.
+const GUION_INCLUYE = `(function(){try{
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var s=document.createElement('style');
+s.textContent='.inc-linea{transform:translateY(120%)}.inc-hilo{transform:scaleX(0)}.inc-vineta{transform:scale(0)}';
 document.head.appendChild(s);
 setTimeout(function(){s.remove();},3000);
 }catch(e){}})();`;
@@ -46,6 +57,8 @@ export default function HomePage() {
       <Hero />
       <script dangerouslySetInnerHTML={{ __html: GUION_GALERIA }} />
       <Galeria />
+      <script dangerouslySetInnerHTML={{ __html: GUION_INCLUYE }} />
+      <Incluye />
       <script dangerouslySetInnerHTML={{ __html: GUION_CALENDARIO }} />
       <Suspense fallback={<DisponibilidadEsperando />}>
         <Disponibilidad />

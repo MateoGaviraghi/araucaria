@@ -349,6 +349,36 @@ Mateo, looking at the calendar on a phone: *"cuando elegís un día deslice haci
 
 **Trap:** a constant exported from a `"use client"` module reaches a server component as a client reference, not as its value, so the pre-paint CSS lives as a literal in `app/page.tsx` (see `G-055`).
 
+### D-037 · 2026-09-24 · "Lo que incluye el alquiler" is a short band of four numbered groups with bullets, after the gallery
+
+**Round.** `seccion-premium`, block 4 (`D-036`: *"dentro de la galería, debe ser resumido"*). Mateo placed it as a band after the four spaces rather than inside each card (*"la b"*).
+- **References.** uiverse.io first, as he asked: only pricing cards with ticks and loose icon grids, none of them this component, so nothing was sent from there (it also blocks headless browsers). 21st.dev: 22 checked, 7 sent. Mateo: *"la 1 o 2"* (21st · Hover Image Preview, avanishverma4 · 21st · Cinematic List, daiwiikharihar).
+- **First prototype round** on `/prototipo-incluye`: A · Frase (a sentence whose words lift a photo card on hover) · B · Filas (rows that open with the photo) · C · Mezcla (rows with the card following the mouse). Rejected whole: *"quiero algo más sencillo, que sea fácil de ver, fácil de entender, pero profesional, serio y prolijo, y que siga con la estética de esto… hacelo vos… no me traigas cualquier pavada, necesito terminar con esto"*.
+- **Second round**, everything visible and nothing on hover: A · Ficha (a big 35 and a spec sheet) · B · Columnas · C · Con foto (the salon photo with a two-column list). Mateo: *"me gustó el b pero me gustaría que tenga viñetas, algo más prolijo y lindo, siempre respetando el GSAP"*.
+
+**Decision** (`components/incluye/incluye.tsx`, `id="incluye"`, between the gallery and the calendar):
+- Same beige, blue and title face as the gallery.
+- Head: the small label "Lo que incluye el alquiler", then two title-face lines: "Para hasta 35 personas." and, muted, "La limpieza del lugar está incluida."
+- Four groups numbered 01–04, like the gallery's four cards: El salón · El patio · La parrilla · Para la mesa. Each has a hairline on top, its number, its name in the title face, and its items with a 6 px blue bullet.
+- Four columns from 900 px; on the phone one group per row, number on the left.
+- Every fact comes from `01-CONTEXT.md` §Amenities and the cleaning line from §Modules and prices.
+- **Entrance**, once, at `top 75%`:
+  - the hairlines draw left to right (0.9 s);
+  - the lines rise from their masks (0.9 s, 0.045 s apart);
+  - each bullet pops in with a small `back.out(2)` (0.5 s, 0.07 s apart), just before its line.
+  - Nothing moves after that.
+- Everything waits hidden before paint (`GUION_INCLUYE` in `app/page.tsx`). With reduced motion it is all shown at once.
+
+**Rejected (do not retry):**
+- a photo that appears only on hover (a sentence with preview cards, rows that open, a card following the mouse): information that needs the mouse is not "fácil de ver";
+- the spec sheet with a giant 35;
+- the salon photo beside a ten-item list;
+- the 21st marquees and ribbons (pill marquee, infinite ribbon, marquee along an SVG path);
+- the rolling-word text marquee;
+- the SaaS feature grids and bentos.
+
+**Trap met again:** `G-047`. The pre-paint `translateY(120%)` was read by GSAP as `y: 22px`, and the lines ended up hidden under their masks on the real page (the prototype had no pre-paint script, so it did not show there). Fixed with `y: 0` at both ends of the tween.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
