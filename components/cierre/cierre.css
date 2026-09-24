@@ -1,0 +1,717 @@
+/* CIERRE (bloques 7 + 8, "Dónde nos encontramos"). Mismos colores y tipografía que el resto del sitio;
+   PROVISORIOS hasta que llegue el logo (CR-03), igual que en calendario.css y galeria.css. */
+
+.cie {
+  --ar-azul: oklch(0.28 0.045 232); /* {{CONFIRMAR}} */
+  --ar-azul-hondo: oklch(0.19 0.038 236); /* {{CONFIRMAR}} */
+  --ar-beige: oklch(0.91 0.028 78); /* {{CONFIRMAR}} */
+  --ar-beige-vivo: oklch(0.84 0.06 74); /* {{CONFIRMAR}} */
+  --ar-tinta: oklch(0.99 0.004 90);
+
+  --cie-borde: clamp(16px, 4vw, 56px);
+  --texto: var(--ar-azul-hondo);
+  --suave: color-mix(in oklab, var(--texto) 70%, transparent);
+  --linea: color-mix(in oklab, var(--texto) 22%, transparent);
+
+  position: relative;
+  color: var(--texto);
+}
+
+/* ---- Máscara: lo que se abre desde abajo (el mismo recurso que la galería y el calendario) ---- */
+
+.cie-mascara {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.cie-linea {
+  display: block;
+}
+
+/* ---- Piezas compartidas ---- */
+
+.cie-titulo {
+  margin: 0 0 clamp(10px, 2svh, 22px);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--suave);
+}
+
+.cie-calle {
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: clamp(3rem, 7.4vw, 7.25rem);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+}
+
+.cie-barrio {
+  margin: clamp(8px, 1.4svh, 16px) 0 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  line-height: 1.1;
+}
+
+.cie-llegar {
+  margin: clamp(10px, 1.8svh, 20px) 0 0;
+  max-width: 34ch;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--suave);
+}
+
+.cie-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: clamp(18px, 3.2svh, 36px);
+}
+
+/* La máscara no puede recortar el canto del botón (4 px) ni su subida al pasar el mouse (8 px). */
+.cie-acciones .cie-mascara {
+  padding: 10px 12px 14px 6px;
+  margin: -10px -12px -14px -6px;
+}
+
+.cie-flecha {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.cie-consultar {
+  position: relative;
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.cie-consultar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: currentColor;
+  transform-origin: right;
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .cie-consultar:hover::after {
+    transform: scaleX(0);
+  }
+}
+
+/* ---- Cada dato (21st · Social Links, serafimcloud): el texto siempre; el logo salta al pasar ---- */
+
+.cie-dato {
+  position: relative;
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cie-dato-texto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* El logo original, chico, al lado del texto. */
+.cie-dato-marca {
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+/* El mismo logo, grande, salta desde atrás del texto al pasar el mouse. */
+.cie-dato-logo {
+  position: absolute;
+  left: -8px;
+  bottom: 100%;
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 14px oklch(0.1 0.03 236 / 0.55));
+  opacity: 0;
+  transform-origin: 30% 100%;
+  transform: translateY(40px) rotate(0deg) scale(0.6);
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease-out;
+}
+
+.cie-dato-logo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (hover: hover) {
+  .cie-dato:hover .cie-dato-logo,
+  .cie-dato:focus-visible .cie-dato-logo {
+    opacity: 1;
+    transform: translateY(-4px) rotate(-10deg) scale(1);
+    transition:
+      transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.2s ease-out;
+  }
+}
+
+/* Con el dedo: el logo salta 0,3 s y después se abre el enlace. */
+.cie-dato[data-salta] .cie-dato-logo {
+  opacity: 1;
+  transform: translateY(-4px) rotate(-10deg) scale(1);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.15s ease-out;
+}
+
+/* Movimiento reducido: el logo aparece en su lugar, sin saltar. */
+@media (prefers-reduced-motion: reduce) {
+  .cie-dato-logo,
+  .cie-dato:hover .cie-dato-logo,
+  .cie-dato:focus-visible .cie-dato-logo {
+    transform: translateY(-4px) rotate(-10deg);
+    transition: opacity 0.2s linear;
+  }
+}
+
+.cie-icono {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* En el celular: los dos botones en una fila y los contactos sin partirse. */
+@media (max-width: 899px) {
+  .cie-acciones {
+    flex-wrap: nowrap;
+    gap: 20px;
+  }
+
+  .cie-acciones .boton {
+    min-height: 46px;
+    padding: 0 18px;
+  }
+
+  .cie-consultar {
+    font-size: 0.92rem;
+  }
+
+}
+
+.cie a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* ================================================================ EL MAPA */
+
+.mp {
+  --mp-tierra: var(--ar-beige);
+  --mp-calle: var(--ar-tinta);
+  --mp-ferro: color-mix(in oklab, var(--ar-beige) 82%, var(--ar-beige-vivo));
+  --mp-parque: color-mix(in oklab, var(--ar-beige) 70%, oklch(0.72 0.06 130));
+  --mp-laguna: color-mix(in oklab, var(--ar-beige) 55%, oklch(0.6 0.05 220));
+  --mp-texto: color-mix(in oklab, var(--ar-azul-hondo) 62%, transparent);
+  --mp-ruta: var(--ar-azul-hondo);
+
+  position: relative;
+  overflow: hidden;
+  background: var(--mp-tierra);
+}
+
+.mp-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mp-tierra {
+  fill: var(--mp-tierra);
+}
+
+.mp-laguna {
+  fill: var(--mp-laguna);
+}
+
+.mp-ferro {
+  fill: var(--mp-ferro);
+}
+
+.mp-parque {
+  fill: var(--mp-parque);
+}
+
+.mp-calle,
+.mp-principal,
+.mp-via {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mp-calle {
+  stroke: var(--mp-calle);
+  stroke-width: 12;
+}
+
+.mp-principal {
+  stroke: var(--mp-calle);
+  stroke-width: 22;
+}
+
+.mp-via {
+  stroke: color-mix(in oklab, var(--ar-azul-hondo) 30%, transparent);
+  stroke-width: 1.6;
+  stroke-dasharray: 7 6;
+}
+
+.mp-estacion {
+  fill: var(--ar-azul);
+}
+
+/* Los nombres de las calles, como en Google Maps: sobre la calle, con un borde del color de la
+   calle para que se lean por encima de las líneas. */
+.mp-etq {
+  fill: var(--mp-texto);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--mp-calle);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.mp-etq-principal {
+  font-size: 12.5px;
+  font-weight: 500;
+  fill: var(--ar-azul-hondo);
+}
+
+.mp-lugar-fondo {
+  fill: var(--ar-azul);
+  stroke: var(--ar-tinta);
+  stroke-width: 1.5px;
+}
+
+.mp-lugar-icono {
+  fill: none;
+  stroke: var(--ar-tinta);
+  stroke-width: 1.1px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* En el agua: se ve en las pantallas anchas (en 1440 la laguna queda en la esquina, sin lugar para el nombre). */
+.mp-agua {
+  text-anchor: middle;
+  fill: color-mix(in oklab, var(--ar-azul) 70%, transparent);
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-style: italic;
+  font-size: 17px;
+  letter-spacing: 0.04em;
+}
+
+.mp-lugar-costanera .mp-lugar-fondo {
+  fill: oklch(0.5 0.06 225);
+}
+
+.mp-lugar-plaza .mp-lugar-fondo,
+.mp-lugar-deporte .mp-lugar-fondo {
+  fill: oklch(0.52 0.07 140);
+}
+
+.mp-lugar-nombre {
+  fill: var(--ar-azul);
+  font-size: 11.5px;
+  font-weight: 500;
+  paint-order: stroke;
+  stroke: var(--mp-tierra);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+
+.mp-pin-gota {
+  fill: var(--ar-azul-hondo);
+  stroke: var(--ar-tinta);
+  stroke-width: 2px;
+}
+
+.mp-pin-ojo {
+  fill: var(--ar-beige-vivo);
+}
+
+.mp-pin-onda {
+  fill: var(--ar-azul-hondo);
+  opacity: 0;
+}
+
+.mp-rotulo {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Arriba del marcador, centrado: a los costados están la estación y el museo. */
+.mp-rotulo-caja {
+  position: absolute;
+  left: 0;
+  bottom: 44px;
+  margin: 0;
+  display: grid;
+  gap: 1px;
+  padding: 8px 12px 9px;
+  translate: -50% 0;
+  background: var(--ar-azul-hondo);
+  color: var(--ar-tinta);
+  font-size: 0.8rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.mp-rotulo-marca {
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: 1.15rem;
+}
+
+.mp-credito {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  margin: 0;
+  font-size: 0.66rem;
+  color: var(--mp-texto);
+}
+
+.mp-credito a {
+  color: inherit;
+}
+
+/* ================================================================ LA UBICACIÓN (bloque 7) */
+
+.cie-ubicacion {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(24px, 4vw, 64px);
+  align-items: center;
+  min-height: 100svh;
+  padding: clamp(32px, 7svh, 88px) var(--cie-borde);
+  background: var(--ar-beige);
+}
+
+.cie-ubicacion-mapa {
+  height: min(78svh, 760px);
+}
+
+@media (max-width: 899px) {
+  .cie-ubicacion {
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 24px;
+  }
+
+  .cie-ubicacion-mapa {
+    order: -1;
+    height: 42svh;
+    margin: 0 calc(var(--cie-borde) * -1);
+  }
+
+  .cie-ubicacion .cie-calle {
+    font-size: clamp(2.8rem, 13vw, 4.2rem);
+  }
+
+}
+
+/* ================================================================ EL PIE (bloque 8)
+   21st · Hover Footer (mdafsarx) traducido a la marca: tarjeta azul con columnas, ARAUCARIA gigante en
+   contorno que se enciende, y los contactos con el logo que salta (21st · Social Links). */
+
+.pie {
+  --texto: var(--ar-tinta);
+  --suave: color-mix(in oklab, var(--ar-tinta) 64%, transparent);
+  --linea: color-mix(in oklab, var(--ar-beige-vivo) 20%, transparent);
+  --luz-tarjeta: oklch(0.33 0.055 228);
+
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: clamp(28px, 4svh, 52px) clamp(22px, 3.4vw, 56px) 0;
+  border: 1px solid var(--linea);
+  border-radius: 20px;
+  /* Un resplandor quieto arriba a la izquierda (ya no sigue al mouse). */
+  background:
+    radial-gradient(560px circle at 18% -10%, var(--luz-tarjeta), transparent 70%),
+    var(--ar-azul-hondo);
+  color: var(--texto);
+}
+
+.pie-cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.85fr);
+  gap: clamp(24px, 3vw, 56px);
+}
+
+.pie-nombre {
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: clamp(2.2rem, 3vw, 3rem);
+  line-height: 0.95;
+}
+
+.pie-sub {
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ar-beige-vivo);
+}
+
+.pie-frase {
+  margin: 16px 0 0;
+  max-width: 28ch;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--suave);
+}
+
+.pie-cabeza {
+  margin: 0 0 14px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--suave);
+}
+
+.pie-lista {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.95rem;
+}
+
+.pie-link {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+}
+
+.pie-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pie-link-flecha {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: var(--ar-beige-vivo);
+  stroke-width: 1.6;
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .pie-link:hover .pie-link-flecha {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pie-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--ar-beige-vivo);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .pie-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* ---- El contacto es una fila de logos; cada logo es el link ---- */
+
+.pie-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* La máscara no puede recortar el salto del logo. */
+.pie-logos .cie-mascara {
+  padding: 10px 6px 6px;
+  margin: -10px -6px -6px;
+}
+
+/* Mateo: "achicá los logos, están muy grandes": 48 → 34 px. */
+.pie-logo {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+}
+
+.pie-logo-cuerpo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pie-logo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (hover: hover) {
+  .pie-logo:hover .pie-logo-cuerpo,
+  .pie-logo:focus-visible .pie-logo-cuerpo {
+    transform: translateY(-6px) rotate(-8deg) scale(1.12);
+  }
+}
+
+.pie-logo:active .pie-logo-cuerpo {
+  transform: scale(0.92);
+  transition-duration: 0.15s;
+}
+
+/* ---- La base y el contorno ---- */
+
+.pie-base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 24px;
+  margin-top: clamp(24px, 4svh, 44px);
+  padding-top: 16px;
+  border-top: 1px solid var(--linea);
+  font-size: 0.78rem;
+  color: var(--suave);
+}
+
+.pie-contorno {
+  display: block;
+  width: 100%;
+  max-height: min(30svh, 330px);
+  margin: clamp(4px, 1svh, 12px) auto -0.6%;
+  overflow: visible;
+}
+
+.pie-contorno text {
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: 196px;
+  letter-spacing: 0.02em;
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.pie-contorno-letras {
+  stroke: var(--ar-beige-vivo);
+  stroke-width: 1.8;
+  fill: var(--ar-beige-vivo) !important;
+  fill-opacity: 0.14;
+}
+
+/* ---- La tarjeta sube montada sobre el beige de debajo del mapa ---- */
+
+.pie-marco {
+  position: relative;
+  z-index: 2;
+  padding: 0 var(--cie-borde) clamp(12px, 2svh, 20px);
+  background: var(--ar-beige);
+}
+
+/* Sube apenas sobre el beige de debajo del mapa, sin taparlo (Mateo: "en desktop parece que se pisa
+   con el mapa"). */
+.pie-marco .pie {
+  margin-top: -36px;
+  box-shadow: 0 40px 80px -40px oklch(0.15 0.04 236 / 0.6);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* ---- Celular: columnas apiladas ---- */
+
+@media (max-width: 899px) {
+  .pie {
+    border-radius: 16px;
+  }
+
+  .pie-cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  /* Los links del salón: filas con línea, en dos columnas, con la flecha siempre a la vista. */
+  nav.pie-col .pie-lista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 20px;
+  }
+
+  nav.pie-col .pie-lista .cie-mascara,
+  nav.pie-col .pie-lista .cie-linea {
+    display: block;
+  }
+
+  .pie-link {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .pie-link::after {
+    display: none;
+  }
+
+  .pie-link-flecha {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pie-marco .pie {
+    margin-top: -20px;
+  }
+}

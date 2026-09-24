@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useLenis } from "lenis/react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildMonth, type AvailabilityEntry, type BlockChoice, type DayCell } from "@/components/calendar/month";
 import { addMonthsToMonth, monthOf, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { Formulario } from "@/components/formulario/formulario";
@@ -82,6 +83,28 @@ export function Calendario(datos: Datos) {
   const raiz = useRef<HTMLElement>(null);
   const [llego, setLlego] = useState(false);
   const abierto = cal.dia !== null;
+  const lenis = useLenis();
+
+  // En el celular el panel va DEBAJO de la grilla: al elegir un día, y otra vez al seguir con los
+  // datos, la pantalla baja sola hasta el panel (Mateo, 2026-09-24: "cuando elegís un día deslice
+  // hacia abajo, no tenga que scrollear yo"). Lo dispara el toque de la persona; en escritorio el panel
+  // está al lado y no se mueve nada (D-035).
+  const dia = cal.dia?.date ?? null;
+  const siguiendoAhora = sigue !== null;
+  useEffect(() => {
+    if (!dia) return;
+    const panel = raiz.current?.querySelector<HTMLElement>(".cal-panel");
+    const grilla = raiz.current?.querySelector<HTMLElement>(".cal-grilla");
+    if (!panel || !grilla) return;
+    if (panel.getBoundingClientRect().top < grilla.getBoundingClientRect().bottom - 1) return;
+    const destino = panel.getBoundingClientRect().top + window.scrollY - 16;
+    const duracion = quieto() ? 1.1 : 0;
+    // Con el dedo el scroll es el nativo (Lenis no simula el toque, `syncTouch: false`) y Lenis ignora
+    // scrollTo mientras hay un toque: se usa el del navegador.
+    const conDedo = !window.matchMedia("(hover: hover)").matches;
+    if (lenis && !conDedo) lenis.scrollTo(destino, { duration: duracion, easing: (t) => 1 - Math.pow(1 - t, 3) });
+    else window.scrollTo({ top: destino, behavior: duracion ? "smooth" : "auto" });
+  }, [dia, siguiendoAhora, lenis]);
 
   useGSAP(
     () => {

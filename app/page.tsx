@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Disponibilidad, DisponibilidadEsperando } from "@/components/calendario/disponibilidad";
+import { Cierre } from "@/components/cierre/cierre";
 import { Galeria } from "@/components/galeria/galeria";
 import { Hero } from "@/components/hero/hero";
 import { ScrollSuave } from "@/components/scroll-suave";
@@ -27,6 +28,17 @@ document.head.appendChild(s);
 setTimeout(function(){s.remove();},3000);
 }catch(e){}})();`;
 
+// El cierre (D-036): textos, nombres del mapa, marcador, contorno de ARAUCARIA y la tarjeta esperan
+// escondidos hasta su entrada. Literal y no importado: una constante de un módulo "use client" llega al
+// servidor como referencia de cliente, no como texto.
+const GUION_CIERRE = `(function(){try{
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var s=document.createElement('style');
+s.textContent='.cie-linea{transform:translateY(130%)}.mp-etq,.mp-lugar,.mp-pin,.mp-rotulo{opacity:0}.pie-contorno text{stroke-dasharray:1600;stroke-dashoffset:1600;fill-opacity:0}.pie-marco .pie{transform:translateY(140px)}';
+document.head.appendChild(s);
+setTimeout(function(){s.remove();},3000);
+}catch(e){}})();`;
+
 export default function HomePage() {
   return (
     <>
@@ -38,6 +50,8 @@ export default function HomePage() {
       <Suspense fallback={<DisponibilidadEsperando />}>
         <Disponibilidad />
       </Suspense>
+      <script dangerouslySetInnerHTML={{ __html: GUION_CIERRE }} />
+      <Cierre />
     </>
   );
 }

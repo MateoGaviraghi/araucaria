@@ -291,6 +291,64 @@ framing problem.
 **Measured (local, real dev database):** the full flow at 1440 and 375 on `/` — errors on empty steps, the phone cases ("03425162081" and "+54 9 342 516-2081" → "3425162081" 10/10 ✓; "342155162081" → 12/10 in red), "Otro (Bautismo)", 35 people, send — opens `wa.me` with the number and the exact message; zero console errors; the calendar entrance unchanged. `npm run build` passes (`/` partial prerender). **Not verified:** Chrome autofill itself (cannot be triggered from a script) and a real phone.
 **Reopen if:** the client wants landlines or foreign numbers (the 10-digit rule), or the three steps feel long on a real phone.
 
+### D-035 · 2026-09-24 · On the phone, picking a day scrolls to the day panel
+
+Mateo, looking at the calendar on a phone: *"cuando elegís un día deslice hacia abajo, no tenga que scrollear yo para tener que ir a rellenar la info; la idea es facilitar la carga de toda la info lo mayor posible"*. Plan answered *"go"*.
+
+**Decision:** on narrow screens, where the day panel sits below the grid, tapping a day, and later "Seguir con mis datos", brings the panel to 16 px from the top of the screen (`components/calendario/calendario.tsx`). With a finger the browser's native smooth scroll is used, because Lenis runs with `syncTouch: false` and ignores `scrollTo` during a touch; with a mouse, `lenis.scrollTo` runs for 1.1 s. On the desktop the panel is beside the grid and nothing moves.
+
+**Exception to a standing rule:** `seccion-premium` says the scroll never moves by itself. This movement is started by the person's own tap and was asked for by Mateo; it is the only exception. Snap, stops between sections and scroll-jacking stay forbidden.
+
+### D-036 · 2026-09-24 · The page closes with "Dónde nos encontramos" + a floating footer card; no NAV, no pricing table
+
+**Order of the public page.** Mateo: *"lo mejor es dejar hecha al completo la parte pública y luego terminamos el dashboard admin; los precios ya están; solo agregaría un 'dónde nos encontramos' junto con el CTA y el footer; las cosas que incluye el alquiler las incluiría dentro de la galería, debe ser resumido"*, then *"1 - el cierre 2 - sacarlo"*. So: `NAV` (block 1) is not built, and the hero keeps its top bar. `PRICING-TABLE` (block 5) is not built, because the prices live in the calendar's day panel. `FEATURE-GRID` (block 4) goes into the gallery as a summary, in a later round. Blocks 7 and 8 are one closing section.
+
+**Round.** `seccion-premium`:
+- **References.** First round: 17 sites checked, 5 sent (Codrops ScrollMap, Olivier Larose Sticky Footer, Dennis Snellenberg, Locomotive, Times Event). Mateo: *"1 con la 2"*.
+- **Three prototypes on `/prototipo-cierre`**: A · the map is the lid · B · map first, then the footer · C · the map as a window. Mateo: *"me gustó el diseño de la B"*.
+- **Map.** *"No me gusta la animación del mapa que recorra desde un lugar, porque todos vienen de otro sitio; tendría que verse bien las calles, lugares, tipo Google Maps"*. Then *"sacar y agregar lugares importantes, que la gente se ubique"*.
+- **Footer.**
+  - First footer rejected whole: *"no hiciste absolutamente nada en el footer, sigue todo igual, asqueroso… eso no son footer, horrible tanto en mobile como desktop"*.
+  - A round of the 51 footers on 21st.dev (7 sent). Mateo picked *"la 2"* (21st · Hover Footer, mdafsarx), *"hacelo dinámico, más premium… combinalo"* with the contact links (21st · Social Links, serafimcloud).
+  - Three footer prototypes (A · card that lights up · B · buttons with logo · C · floating card). Mateo: *"la C"*.
+  - Corrections, all applied:
+    - the card overlapped the map;
+    - original logos (WhatsApp, Gmail, Google Maps, Instagram);
+    - salon links in rows on the phone;
+    - nothing lights up with the mouse;
+    - the logo is the link, with no text beside it;
+    - a single phone;
+    - smaller logos (34 px);
+    - a phone icon like WhatsApp's;
+    - a better clock icon;
+    - the whole ARAUCARIA in one colour.
+  - Mateo: *"si pasalo"*.
+
+**Decision.**
+- **Location section** (`components/cierre/cierre.tsx`, `id="ubicacion"`): beige. On the left, the address in the title face with the Barrio line, the walk-in line from `01-CONTEXT.md` and two actions ("Cómo llegar" → Google Maps directions; "Consultar disponibilidad" → `#disponibilidad`).
+- **The map** (`mapa.tsx`, data in `mapa-datos.ts`) is an SVG of Candioti Norte generated once from OpenStreetMap (ODbL, credited on the map). It shows:
+  - streets with their names on them;
+  - Laguna Setúbal (named only where it fits);
+  - 9 landmarks: Estación Belgrano, Liceo Municipal, Plaza Pueyrredón, Museo MAC, Puente Colgante, Monumento Brigadier López, Club Regatas, Costanera, Plaza de las Banderas;
+  - a drop marker on Güemes 3660 with its label above.
+- **Map scale and entrance.** 0.5 px/m on the desktop, 0.62 on the phone. It enters at `top 70%`: it zooms 0.92 → 1 (2.4 s), names fade in at random, the marker drops (0.7 s) with one ripple.
+- **Footer card.** A blue card that rises 140 → 0 px (1.3 s) and sits 36 px over the beige below the map; it tilts slightly with the mouse (≤ 4°). It has four columns (Araucaria · Contacto · Horarios · El salón), a © line, and ARAUCARIA as a large outline, the whole word in `--ar-beige-vivo`: the stroke draws (1.6 s), then a 14 % fill (0.9 s).
+- **Everything waits hidden before paint** (`GUION_CIERRE` in `app/page.tsx`). With reduced motion, all is shown at once.
+
+**Rejected (do not retry):**
+- the walking route drawn from the station;
+- the map as the page's lid (A) and the map in a window (C of the first round);
+- the first footer (contacts in three columns with a lone giant "Araucaria" and dead space);
+- a footer that only changes on hover;
+- the light that follows the mouse (on the card and on the letters);
+- text next to the contact logos;
+- two phone buttons;
+- the beige round phone icon and the flat clock;
+- ARAUCARIA lit only where the light passes;
+- the round of 44 generic 21st footers (SaaS link columns, newsletter boxes).
+
+**Trap:** a constant exported from a `"use client"` module reaches a server component as a client reference, not as its value, so the pre-paint CSS lives as a literal in `app/page.tsx` (see `G-055`).
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
@@ -365,6 +423,8 @@ framing problem.
 | G-052 | A ScrollTrigger created for a section below the calendar was positioned before the calendar finished measuring its height, so its start sat lower than the real section and never fired. For a one-shot "arrived on screen", an `IntersectionObserver` does not depend on precomputed positions |
 | G-053 | `window.open(url, "_blank", "noopener")` returns `null` and Playwright's popup event is unreliable for it; the tests read the fallback link's `href` ("Si no se abrió WhatsApp, tocá acá"), which is the same URL |
 | G-054 | Chrome's autofill paints filled inputs light blue with its own text colour, covering the design (it hid the fixed "+54"). Neutralise with `:-webkit-autofill` → `-webkit-text-fill-color` + a very long `background-color` transition, and `:autofill { background: transparent }`. It cannot be triggered from a script, so it is checked by eye |
+| G-055 | A `.cie-linea` that GSAP animated on entry keeps an inline `transform`, which beats any `:hover { transform }` on the same element: the contact logos, which were also the mask line, never jumped. Put the hover movement on an inner wrapper (`.pie-logo-cuerpo`). A value exported from a `"use client"` module (like a CSS string) arrives in a server component as a client reference, not as text: keep such literals in the server file |
+| G-056 | Lenis with `syncTouch: false` ignores `scrollTo` while a finger is on the screen; on touch devices use `window.scrollTo({ behavior: "smooth" })`. A programmatic scroll also stops at the page end: with the calendar as the last section, "go to the panel" fell 237 px short until the closing section existed below it |
 
 ## Technical debt taken on purpose
 
