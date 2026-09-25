@@ -9,12 +9,11 @@ import { Logo } from "@/components/cierre/logos";
 import "@/components/ui/boton.css";
 import "./nav.css";
 
-// NAVBAR (bloque 1, D-040; reemplaza el "sacarlo" de D-036). Mateo eligió la 1 de la ronda: Dennis
-// Snellenberg (dennissnellenberg.com), con el menú curvo de Olivier Larose. Arriba de todo, el logo y
-// los links sobre el hero; al bajar, los links se quedan atrás y aparece arriba a la derecha un botón
-// redondo fijo; al tocarlo entra desde la derecha un panel azul con el borde curvo que se estira.
-// En el celular el botón está desde el principio. Sin el botón rápido de antes (Mateo: "quitá ese call
-// to action rápido"): cada sección ya termina en el calendario.
+// NAVBAR (bloque 1, D-041; reemplaza el botón redondo de D-040). Mateo: "no baja el header completo
+// donde siga toda la web, lo mismo en desktop". El header entero queda fijo arriba en toda la página:
+// arriba de todo es transparente sobre el hero; al bajar se vuelve una barra azul con desenfoque y se
+// achica (GSAP). Se esconde SOLO mientras pasa la galería, para no achicar sus tarjetas (Mateo: "b").
+// En el celular, el botón de menú va dentro del header y abre el panel de borde curvo.
 
 const LINKS = [
   { texto: "El espacio", href: "#espacio" },
@@ -28,96 +27,111 @@ const INSTAGRAM = "https://www.instagram.com/araucariamultiespacio/";
 const WHATSAPP = hayNumero ? enlace("Hola Araucaria, quería hacer una consulta sobre el salón.") : null;
 
 const quieto = () => window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
-const esAncho = () => window.matchMedia("(min-width: 900px)").matches;
 
 /** El borde curvo del panel: con la curva hacia afuera mientras se mueve, recto cuando se queda. */
-const curva = (alto: number, estirada: boolean) => `M100 0 L100 ${alto} Q${estirada ? -100 : 100} ${alto / 2} 100 0`;
+const curva = (estirada: boolean) => `M100 0 L100 1000 Q${estirada ? -100 : 100} 500 100 0`;
+
+/** El alto del header fijo (lo usan el calendario y los links para dejar las cosas debajo). */
+export function altoNav() {
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--alto-nav")) || 64;
+}
 
 export function Nav() {
   const lenis = useLenis();
   const [abierto, setAbierto] = useState(false);
-  const boton = useRef<HTMLButtonElement>(null);
+  const [activa, setActiva] = useState<string | null>(null);
+  const barra = useRef<HTMLElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const borde = useRef<SVGPathElement>(null);
   const velo = useRef<HTMLDivElement>(null);
+  const boton = useRef<HTMLButtonElement>(null);
   const primero = useRef(true);
 
-  // El botón redondo: en el escritorio crece (con un rebote) cuando la barra de arriba quedó atrás y se
-  // achica al volver arriba; en el celular está siempre.
   useGSAP(() => {
-    const b = boton.current;
-    if (!b) return;
+    const h = barra.current;
+    if (!h) return;
     const d = quieto() ? 1 : 0;
-    const mm = gsap.matchMedia();
-    mm.add("(min-width: 900px)", () => {
-      gsap.set(b, { scale: 0 });
-      ScrollTrigger.create({
-        start: 160,
-        onEnter: () => gsap.to(b, { scale: 1, duration: 0.55 * d, ease: "back.out(1.8)", overwrite: true }),
-        onLeaveBack: () => {
-          if (!document.documentElement.hasAttribute("data-menu-abierto")) gsap.to(b, { scale: 0, duration: 0.35 * d, ease: "power2.in", overwrite: true });
-        },
-      });
+
+    // Al cargar, el header baja desde arriba (lo deja escondido GUION_NAV en app/page.tsx).
+    gsap.fromTo(h, { y: 0, yPercent: -110 }, { y: 0, yPercent: 0, duration: 0.9 * d, ease: "power3.out", delay: 0.2 * d });
+
+    // Transparente arriba de todo; al bajar 60 px, la barra azul con desenfoque, más baja.
+    // Un solo número, --nav-p de 0 a 1: el CSS saca de ahí el fondo, el desenfoque, la sombra, el alto
+    // y el tamaño del logo.
+    gsap.set(h, { "--nav-p": 0 });
+    const solido = gsap.to(h, { "--nav-p": 1, duration: 0.5 * d, ease: "power3.out", paused: true });
+    ScrollTrigger.create({
+      start: 60,
+      onEnter: () => solido.play(),
+      onLeaveBack: () => solido.reverse(),
     });
-    // En el celular se esconde hacia arriba mientras se baja y vuelve apenas se sube: así no tapa lo que
-    // queda arriba a la derecha ("Cambiar" en el panel del día, que la página deja a 16 px del borde,
-    // D-035, ni el botón de ampliar de la galería).
-    mm.add("(max-width: 899px)", () => {
-      gsap.set(b, { scale: 1, yPercent: 0 });
-      let escondido = false;
+
+    // Mientras pasa la galería el header se va para arriba y vuelve después (D-041, Mateo: "b").
+    const esconder = (si: boolean) => {
+      if (document.documentElement.hasAttribute("data-menu-abierto")) return;
+      gsap.to(h, { y: 0, yPercent: si ? -110 : 0, duration: (si ? 0.4 : 0.6) * d, ease: si ? "power2.in" : "power3.out", overwrite: "auto" });
+    };
+    const galeria = document.querySelector("#espacio");
+    if (galeria) {
       ScrollTrigger.create({
-        start: 0,
-        end: "max",
-        onUpdate: (st) => {
-          if (document.documentElement.hasAttribute("data-menu-abierto")) return;
-          const esconder = st.direction === 1 && st.scroll() > 160;
-          if (esconder === escondido) return;
-          escondido = esconder;
-          gsap.to(b, { yPercent: esconder ? -170 : 0, duration: 0.45 * d, ease: esconder ? "power2.in" : "back.out(1.6)", overwrite: "auto" });
-        },
+        trigger: galeria,
+        start: "top 10%",
+        end: "bottom 45%",
+        onEnter: () => esconder(true),
+        onLeave: () => esconder(false),
+        onEnterBack: () => esconder(true),
+        onLeaveBack: () => esconder(false),
       });
-    });
-    return () => mm.revert();
+    }
+
+    // El link de la sección en la que se está queda marcado.
+    for (const l of LINKS) {
+      const s = document.querySelector(l.href);
+      if (!s) continue;
+      ScrollTrigger.create({
+        trigger: s,
+        start: "top 50%",
+        end: "bottom 50%",
+        onToggle: (st) => st.isActive && setActiva(l.href),
+        onLeaveBack: () => l.href === "#espacio" && setActiva(null),
+      });
+    }
   });
 
-  // Abrir y cerrar: el panel entra desde la derecha (0,8 s) mientras su borde se estira hacia afuera y
+  // El panel del celular: entra desde la derecha (0,8 s) mientras su borde se estira hacia afuera y
   // vuelve recto; los links llegan uno detrás de otro. Al cerrar, lo mismo al revés.
   useEffect(() => {
     const p = panel.current;
     const path = borde.current;
     if (!p || !path) return;
-    const alto = 1000; // el alto del viewBox del borde (se estira al alto del panel)
     const d = quieto() ? 1 : 0;
     const items = p.querySelectorAll(".nav-panel-item");
     if (primero.current) {
       primero.current = false;
       // x: 0 explícito: GSAP leería el translateX(101%) del CSS como píxeles (G-047).
       gsap.set(p, { x: 0, xPercent: 101 });
-      gsap.set(path, { attr: { d: curva(alto, false) } });
+      gsap.set(path, { attr: { d: curva(false) } });
       return;
     }
     const raiz = document.documentElement;
     if (abierto) {
       raiz.setAttribute("data-menu-abierto", "");
       lenis?.stop();
-      gsap.to(boton.current, { scale: 1, yPercent: 0, duration: 0.3 * d, overwrite: true });
+      gsap.to(barra.current, { y: 0, yPercent: 0, duration: 0.3 * d, overwrite: "auto" });
       gsap.to(velo.current, { autoAlpha: 1, duration: 0.5 * d });
       gsap.fromTo(p, { x: 0, xPercent: 101 }, { x: 0, xPercent: 0, duration: 0.8 * d, ease: "power3.inOut" });
-      gsap.fromTo(path, { attr: { d: curva(alto, true) } }, { attr: { d: curva(alto, false) }, duration: 0.9 * d, ease: "power3.inOut" });
+      gsap.fromTo(path, { attr: { d: curva(true) } }, { attr: { d: curva(false) }, duration: 0.9 * d, ease: "power3.inOut" });
       gsap.fromTo(items, { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8 * d, ease: "power3.out", stagger: 0.06 * d, delay: 0.25 * d });
-      p.querySelector<HTMLElement>("a, button")?.focus({ preventScroll: true });
     } else {
       raiz.removeAttribute("data-menu-abierto");
       lenis?.start();
       gsap.to(velo.current, { autoAlpha: 0, duration: 0.5 * d });
       gsap.to(p, { x: 0, xPercent: 101, duration: 0.8 * d, ease: "power3.inOut" });
-      gsap.fromTo(path, { attr: { d: curva(alto, true) } }, { attr: { d: curva(alto, false) }, duration: 0.9 * d, ease: "power3.inOut" });
-      // En el escritorio, si se cierra arriba de todo, el botón vuelve a esconderse.
-      if (esAncho() && window.scrollY < 160) gsap.to(boton.current, { scale: 0, duration: 0.35 * d, ease: "power2.in", delay: 0.5 * d });
+      gsap.fromTo(path, { attr: { d: curva(true) } }, { attr: { d: curva(false) }, duration: 0.9 * d, ease: "power3.inOut" });
     }
   }, [abierto, lenis]);
 
-  // Esc cierra.
+  // Esc cierra; si la pantalla se agranda a escritorio con el menú abierto, también.
   useEffect(() => {
     if (!abierto) return;
     const tecla = (e: KeyboardEvent) => {
@@ -126,11 +140,18 @@ export function Nav() {
         boton.current?.focus();
       }
     };
+    const mq = window.matchMedia("(min-width: 900px)");
+    const cambio = () => mq.matches && setAbierto(false);
     document.addEventListener("keydown", tecla);
-    return () => document.removeEventListener("keydown", tecla);
+    mq.addEventListener("change", cambio);
+    return () => {
+      document.removeEventListener("keydown", tecla);
+      mq.removeEventListener("change", cambio);
+    };
   }, [abierto]);
 
-  // Un link lleva a su sección: con el menú abierto, primero se cierra y después la página baja.
+  // Un link lleva a su sección y la deja justo debajo del header; con el menú abierto, primero se
+  // cierra.
   function ir(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
     e.preventDefault();
     const destino = document.querySelector<HTMLElement>(href);
@@ -138,10 +159,11 @@ export function Nav() {
     setAbierto(false);
     if (!destino) return;
     const irAhora = () => {
+      const y = href === "#inicio" ? 0 : destino.getBoundingClientRect().top + window.scrollY - altoNav();
       const conDedo = !window.matchMedia("(hover: hover)").matches;
       // Con el dedo, el scroll del navegador (Lenis ignora scrollTo con un toque en curso, G-056).
-      if (lenis && !conDedo && quieto()) lenis.scrollTo(destino, { duration: 1.4 });
-      else destino.scrollIntoView({ behavior: quieto() ? "smooth" : "auto" });
+      if (lenis && !conDedo && quieto()) lenis.scrollTo(y, { duration: 1.4 });
+      else window.scrollTo({ top: y, behavior: quieto() ? "smooth" : "auto" });
     };
     if (estabaAbierto) window.setTimeout(irAhora, quieto() ? 450 : 0);
     else irAhora();
@@ -149,38 +171,38 @@ export function Nav() {
 
   return (
     <>
-      <header className="nav-barra">
-        <a className="nav-marca" href="#inicio" onClick={(e) => ir(e, "#inicio")}>
-          <Image src="/media/logo-araucaria.png" alt="" width={52} height={52} priority />
-          <span>
-            Araucaria
-            <small>multiespacio</small>
-          </span>
-        </a>
-        <nav className="nav-links" aria-label="Secciones">
-          {LINKS.map((l) => (
-            <a key={l.href} href={l.href} onClick={(e) => ir(e, l.href)}>
-              {l.texto}
-            </a>
-          ))}
-        </nav>
+      <header ref={barra} className="nav-barra" data-abierto={abierto ? "" : undefined}>
+        <div className="nav-barra-cuerpo">
+          <a className="nav-marca" href="#inicio" onClick={(e) => ir(e, "#inicio")}>
+            <Image src="/media/logo-araucaria.png" alt="" width={52} height={52} priority />
+            <span>
+              Araucaria
+              <small>multiespacio</small>
+            </span>
+          </a>
+          <nav className="nav-links" aria-label="Secciones">
+            {LINKS.map((l) => (
+              <a key={l.href} href={l.href} onClick={(e) => ir(e, l.href)} aria-current={activa === l.href ? "location" : undefined}>
+                {l.texto}
+              </a>
+            ))}
+          </nav>
+          <button
+            ref={boton}
+            type="button"
+            className="nav-boton"
+            aria-expanded={abierto}
+            aria-controls="nav-panel"
+            aria-label={abierto ? "Cerrar el menú" : "Abrir el menú"}
+            onClick={() => setAbierto((a) => !a)}
+          >
+            <span className="nav-boton-rayas" aria-hidden="true">
+              <span />
+              <span />
+            </span>
+          </button>
+        </div>
       </header>
-
-      <button
-        ref={boton}
-        type="button"
-        className="nav-boton"
-        data-abierto={abierto ? "" : undefined}
-        aria-expanded={abierto}
-        aria-controls="nav-panel"
-        aria-label={abierto ? "Cerrar el menú" : "Abrir el menú"}
-        onClick={() => setAbierto((a) => !a)}
-      >
-        <span className="nav-boton-rayas" aria-hidden="true">
-          <span />
-          <span />
-        </span>
-      </button>
 
       <div ref={velo} className="nav-velo" aria-hidden="true" onClick={() => setAbierto(false)} />
 

@@ -7,6 +7,15 @@ import { Incluye } from "@/components/incluye/incluye";
 import { Nav } from "@/components/nav/nav";
 import { ScrollSuave } from "@/components/scroll-suave";
 
+// El header (D-041) espera arriba, fuera de la pantalla, hasta que GSAP lo baja.
+const GUION_NAV = `(function(){try{
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var s=document.createElement('style');
+s.textContent='.nav-barra{transform:translateY(-110%)}';
+document.head.appendChild(s);
+setTimeout(function(){s.remove();},3000);
+}catch(e){}})();`;
+
 // Los textos de la galería se abren desde su máscara cuando llega cada tarjeta. Este guion los deja
 // abajo ANTES del primer pintado: si lo hiciera React, al recargar parado en la galería se verían
 // escritos, desaparecerían y recién ahí se abrirían (criterio: cero parpadeos al recargar). Mismo
@@ -55,6 +64,7 @@ export default function HomePage() {
   return (
     <>
       <ScrollSuave />
+      <script dangerouslySetInnerHTML={{ __html: GUION_NAV }} />
       <Nav />
       <Hero />
       <script dangerouslySetInnerHTML={{ __html: GUION_GALERIA }} />

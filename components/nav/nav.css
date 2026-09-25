@@ -11,17 +11,38 @@
   --ar-tinta: oklch(0.99 0.004 90);
 }
 
-/* ---- La barra de arriba: logo y links sobre el hero. No es fija: se queda arriba. ---- */
+/* ---- El header: fijo arriba en toda la página (D-041) ----
+   --nav-p va de 0 (arriba de todo: transparente sobre el hero, más alto) a 1 (al bajar: barra azul con
+   desenfoque, más baja). Lo anima GSAP; todo lo demás sale de ese número. */
 
 .nav-barra {
-  position: absolute;
-  inset: max(18px, env(safe-area-inset-top)) clamp(16px, 4vw, 56px) auto;
-  z-index: 20;
+  --nav-p: 0;
+  --relleno-arriba: 22px;
+  --relleno-abajo: 11px;
+
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 70;
+  padding-top: env(safe-area-inset-top);
+  background: color-mix(in oklab, var(--ar-azul-hondo) calc(var(--nav-p) * 92%), transparent);
+  -webkit-backdrop-filter: blur(calc(var(--nav-p) * 14px)) saturate(calc(1 + var(--nav-p) * 0.3));
+  backdrop-filter: blur(calc(var(--nav-p) * 14px)) saturate(calc(1 + var(--nav-p) * 0.3));
+  box-shadow: 0 10px 30px oklch(0.12 0.03 236 / calc(var(--nav-p) * 0.28));
+  border-bottom: 1px solid color-mix(in oklab, var(--ar-tinta) calc(var(--nav-p) * 10%), transparent);
+  color: var(--ar-tinta);
+}
+
+/* Con el menú abierto el header queda sólido (la X está adentro). */
+.nav-barra[data-abierto] {
+  --nav-p: 1 !important;
+}
+
+.nav-barra-cuerpo {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  color: var(--ar-tinta);
+  padding: calc(var(--relleno-arriba) - (var(--relleno-arriba) - var(--relleno-abajo)) * var(--nav-p)) clamp(16px, 4vw, 56px);
 }
 
 .nav-marca {
@@ -33,7 +54,7 @@
 }
 
 .nav-marca img {
-  width: clamp(38px, 4.4vw, 52px);
+  width: calc(46px - 8px * var(--nav-p));
   height: auto;
   border-radius: 50%;
 }
@@ -55,7 +76,7 @@
 
 .nav-links {
   display: none;
-  gap: clamp(20px, 2.6vw, 40px);
+  gap: clamp(22px, 2.8vw, 44px);
 }
 
 .nav-links a {
@@ -64,9 +85,11 @@
   color: inherit;
   font-size: 0.98rem;
   text-decoration: none;
+  opacity: 0.86;
+  transition: opacity 250ms ease;
 }
 
-/* La línea de abajo se dibuja de izquierda a derecha con el mouse. */
+/* La línea de abajo se dibuja de izquierda a derecha con el mouse; en la sección actual queda puesta. */
 .nav-links a::after {
   content: "";
   position: absolute;
@@ -80,35 +103,36 @@
   transition: transform 450ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+.nav-links a:hover,
+.nav-links a:focus-visible,
+.nav-links a[aria-current] {
+  opacity: 1;
+}
+
 .nav-links a:hover::after,
-.nav-links a:focus-visible::after {
+.nav-links a:focus-visible::after,
+.nav-links a[aria-current]::after {
   transform: scaleX(1);
   transform-origin: 0 50%;
 }
 
-/* ---- El botón redondo, fijo arriba a la derecha ---- */
-
-.nav-boton {
-  position: fixed;
-  top: max(16px, env(safe-area-inset-top));
-  right: clamp(16px, 3vw, 40px);
-  z-index: 70;
-  display: grid;
-  place-items: center;
-  width: clamp(54px, 5vw, 72px);
-  aspect-ratio: 1;
-  padding: 0;
-  border: 1px solid color-mix(in oklab, var(--ar-tinta) 22%, transparent);
-  border-radius: 50%;
-  background: var(--ar-azul);
-  color: var(--ar-tinta);
-  box-shadow: 0 10px 30px oklch(0.12 0.03 236 / 0.3);
-  cursor: pointer;
-  transition: background 300ms ease;
+.nav-links a[aria-current]::after {
+  background: var(--ar-beige-vivo);
 }
 
-.nav-boton:hover {
-  background: var(--ar-azul-hondo);
+/* ---- El botón del menú (celular), dentro del header ---- */
+
+.nav-boton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid color-mix(in oklab, var(--ar-tinta) 30%, transparent);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }
 
 .nav-boton:focus-visible {
@@ -120,8 +144,8 @@
 .nav-boton-rayas {
   position: relative;
   display: block;
-  width: 38%;
-  height: 10px;
+  width: 18px;
+  height: 8px;
 }
 
 .nav-boton-rayas span {
@@ -144,15 +168,15 @@
   top: calc(100% - 1.5px);
 }
 
-.nav-boton[data-abierto] .nav-boton-rayas span {
+.nav-boton[aria-expanded="true"] .nav-boton-rayas span {
   top: calc(50% - 0.75px);
 }
 
-.nav-boton[data-abierto] .nav-boton-rayas span:first-child {
+.nav-boton[aria-expanded="true"] .nav-boton-rayas span:first-child {
   transform: rotate(45deg);
 }
 
-.nav-boton[data-abierto] .nav-boton-rayas span:last-child {
+.nav-boton[aria-expanded="true"] .nav-boton-rayas span:last-child {
   transform: rotate(-45deg);
 }
 
@@ -195,7 +219,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: calc(max(16px, env(safe-area-inset-top)) + clamp(72px, 9vw, 96px)) clamp(28px, 5vw, 64px) max(32px, env(safe-area-inset-bottom));
+  padding: calc(env(safe-area-inset-top) + var(--alto-nav) + 28px) clamp(28px, 5vw, 64px) max(32px, env(safe-area-inset-bottom));
   overflow-y: auto;
 }
 
@@ -271,14 +295,25 @@
   height: 100%;
 }
 
-/* ---- Escritorio: los links a la vista; el botón aparece al bajar ---- */
+/* ---- Escritorio: los links a la vista; sin botón de menú ni panel ---- */
 
 @media (min-width: 900px) {
+  .nav-barra {
+    --relleno-arriba: 24px;
+    --relleno-abajo: 12px;
+  }
+
+  .nav-marca img {
+    width: calc(52px - 8px * var(--nav-p));
+  }
+
   .nav-links {
     display: flex;
   }
 
-  .nav-boton {
-    transform: scale(0);
+  .nav-boton,
+  .nav-panel,
+  .nav-velo {
+    display: none;
   }
 }

@@ -444,6 +444,30 @@ Mateo: *"además agregale el navbar todo personalizado, fijo con GSAP para ambos
 
 **Rejected in the round:** the SaaS bars (Login / Get Started); the glass and "tubelight" pills; the dashboard-style nav; menu-toggle icons without a navbar.
 
+### D-041 · 2026-09-25 · The whole header is fixed and follows the page (replaces the round button of D-040)
+
+Mateo, after trying `D-040` in production: *"el navbar funciona súper mal y solamente dejaste las tres líneas; no baja el header completo donde siga toda la web, lo mismo en desktop, malísimo, eso no es lo que pedí"*. Plan → *"1 - go 2 - b"* (b: the header hides only while the gallery passes, so the gallery cards keep their size).
+
+**Decision** (`components/nav/nav.tsx`, `nav.css`):
+- **Fixed header** (`.nav-barra`, `position: fixed`, `z-index: 70`) with logo + "Araucaria multiespacio" and, from 900 px, the four links.
+  - One number, `--nav-p`, goes 0 → 1 (GSAP, 0.5 s `power3.out`) after 60 px of scroll. The CSS derives everything from it:
+    - background: `color-mix(azul-hondo calc(p·92%), transparent)`;
+    - blur up to 14 px;
+    - shadow and bottom hairline;
+    - padding: 24 → 12 px on desktop, 22 → 11 px on the phone;
+    - logo: 52 → 44 px on desktop, 46 → 38 px on the phone.
+  - Heights: 101 → 70 px on desktop and 91 → 67 on the phone (measured).
+- **Entrance:** the header drops from `yPercent -110` (0.9 s) after load. `GUION_NAV` in `app/page.tsx` keeps it up before first paint.
+- **During the gallery** (`#espacio`, `start "top 10%"`, `end "bottom 45%"`) it goes up (`yPercent -110`, 0.4 s) and comes back after (0.6 s).
+- **Current section:** its link gets `aria-current="location"` and a beige-vivo underline (ScrollTriggers at 50 %).
+- **Phone:** a 44 px round menu button inside the header. It opens the same right-hand panel with the curved edge as `D-040`; the panel starts under the header, the X stays in the header and the header stays solid while it is open. On desktop there is no menu button or panel.
+- **Offsets:** `--alto-nav` in `app/globals.css` (66 px phone, 68 px desktop) plus `html { scroll-padding-top }`.
+  - Links land their section just under the header (measured at 66 / 68 px).
+  - The calendar's day panel now parks under the header with 12 px of air (`altoNav()` exported from `nav.tsx`; measured at 78 px on 390 × 664).
+  - The panel measures `calc(100svh - var(--alto-nav) - 24px)`.
+
+**Rejected (do not retry):** a navbar that is only a round floating button, with no header following the page (`D-040`); the header shrinking the gallery cards (Mateo chose b).
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

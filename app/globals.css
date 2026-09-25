@@ -4,3 +4,19 @@
 html {
   background: oklch(0.19 0.038 236); /* {{CONFIRMAR}} azul petróleo, hasta que llegue el logo (CR-03) */
 }
+
+/* El alto del header fijo ya achicado (D-041): lo usan el calendario y los links para dejar las cosas
+   justo debajo. Celular: 44 px del botón + 11 arriba y abajo. Escritorio: 44 px del logo + 12. */
+:root {
+  --alto-nav: 66px;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --alto-nav: 68px;
+  }
+}
+
+html {
+  scroll-padding-top: var(--alto-nav);
+}

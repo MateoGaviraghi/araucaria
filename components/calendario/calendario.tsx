@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildMonth, type AvailabilityEntry, type BlockChoice, type DayCell } from "@/components/calendar/month";
 import { addMonthsToMonth, monthOf, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { Formulario } from "@/components/formulario/formulario";
+import { altoNav } from "@/components/nav/nav";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { ABRE, CURVA, ESCONDIDO, Mascara, quieto } from "./comun";
 import { Detalle } from "./detalle";
@@ -96,7 +97,8 @@ export function Calendario(datos: Datos) {
     const grilla = raiz.current?.querySelector<HTMLElement>(".cal-grilla");
     if (!panel || !grilla) return;
     if (panel.getBoundingClientRect().top < grilla.getBoundingClientRect().bottom - 1) return;
-    const destino = panel.getBoundingClientRect().top + window.scrollY - 16;
+    // Justo debajo del header fijo (D-041), con 12 px de aire.
+    const destino = panel.getBoundingClientRect().top + window.scrollY - altoNav() - 12;
     if (Math.abs(destino - window.scrollY) < 2) return;
     const duracion = quieto() ? 1.1 : 0;
     // Con el dedo el scroll es el nativo (Lenis no simula el toque, `syncTouch: false`) y Lenis ignora

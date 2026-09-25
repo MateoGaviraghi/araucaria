@@ -735,3 +735,30 @@ Then Mateo: **"commitea eso primero y deja anotado para cuando yo te pida el com
 **Gates:** `npm run lint` ✓ · `npm run typecheck` ✓ · `npm run build` ✓.
 
 **Sigue:** Mateo checks on the iPhone; then the `/admin` redesign.
+
+### 2026-09-25 · WU-10 (cont.) · el header entero fijo (D-041)
+
+**Asked (Mateo's words):** *"el navbar funciona súper mal y solamente dejaste las tres líneas; no baja el header completo donde siga toda la web, lo mismo en desktop, malísimo, eso no es lo que pedí"* → plan → *"1 - go 2 - b"*.
+
+**Done:**
+- `components/nav/nav.tsx` — `Nav` rewritten as a fixed header (see `D-041`). Also exports `altoNav()`.
+- `components/nav/nav.css` — `.nav-barra` driven by `--nav-p`; menu button inside the header; panel only below 900 px.
+- `app/globals.css` — `--alto-nav` (66 / 68 px) and `scroll-padding-top`.
+- `app/page.tsx` — `GUION_NAV`.
+- `components/calendario/calendario.tsx` — `alPanel` parks the panel at `altoNav() + 12`.
+- `components/calendario/calendario.css` — `.cal-panel` `min-height: max(460px, calc(100svh - var(--alto-nav) - 24px))`.
+- `docs/06-UI-UX.md` §2 row 1; `docs/10-MEMORY.md` `D-041`.
+
+**Verified** (headless Chromium, 1440 × 900, 390 × 664, 1920 × 1080):
+- **Header height:** 101 px at the top, 70 after scrolling (`--nav-p` 0 → 1). On the phone 91 → 67.
+- **Gallery:** hidden while it passes, at −77 px on desktop and −74 on the phone; back after it.
+- **Active link:** Qué incluye, then Disponibilidad, then Dónde estamos, in step with the section.
+- **Link "Dónde estamos":** lands the section at 68 px on desktop and 66 on the phone.
+- **Phone:** the day panel sits at 78 px; the menu opens with the X in the header.
+- 0 overflow, 0 errors.
+
+**Sin verificar:** the real iPhone.
+
+**Gates:** lint ✓ · typecheck ✓ · build: see the commit.
+
+**Sigue:** Mateo checks on the iPhone; then the `/admin` redesign.

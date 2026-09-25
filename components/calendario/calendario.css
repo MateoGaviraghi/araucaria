@@ -583,7 +583,8 @@
    hacelo que se vea completo". */
 .cal-panel {
   position: relative;
-  min-height: max(460px, calc(100svh - 32px));
+  /* Una pantalla menos el header fijo y 12 px arriba y abajo (D-041). */
+  min-height: max(460px, calc(100svh - var(--alto-nav) - 24px));
   overflow: hidden;
   border-radius: 10px;
 }
