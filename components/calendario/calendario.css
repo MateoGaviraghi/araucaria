@@ -623,19 +623,11 @@
   order: -1;
 }
 
-/* En el celular el panel mide una pantalla (D-038): el botón de cada paso ("Seguir con mis datos",
-   "Siguiente", "Enviar…") baja al pie del panel, cerca del pulgar, y el aire queda entre el contenido y
-   el botón en vez de un hueco vacío abajo. */
+/* En el celular el panel mide una pantalla (D-038): "Seguir con mis datos" baja al pie del panel, cerca
+   del pulgar. En el formulario NO (D-039): ahí se escribe, el teclado del iPhone tapaba "Siguiente" al
+   pie y Safari corría la página para mostrarlo; el botón queda justo debajo de los campos. */
 @media (max-width: 999px) {
   .cal-telon .cal-seguir {
-    margin-top: auto;
-  }
-
-  .cal-continua .fo-c-paso {
-    flex: 1;
-  }
-
-  .cal-continua .fo-c-botones {
     margin-top: auto;
   }
 }

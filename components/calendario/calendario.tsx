@@ -1,7 +1,7 @@
 "use client";
 
 import { useLenis } from "lenis/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildMonth, type AvailabilityEntry, type BlockChoice, type DayCell } from "@/components/calendar/month";
 import { addMonthsToMonth, monthOf, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { Formulario } from "@/components/formulario/formulario";
@@ -91,20 +91,48 @@ export function Calendario(datos: Datos) {
   // está al lado y no se mueve nada (D-035).
   const dia = cal.dia?.date ?? null;
   const siguiendoAhora = sigue !== null;
-  useEffect(() => {
-    if (!dia) return;
+  const alPanel = useCallback(() => {
     const panel = raiz.current?.querySelector<HTMLElement>(".cal-panel");
     const grilla = raiz.current?.querySelector<HTMLElement>(".cal-grilla");
     if (!panel || !grilla) return;
     if (panel.getBoundingClientRect().top < grilla.getBoundingClientRect().bottom - 1) return;
     const destino = panel.getBoundingClientRect().top + window.scrollY - 16;
+    if (Math.abs(destino - window.scrollY) < 2) return;
     const duracion = quieto() ? 1.1 : 0;
     // Con el dedo el scroll es el nativo (Lenis no simula el toque, `syncTouch: false`) y Lenis ignora
     // scrollTo mientras hay un toque: se usa el del navegador.
     const conDedo = !window.matchMedia("(hover: hover)").matches;
     if (lenis && !conDedo) lenis.scrollTo(destino, { duration: duracion, easing: (t) => 1 - Math.pow(1 - t, 3) });
     else window.scrollTo({ top: destino, behavior: duracion ? "smooth" : "auto" });
-  }, [dia, siguiendoAhora, lenis]);
+  }, [lenis]);
+
+  useEffect(() => {
+    if (dia) alPanel();
+  }, [dia, siguiendoAhora, alPanel]);
+
+  // Mientras se completa el formulario en el celular, el teclado del iPhone corre la página para mostrar
+  // el campo, y al cerrarse la deja corrida (Mateo: "mientras fui rellenando el form no queda fijo, se
+  // hace como scroll para abajo"). Cuando el teclado se cierra (el alto visible vuelve a crecer), el
+  // panel vuelve a su lugar, a 16 px del borde de arriba (D-039). Al cambiar de paso también (abajo,
+  // `alCambiarPaso`).
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!siguiendoAhora || !vv) return;
+    let alto = vv.height;
+    let espera = 0;
+    const cambio = () => {
+      const crecio = vv.height - alto > 120;
+      alto = vv.height;
+      if (!crecio) return;
+      window.clearTimeout(espera);
+      espera = window.setTimeout(alPanel, 120);
+    };
+    vv.addEventListener("resize", cambio);
+    return () => {
+      vv.removeEventListener("resize", cambio);
+      window.clearTimeout(espera);
+    };
+  }, [siguiendoAhora, alPanel]);
 
   useGSAP(
     () => {
@@ -165,7 +193,7 @@ export function Calendario(datos: Datos) {
             <Detalle cal={cal} onSeguir={seguir} />
             {sigue ? (
               <div className="cal-continua">
-                <Formulario sel={sigue} volver={() => setSiguiendo(null)} />
+                <Formulario sel={sigue} volver={() => setSiguiendo(null)} alCambiarPaso={alPanel} />
               </div>
             ) : null}
           </div>

@@ -151,3 +151,15 @@
     margin-bottom: 14px;
   }
 }
+
+/* ---- El botón al calendario ---- */
+
+.inc-accion {
+  margin-top: clamp(32px, 4.4vw, 56px);
+}
+
+/* La máscara deja ver el canto del botón (4 px abajo y a la derecha). */
+.inc-accion .inc-mascara {
+  display: inline-block;
+  padding: 0 6px 6px 0;
+}

@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
+import "@/components/ui/boton.css";
 import "./incluye.css";
 
 // LO QUE INCLUYE EL ALQUILER (bloque 4, D-036 y D-037): una franja corta después de los cuatro espacios de
@@ -104,6 +105,15 @@ export function Incluye() {
           </li>
         ))}
       </ul>
+      {/* Toda sección termina en el calendario (D-040, Mateo: "todas las secciones deben ser call to
+          action al calendario de reserva"). */}
+      <div className="inc-accion">
+        <L>
+          <a className="boton" href="#disponibilidad">
+            Consultar disponibilidad
+          </a>
+        </L>
+      </div>
     </section>
   );
 }

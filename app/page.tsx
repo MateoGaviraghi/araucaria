@@ -4,6 +4,7 @@ import { Cierre } from "@/components/cierre/cierre";
 import { Galeria } from "@/components/galeria/galeria";
 import { Hero } from "@/components/hero/hero";
 import { Incluye } from "@/components/incluye/incluye";
+import { Nav } from "@/components/nav/nav";
 import { ScrollSuave } from "@/components/scroll-suave";
 
 // Los textos de la galería se abren desde su máscara cuando llega cada tarjeta. Este guion los deja
@@ -54,6 +55,7 @@ export default function HomePage() {
   return (
     <>
       <ScrollSuave />
+      <Nav />
       <Hero />
       <script dangerouslySetInnerHTML={{ __html: GUION_GALERIA }} />
       <Galeria />

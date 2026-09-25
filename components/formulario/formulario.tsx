@@ -67,7 +67,8 @@ function L({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Formulario({ sel, volver }: { sel: Seleccion; volver: () => void }) {
+/** `alCambiarPaso`: el calendario vuelve a poner el panel en su lugar en el celular (D-039). */
+export function Formulario({ sel, volver, alCambiarPaso }: { sel: Seleccion; volver: () => void; alCambiarPaso?: () => void }) {
   const f = useConsulta(sel);
   const raiz = useRef<HTMLDivElement>(null);
   const [paso, setPaso] = useState(0);
@@ -97,6 +98,7 @@ export function Formulario({ sel, volver }: { sel: Seleccion; volver: () => void
   function ir(a: number) {
     setSentido(a > paso ? 1 : -1);
     setPaso(a);
+    alCambiarPaso?.();
   }
 
   function siguiente() {

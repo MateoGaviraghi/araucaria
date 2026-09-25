@@ -12,7 +12,7 @@
 | **Real status** | `main` = `origin/main` = `f72b155` (pushed 2026-09-24; Vercel served it ~50 s later). **Verified in production** (`araucaria-multiespacio.vercel.app`) at 1440 × 900, 375 × 812 and 1920 × 1080: the band is 690 / 847 / 715 px tall, 0 px horizontal overflow, 0 console errors; reloading parked on the band, the lines start hidden (`translateY` 22.46 px) and end at 0. Only branch: `main`, locally and on GitHub (the old `wu-02` … `wu-09` branches were deleted this chat after checking each was inside `origin/main`). Then the phone corrections of `D-038` were committed and pushed together with this record (see the last §2 entry). The WhatsApp number in Vercel is still Mateo's test number |
 | **Last chat** | 2026-09-24 (began with `/retomar`) |
 | **Waiting on me (Claude)** | Nothing |
-| **Waiting on Mateo** | (a) Whether to commit (and push) this `/cerrar` record. (b) **On his iPhone, in production: whether the footer's ARAUCARIA now shows** (`D-038`, `G-057` — never reproduced here), whether the day panel now fills the screen with the form whole, and the slightly larger gallery take. (c) **The `/admin` redesign**, asked for "luego", after the public page: *"quiero que modifiquemos todo el dashboard admin porque no me gustó nada, y que implementemos /diseno, /web-distintiva y los mejores criterios para dashboard de `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`, usando animación de alertas, GSAP, etc."* |
+| **Waiting on Mateo** | (a) Whether to commit (and push) this `/cerrar` record. (b) ~~iPhone check of `D-038`~~ — **done 2026-09-24, Mateo: "ya lo vi en el iphone, está todo bien"** (ARAUCARIA shows, the day panel fills the screen, the gallery take is larger). (c) **The `/admin` redesign**, asked for "luego", after the public page: *"quiero que modifiquemos todo el dashboard admin porque no me gustó nada, y que implementemos /diseno, /web-distintiva y los mejores criterios para dashboard de `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`, usando animación de alertas, GSAP, etc."* |
 | **Waiting on third parties** | The client owes `CI-01` (WhatsApp number — until then production uses Mateo's test number, in the form AND in the footer's WhatsApp logo), `CI-02`, `CI-03`, `CI-05` (VAT and price validity, still `{{CONFIRMAR}}`) and `CR-01`…`CR-03` (original photos, videos and logo). All colours stay `{{CONFIRMAR}}` until the logo arrives. `CR-04` (Instagram says 3650). **If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
 | **Next action** | **On `/retomar`: ask whether to commit this record, then start the `/admin` redesign** (item (c)). Before touching anything: read `docs/08-SECURITY.md` and load `/seguridad` (every Server Action is a public endpoint; `requireAdmin()` first), `docs/06-UI-UX.md` for the panel, `D-032` (panel full width) and the panel decisions in `docs/10-MEMORY.md` (`D-018`; `D-019` "Mitades" + undo; `D-020` the Apple-style confirmation alert with the GSAP tick — Mateo liked it: *"genial, está perfecto"*), then Mateo's `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`. Run it as a `seccion-premium` round through `/diseno`, uiverse.io and 21st.dev first (memory `referencias-uiverse-21st`). **Ask Mateo which screen of the panel he wants first** — he names the section, never propose it |
 | **Do not touch** | Pushing `main` without Mateo's word · `.env.local` — **not even to count or grep a variable** · the Vercel environment variables · the production Neon branch (a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · the Neon branch `backup-pre-0000-init` · `components/cierre/mapa-datos.ts` by hand (generated from OpenStreetMap; see `D-036`) · **the designs already rejected**: `D-023`, `D-025`, `D-027`, `D-029`, `D-030`, `D-033`, `D-034`, `D-036` and `D-037` (see each entry's "Rejected" list) |
@@ -703,3 +703,35 @@ Then Mateo: **"commitea eso primero y deja anotado para cuando yo te pida el com
 **Gates:** `npm run lint` ✓ · `npm run typecheck` ✓ · `npm run build` ✓.
 
 **Sigue:** Mateo checks these on his iPhone; then the `/admin` redesign.
+
+### 2026-09-24 → 2026-09-25 · WU-10 (cont.) · el formulario queda en su lugar (D-039) y el navbar a medida (D-040)
+
+**Asked (Mateo's words):** after the iPhone check (*"ya lo vi en el iphone, está todo bien"*): *"esperá, mientras fui rellenando, no sé por qué el form no queda fijo y se hace como scroll para abajo, es raro, no queda fijo mientras voy pasando las secciones"* → plan → *"además agregale el navbar todo personalizado, fijo con GSAP para ambos, ya que no lo tiene, y también quitá ese call to action rápido"* (read as the go for the form fix) → navbar references → *"1 - 1; 2 - todas las secciones deben ser call to action al calendario de reserva; por favor necesito que terminemos esto"* → plan → **"go"**.
+
+**Done:**
+- `D-039` (form stays put on the phone):
+  - `components/calendario/calendario.css` — only "Seguir con mis datos" stays at the bottom of the panel; the form's step button sits under the fields again.
+  - `components/calendario/calendario.tsx` — `alPanel` (`useCallback`) runs on day change, on step change (`Formulario.alCambiarPaso`) and when `visualViewport` grows more than 120 px while the form is open (the keyboard closing).
+  - `components/formulario/formulario.tsx` — the optional prop `alCambiarPaso`, called from `ir()`.
+- `D-040` (navbar):
+  - `components/nav/nav.tsx` + `nav.css` (new) — `Nav`: top bar (logo + 4 links from 900 px), round fixed button (desktop: appears after 160 px; phone: always, hides on scroll down, returns on scroll up), right-hand panel with the curved SVG edge, links, "Consultar disponibilidad", WhatsApp (if the number is set) and Instagram; Esc / veil / X / link close it; Lenis stops while open.
+  - `components/hero/hero-nav.tsx` — deleted (the old bar and its quick "Disponibilidad" button).
+  - `components/hero/hero.tsx`, `hero.css` — no `HeroNav`; `.hero-barra-sup` and `.hero-marca` rules moved to `nav.css`.
+  - `app/page.tsx` — `<Nav />` before `<Hero />`.
+  - `components/incluye/incluye.tsx` + `.css` — "Consultar disponibilidad" under the four columns (`.inc-accion`).
+  - `docs/06-UI-UX.md` §2 row 1; `docs/10-MEMORY.md` `D-039`, `D-040`.
+
+**Verified:** headless Chromium.
+- **Form, 390 × 664:** with the page pushed away, the panel is back at 16 px after the "keyboard" closes and after tapping "Siguiente". The step-2 button sits at 497 px of a 632 px panel.
+- **Navbar at 1440 / 375 / 1920:**
+  - desktop button `scale(0)` at the top, `scale(1)` after scrolling;
+  - panel 480 px on desktop and full width on the phone;
+  - the "Qué incluye" link closes it and lands `#incluye` at 0;
+  - 0 overflow, 0 errors.
+- **Phone, 390 × 664:** with the form open the round button is hidden (bottom −22 px) and returns (70) after scrolling up.
+
+**Sin verificar:** the real iOS keyboard; the navbar on the real iPhone.
+
+**Gates:** `npm run lint` ✓ · `npm run typecheck` ✓ · `npm run build` ✓.
+
+**Sigue:** Mateo checks on the iPhone; then the `/admin` redesign.

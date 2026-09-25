@@ -404,6 +404,46 @@ Mateo looked at production on his iPhone and sent three screenshots: *"hay detal
 
 **Not verified:** Mateo's real iPhone. WebKit on Windows (Playwright 1.56) rendered BOTH the old SVG and the new text, so the iPhone failure was never reproduced here; see `G-057`.
 
+### D-039 · 2026-09-24 · On the phone the day panel stays in place while the form is filled in
+
+Mateo, on his iPhone: *"mientras fui rellenando, no sé por qué el form no queda fijo y se hace como scroll para abajo, es raro, no queda fijo mientras voy pasando las secciones"*.
+
+**Cause** (my own `D-038`): the form's "Siguiente" had been pushed to the bottom of the full-screen panel. With the iPhone keyboard open it sat under the keyboard, and Safari scrolled the page to show it. When the step changed, the focused field was removed, the keyboard closed, and the page stayed shifted.
+
+**Decision:**
+- **`calendario.css`:** only "Seguir con mis datos" (no keyboard there) stays at the bottom of the panel. In the form, the step button goes back right under the fields.
+- **`calendario.tsx`:** `alPanel()` (the `D-035` scroll, now a `useCallback`) runs in two cases, and only when the panel sits below the grid:
+  - on every step change, through the new optional prop `Formulario.alCambiarPaso`;
+  - when the keyboard closes, detected as `visualViewport` growing by more than 120 px while the form is open.
+- **Effect:** the panel goes back to 16 px from the top. Desktop is untouched: there the panel is beside the grid.
+
+**Verified** at 390 × 664 in headless Chromium: with the page pushed away, "keyboard" closed → panel back at 16 px; "Siguiente" tapped → panel at 16 px on step 2; the step-2 button sits 497 px into a 632 px panel. **Not verified:** the real iOS keyboard (it cannot be emulated here).
+
+### D-040 · 2026-09-25 · A custom fixed navbar (replaces the "sacarlo" of D-036); every section ends on the calendar
+
+Mateo: *"además agregale el navbar todo personalizado, fijo con GSAP para ambos, ya que no lo tiene, y también quitá ese call to action rápido"*. From a `seccion-premium` round (18 navbars on 21st.dev plus two real sites; 6 sent) he picked **1: Dennis Snellenberg** (dennissnellenberg.com, with Olivier Larose's curved menu). On the CTA: *"todas las secciones deben ser call to action al calendario de reserva"*.
+
+**Decision** (`components/nav/nav.tsx`, `nav.css`, mounted first in `app/page.tsx`):
+- **Top bar** (not fixed, over the hero): logo + "Araucaria multiespacio" on the left; the links on the right from 900 px: El espacio `#espacio` · Qué incluye `#incluye` · Disponibilidad `#disponibilidad` · Dónde estamos `#ubicacion`. The underline draws on hover. The old provisional bar `components/hero/hero-nav.tsx` and its quick "Disponibilidad" button are deleted.
+- **Round button** (fixed, top right, `--ar-azul`, 54–72 px, two lines that cross into an X).
+  - Desktop: hidden until 160 px of scroll, then it grows with `back.out(1.8)` (0.55 s).
+  - Phone: visible from the start. It hides upwards (`yPercent -170`) while scrolling down past 160 px and comes back on scrolling up, so it never covers "Cambiar" in the day panel (which the page parks 16 px from the top, `D-035`) or the gallery's expand button.
+- **Panel** (`--ar-azul-hondo`, `min(480px, 100vw)`), from the right in 0.8 s `power3.inOut`.
+  - An SVG edge on its left bulges out while it moves and settles flat (`M100 0 L100 1000 Q-100 500 100 0` → `Q100 500`, 0.9 s).
+  - A veil darkens the page.
+  - Items arrive 0.06 s apart: "Navegación", the four links in the title face (`clamp(2.4rem, 5.2vw, 3.4rem)`), "Consultar disponibilidad", and WhatsApp (only if `NEXT_PUBLIC_WHATSAPP_NUMBER` is set) and Instagram.
+  - Lenis stops while it is open.
+  - It closes with the X, the veil, Esc, or a link. A link closes it, then scrolls: `lenis.scrollTo` with a mouse, native `scrollIntoView` with a finger (`G-056`).
+- **Every section leads to the calendar:** "Lo que incluye el alquiler" (`D-037`) gets a "Consultar disponibilidad" button under its four columns. The hero and the closing already had one, and the gallery flows into "Lo que incluye".
+
+**Verified** (headless Chromium, 1440 × 900, 375 × 812, 1920 × 1080, 390 × 664):
+- **Round button:** `scale(0)` at the top and `scale(1)` after scrolling on desktop. On the phone it is 70 px from the top at rest, hidden (−22) after scrolling down to the calendar and with the form open, and back (70) after scrolling up 150 px.
+- **Panel:** 480 px on desktop, full width on the phone.
+- **Link "Qué incluye":** closes the panel and lands `#incluye` at 0.
+- 0 px overflow, 0 errors.
+
+**Rejected in the round:** the SaaS bars (Login / Get Started); the glass and "tubelight" pills; the dashboard-style nav; menu-toggle icons without a navbar.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
