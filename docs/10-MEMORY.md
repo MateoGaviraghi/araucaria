@@ -495,6 +495,21 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the logo (`CR-03`) or the original photos (`CR-01`) arrive: the tokens and the photo change, not the layout.
 
+### D-044 · 2026-09-25 · The login form is in the static shell; the session check and the C-09 time arrive streamed (changes the wait of D-021 for this page)
+
+**What he asked, in his words:** trying D-043 in production, *"demora MUCHÍSIMO en entrar o decir contraseña incorrecta"*. Measured: the free Neon compute scales to zero after 5 idle minutes and the page waited for `requireAdmin()` before showing the form, so a cold visit showed the form after **3.6 s** (warm: 0.3–0.5 s; a wrong password answers in about 0.75 s either way). Function (`gru1`) and database (`sa-east-1`) are both in São Paulo, so distance is not the cause. Options given: a · form at once, b · paid Neon plan, c · leave it. He answered *"a, go"*.
+
+**Decision** (`app/admin/login/page.tsx`, `login-form.tsx`):
+- `LoginForm` renders in the prerendered shell (checked: `.next/server/app/admin/login.html` has `id="password"` and no `renderedAt`).
+- Two parts stream in their own `Suspense`: `Sesion` (`requireAdmin()` → `redirect("/admin")`, plus the "Tu sesión terminó" notice) and `MarcaDeTiempo` (`await connection()`, then the server time for C-09 as the hidden `renderedAt`). Opening the page still queries the session, which wakes the database while the owner types.
+- "Entrar" stays disabled until the time mark has arrived (`Marca` tells the form through a context); without it the server would answer `INVALID_INPUT`.
+
+**Security (checked with `/seguridad`):** `login-action.ts`, `lib/auth/*`, the honeypot and the limits are unchanged. C-09 still uses server time taken at request time, never at build time. C-05: the session check still runs on every request and redirects. G-017: the action is still imported by the page's tree. G-020: the redirect still travels in the streamed part.
+
+**Also found (not a code bug):** the production branch had **no row in `admin_credential`**, so every password was rejected there. The owner's passphrase lives only in the `dev` branch (version 3, rotated 2026-09-23). Mateo loads it with `npm run rotate-password -- <env file with the production DATABASE_URL>`; target host `ep-green-butterfly-acy6w1j5.sa-east-1.aws.neon.tech`.
+
+**Rejected:** none. b (paid Neon plan) stays open if the first submit after idle still feels slow.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

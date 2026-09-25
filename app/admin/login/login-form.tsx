@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { createContext, useActionState, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { login } from "@/app/login-action";
 import type { ActionResult, ErrorCode } from "@/lib/action-result";
 import { gsap, useGSAP } from "@/lib/gsap";
@@ -15,8 +15,22 @@ const MESSAGES: Partial<Record<ErrorCode, string>> = {
 
 // D-043: el campo es el de la consulta pública (subrayado, la etiqueta sube) y el botón es el del sitio.
 // Con un error el campo tiembla una vez y el aviso lleva su dibujo: se ve de reojo, no solo por el color.
-export function LoginForm({ renderedAt }: { renderedAt: number }) {
+// D-044: el formulario sale en el shell estático, sin esperar a la base. La hora del servidor para la
+// trampa C-09 llega después, transmitida (`Marca`), y hasta entonces "Entrar" espera: sin ella el
+// servidor rechazaría el envío como INVALID_INPUT.
+const MarcaLista = createContext<(lista: boolean) => void>(() => {});
+
+// The C-09 time trap's request time. Controlled on purpose: React resets the form after each submit
+// and would wipe a value set on the DOM (D-021).
+export function Marca({ valor }: { valor: number }) {
+  const avisar = useContext(MarcaLista);
+  useEffect(() => avisar(true), [avisar]);
+  return <input type="hidden" name="renderedAt" value={valor} readOnly />;
+}
+
+export function LoginForm({ children }: { children: ReactNode }) {
   const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(login, null);
+  const [marcaLista, setMarcaLista] = useState(false);
   const message = state && !state.ok ? (MESSAGES[state.code] ?? "Algo falló. Reintentá.") : null;
   // "Tiene algo escrito desde la última respuesta": React vacía el campo con cada respuesta sin avisar
   // al onChange, así que lo escrito se ata a esa respuesta y deja de valer cuando llega otra.
@@ -104,8 +118,7 @@ export function LoginForm({ renderedAt }: { renderedAt: number }) {
         <label htmlFor="website">Sitio web</label>
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
       </div>
-      {/* Controlled on purpose: React resets the form after each submit and would wipe a value set on the DOM. */}
-      <input type="hidden" name="renderedAt" value={renderedAt} readOnly />
+      <MarcaLista value={setMarcaLista}>{children}</MarcaLista>
 
       {message && (
         <p ref={aviso} id="login-error" className="lg-aviso lg-aviso-error" role="alert">
@@ -119,7 +132,7 @@ export function LoginForm({ renderedAt }: { renderedAt: number }) {
       )}
 
       <div className="lg-accion">
-        <button className="boton boton-en-oscuro" type="submit" disabled={pending} aria-busy={pending || undefined}>
+        <button className="boton boton-en-oscuro" type="submit" disabled={pending || !marcaLista} aria-busy={pending || undefined}>
           {pending ? "Entrando…" : "Entrar"}
           {!pending && (
             <svg className="lg-flecha" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
