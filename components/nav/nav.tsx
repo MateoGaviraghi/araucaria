@@ -140,7 +140,7 @@ export function Nav() {
         boton.current?.focus();
       }
     };
-    const mq = window.matchMedia("(min-width: 900px)");
+    const mq = window.matchMedia("(min-width: 1080px)");
     const cambio = () => mq.matches && setAbierto(false);
     document.addEventListener("keydown", tecla);
     mq.addEventListener("change", cambio);
@@ -173,9 +173,9 @@ export function Nav() {
     <>
       <header ref={barra} className="nav-barra" data-abierto={abierto ? "" : undefined}>
         <div className="nav-barra-cuerpo">
-          <a className="nav-marca" href="#inicio" onClick={(e) => ir(e, "#inicio")}>
+          <a className="nav-marca" href="#inicio" onClick={(e) => ir(e, "#inicio")} aria-label="Araucaria multiespacio, al inicio">
             <Image src="/media/logo-araucaria.png" alt="" width={52} height={52} priority />
-            <span>
+            <span className="nav-marca-nombre">
               Araucaria
               <small>multiespacio</small>
             </span>
@@ -187,6 +187,12 @@ export function Nav() {
               </a>
             ))}
           </nav>
+          {/* Como el header de Sanalys (Mateo, 2026-09-25: "quiero que quede como este ejemplo"): logo,
+              links al centro y el botón con canto; en el celular, el botón al centro. */}
+          <a className="boton boton-chico boton-en-oscuro nav-cta" href="#disponibilidad" onClick={(e) => ir(e, "#disponibilidad")}>
+            <span className="solo-ancho">Consultar disponibilidad</span>
+            <span className="solo-angosto">Disponibilidad</span>
+          </a>
           <button
             ref={boton}
             type="button"

@@ -468,6 +468,16 @@ Mateo, after trying `D-040` in production: *"el navbar funciona súper mal y sol
 
 **Rejected (do not retry):** a navbar that is only a round floating button, with no header following the page (`D-040`); the header shrinking the gallery cards (Mateo chose b).
 
+### D-042 · 2026-09-25 · The header is laid out like Sanalys's: logo, centred links and the button with its edge
+
+Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanalys's: *"en el header de desktop y de mobile quiero que quede como este ejemplo"*.
+
+**Decision** (`components/nav/nav.tsx`, `nav.css`; the behaviour of `D-041` stays the same):
+- `.nav-barra-cuerpo` is a three-column grid, `1fr auto 1fr`.
+- **Desktop (from 1080 px, it was 900):** logo + name on the left, the four links centred, and on the right `.nav-cta`, the site button `boton boton-chico boton-en-oscuro` "Consultar disponibilidad", with its 4 px edge always showing, as in the example.
+- **Phone and tablet (below 1080 px):** the isotype alone on the left (the name only from 560 px); the button centred, reading "Disponibilidad" below 560 px and "Consultar disponibilidad" above; on the right the menu as two 26 × 2 px lines with no circle.
+- **Measured:** 70 px tall at 1440 and 1920, 67 px at 1024, 390 and 360; 0 px overflow; 0 errors.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

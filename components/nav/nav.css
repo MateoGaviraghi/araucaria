@@ -37,15 +37,18 @@
   --nav-p: 1 !important;
 }
 
+/* Tres columnas, como el header de Sanalys: la marca a la izquierda, al centro los links (escritorio) o
+   el botón (celular), y a la derecha el botón (escritorio) o el menú (celular). */
 .nav-barra-cuerpo {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   padding: calc(var(--relleno-arriba) - (var(--relleno-arriba) - var(--relleno-abajo)) * var(--nav-p)) clamp(16px, 4vw, 56px);
 }
 
 .nav-marca {
+  justify-self: start;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -120,16 +123,36 @@
   background: var(--ar-beige-vivo);
 }
 
-/* ---- El botón del menú (celular), dentro del header ---- */
+/* ---- El botón al calendario: al centro en el celular, a la derecha en el escritorio ---- */
+
+.nav-cta {
+  grid-column: 2;
+  justify-self: center;
+  margin-right: 4px; /* el canto del botón */
+  /* Con el canto puesto también con mouse, como en el ejemplo de Sanalys (al pasar por encima crece
+     igual que en el resto del sitio). */
+  box-shadow: 4px 4px 0 var(--boton-canto);
+}
+
+/* En el celular angosto, solo el isotipo (como Sanalys): el nombre no entra junto al botón. */
+@media (max-width: 559px) {
+  .nav-marca-nombre {
+    display: none;
+  }
+}
+
+/* ---- El menú (celular): dos rayas, sin círculo, a la derecha ---- */
 
 .nav-boton {
+  grid-column: 3;
+  justify-self: end;
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
+  margin-right: -8px;
   padding: 0;
-  border: 1px solid color-mix(in oklab, var(--ar-tinta) 30%, transparent);
-  border-radius: 50%;
+  border: 0;
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -144,15 +167,15 @@
 .nav-boton-rayas {
   position: relative;
   display: block;
-  width: 18px;
-  height: 8px;
+  width: 26px;
+  height: 10px;
 }
 
 .nav-boton-rayas span {
   position: absolute;
   left: 0;
   right: 0;
-  height: 1.5px;
+  height: 2px;
   border-radius: 2px;
   background: currentColor;
   transition:
@@ -165,11 +188,11 @@
 }
 
 .nav-boton-rayas span:last-child {
-  top: calc(100% - 1.5px);
+  top: calc(100% - 2px);
 }
 
 .nav-boton[aria-expanded="true"] .nav-boton-rayas span {
-  top: calc(50% - 0.75px);
+  top: calc(50% - 1px);
 }
 
 .nav-boton[aria-expanded="true"] .nav-boton-rayas span:first-child {
@@ -297,7 +320,7 @@
 
 /* ---- Escritorio: los links a la vista; sin botón de menú ni panel ---- */
 
-@media (min-width: 900px) {
+@media (min-width: 1080px) {
   .nav-barra {
     --relleno-arriba: 24px;
     --relleno-abajo: 12px;
@@ -309,6 +332,12 @@
 
   .nav-links {
     display: flex;
+    grid-column: 2;
+  }
+
+  .nav-cta {
+    grid-column: 3;
+    justify-self: end;
   }
 
   .nav-boton,

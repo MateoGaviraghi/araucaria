@@ -762,3 +762,18 @@ Then Mateo: **"commitea eso primero y deja anotado para cuando yo te pida el com
 **Gates:** lint ✓ · typecheck ✓ · build: see the commit.
 
 **Sigue:** Mateo checks on the iPhone; then the `/admin` redesign.
+
+### 2026-09-25 · WU-10 (cont.) · el header como el de Sanalys (D-042)
+
+**Asked:** *"en el header de desktop y de mobile quiero que quede como este ejemplo"* (Sanalys screenshots).
+
+**Done:**
+- `components/nav/nav.tsx` — `.nav-cta` "Consultar disponibilidad" / "Disponibilidad"; `.nav-marca-nombre`.
+- `components/nav/nav.css` — three-column grid; the desktop breakpoint moved to 1080 px; the name hidden below 560 px; the menu as two lines with no circle; the button's edge always showing.
+- `docs/10-MEMORY.md` — `D-042`.
+
+**Verified:** headless Chromium at 1440, 1920, 1024, 390 and 360. Heights 70 / 70 / 67 / 67 / 67 px; 0 overflow; 0 errors.
+
+**Sin verificar:** the iPhone.
+
+**Gates:** lint ✓ · build ✓.
