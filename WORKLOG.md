@@ -4,18 +4,18 @@
 
 ## 1. STATE
 
-**Updated:** 2026-09-24. **The public page is complete and in production.** Block 4, "lo que incluye el alquiler", went live as a short band after the gallery (`D-037`). **Next: the `/admin` redesign.**
+**Updated:** 2026-09-25. **The public page is complete, in production, and checked by Mateo on his iPhone** (*"ya lo vi en el iphone, está todo bien"*). **Next: the `/admin` redesign, starting with the login screen.**
 
 | | |
 |---|---|
-| **Current task** | Phase 1 of the Araucaria site. The public page is finished; live, in order: `HERO` · gallery (block 3) · **"Lo que incluye el alquiler"** (block 4, `D-037`, `id="incluye"`) · availability calendar with the inquiry form (block 6) · the closing "Dónde nos encontramos" + footer card (blocks 7 + 8, `D-036`, `id="ubicacion"`). By `D-036` there is no `NAV` (block 1) and no `PRICING-TABLE` (block 5). **Next piece of work: the owner panel `/admin` redesign** |
-| **Real status** | `main` = `origin/main` = `f72b155` (pushed 2026-09-24; Vercel served it ~50 s later). **Verified in production** (`araucaria-multiespacio.vercel.app`) at 1440 × 900, 375 × 812 and 1920 × 1080: the band is 690 / 847 / 715 px tall, 0 px horizontal overflow, 0 console errors; reloading parked on the band, the lines start hidden (`translateY` 22.46 px) and end at 0. Only branch: `main`, locally and on GitHub (the old `wu-02` … `wu-09` branches were deleted this chat after checking each was inside `origin/main`). Then the phone corrections of `D-038` were committed and pushed together with this record (see the last §2 entry). The WhatsApp number in Vercel is still Mateo's test number |
-| **Last chat** | 2026-09-24 (began with `/retomar`) |
+| **Current task** | Phase 1 of the Araucaria site. The public page is finished. Live, in order: **fixed header** (block 1, `D-041` + `D-042`, Sanalys-style: logo · centred links · "Consultar disponibilidad"; it hides only while the gallery passes) · `HERO` · gallery (block 3) · "Lo que incluye el alquiler" (block 4, `D-037`, with its button to the calendar, `D-040`) · availability calendar with the inquiry form (block 6; on the phone the day panel parks under the header and fills the screen, `D-038`/`D-039`/`D-041`) · closing "Dónde nos encontramos" + footer card (blocks 7 + 8, `D-036`; ARAUCARIA outline as CSS text, `D-038`). No `PRICING-TABLE` (block 5, `D-036`). **Next piece of work: the owner panel `/admin` redesign** |
+| **Real status** | `main` = `origin/main` = `57a4812` (pushed 2026-09-25; Vercel served it ~40 s later), plus this `/cerrar` record (committed and pushed right after). **Verified in production** (`araucaria-multiespacio.vercel.app`) with headless Chromium at 1440 / 1920 / 1024 / 390 / 360: header 70 px on desktop and 67 on the phone after scrolling, 0 px overflow, 0 errors. **Verified by Mateo on his iPhone (2026-09-25):** the header, the menu, the gallery, the day panel and the form, and the footer's ARAUCARIA — *"está todo bien"*. Only branch: `main`. The WhatsApp number in Vercel is still Mateo's test number |
+| **Last chat** | 2026-09-24 → 2026-09-25 (began with `/retomar`): blocks 4 and 1, and the phone corrections `D-037` … `D-042` |
 | **Waiting on me (Claude)** | Nothing |
-| **Waiting on Mateo** | (a) Whether to commit (and push) this `/cerrar` record. (b) ~~iPhone check of `D-038`~~ — **done 2026-09-24, Mateo: "ya lo vi en el iphone, está todo bien"** (ARAUCARIA shows, the day panel fills the screen, the gallery take is larger). (c) **The `/admin` redesign**, asked for "luego", after the public page: *"quiero que modifiquemos todo el dashboard admin porque no me gustó nada, y que implementemos /diseno, /web-distintiva y los mejores criterios para dashboard de `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`, usando animación de alertas, GSAP, etc."* |
-| **Waiting on third parties** | The client owes `CI-01` (WhatsApp number — until then production uses Mateo's test number, in the form AND in the footer's WhatsApp logo), `CI-02`, `CI-03`, `CI-05` (VAT and price validity, still `{{CONFIRMAR}}`) and `CR-01`…`CR-03` (original photos, videos and logo). All colours stay `{{CONFIRMAR}}` until the logo arrives. `CR-04` (Instagram says 3650). **If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
-| **Next action** | **On `/retomar`: ask whether to commit this record, then start the `/admin` redesign** (item (c)). Before touching anything: read `docs/08-SECURITY.md` and load `/seguridad` (every Server Action is a public endpoint; `requireAdmin()` first), `docs/06-UI-UX.md` for the panel, `D-032` (panel full width) and the panel decisions in `docs/10-MEMORY.md` (`D-018`; `D-019` "Mitades" + undo; `D-020` the Apple-style confirmation alert with the GSAP tick — Mateo liked it: *"genial, está perfecto"*), then Mateo's `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`. Run it as a `seccion-premium` round through `/diseno`, uiverse.io and 21st.dev first (memory `referencias-uiverse-21st`). **Ask Mateo which screen of the panel he wants first** — he names the section, never propose it |
-| **Do not touch** | Pushing `main` without Mateo's word · `.env.local` — **not even to count or grep a variable** · the Vercel environment variables · the production Neon branch (a migration there is class `R3`) · the two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche) · the Neon branch `backup-pre-0000-init` · `components/cierre/mapa-datos.ts` by hand (generated from OpenStreetMap; see `D-036`) · **the designs already rejected**: `D-023`, `D-025`, `D-027`, `D-029`, `D-030`, `D-033`, `D-034`, `D-036` and `D-037` (see each entry's "Rejected" list) |
+| **Waiting on Mateo** | (a) ~~Commit this record~~ — done (Mateo: *"sí, commit y push primero"*). (b) **The first `/admin` screen is decided: the LOGIN** (Mateo, 2026-09-25: *"dejá anotado que arrancamos por el login"*). He asked for the redesign "luego": *"quiero que modifiquemos todo el dashboard admin porque no me gustó nada, y que implementemos /diseno, /web-distintiva y los mejores criterios para dashboard de `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`, usando animación de alertas, GSAP, etc."* |
+| **Waiting on third parties** | The client owes:<br>• `CI-01`, the WhatsApp number. Until then production uses Mateo's test number: in the form, in the footer, and in the phone menu's WhatsApp logo.<br>• `CI-02` and `CI-03`.<br>• `CI-05`, VAT and price validity, still `{{CONFIRMAR}}`.<br>• `CR-01` … `CR-03`: original photos, videos and logo. All colours stay `{{CONFIRMAR}}` until the logo arrives.<br>• `CR-04`: Instagram says 3650.<br>**If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
+| **Next action** | **On `/retomar`: start the `/admin` redesign with the LOGIN screen** (`app/admin/login/`, Mateo chose it on 2026-09-25). Before touching anything:<br>• read `docs/08-SECURITY.md` and load `/seguridad`: every Server Action is a public endpoint, with `requireAdmin()` on the first line;<br>• read the panel rows of `docs/06-UI-UX.md` and `D-018`, `D-019` ("Mitades" + undo), `D-020` (Apple-style alert with the GSAP tick, which Mateo liked: *"genial, está perfecto"*) and `D-032` (full width);<br>• read Mateo's `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`.<br>Then a `seccion-premium` round through `/diseno`, with uiverse.io and 21st.dev first (memory `referencias-uiverse-21st`) |
+| **Do not touch** | • Pushing `main` without Mateo's word.<br>• `.env.local` — **not even to count or grep a variable**.<br>• The Vercel environment variables.<br>• The production Neon branch (a migration there is class `R3`).<br>• The two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche).<br>• The Neon branch `backup-pre-0000-init`.<br>• `components/cierre/mapa-datos.ts` by hand (it is generated from OpenStreetMap, see `D-036`).<br>• **The designs already rejected** in `D-023`, `D-025`, `D-027`, `D-029`, `D-030`, `D-033`, `D-034`, `D-036`, `D-037`, `D-040` and `D-041`: see each entry's "Rejected" list. Among them: a navbar that is only a round button; hover-only amenity previews; the SVG-text footer outline |
 
 ## 2. LOG
 
@@ -777,3 +777,24 @@ Then Mateo: **"commitea eso primero y deja anotado para cuando yo te pida el com
 **Sin verificar:** the iPhone.
 
 **Gates:** lint ✓ · build ✓.
+
+### 2026-09-25 · WU-10 (cierre) · confirmado en el iPhone y `/cerrar`
+
+**Asked:** *"ya lo vi en el iphone, está todo bien /cerrar"*.
+
+**Done:** this record. §1 was rewritten (the public page is complete and checked on the iPhone; next is the `/admin` redesign).
+
+**Commits of this chat, all on `main` and pushed:**
+- `f72b155` — "Lo que incluye" (`D-037`);
+- `f563aa8` — phone corrections (`D-038`, `G-057`);
+- `62de01f` — form in place + the round-button nav (`D-039`, `D-040`);
+- `1181ada` — fixed header (`D-041`);
+- `57a4812` — Sanalys-style header (`D-042`).
+
+**Tooling left outside the repo:** Playwright 1.56 WebKit and the capture/measurement scripts (`hdr-ver.cjs`, `nav-ver.cjs`, `cal-medir.cjs`, `gal-medir.cjs`, `pie-webkit.cjs`, `form-fijo.cjs`) live only in the session scratchpad.
+
+**Verified:** Mateo on his iPhone, 2026-09-25: *"está todo bien"*. Everything else is in the entries above.
+
+**Gates:** none run for this record (docs only).
+
+**Sigue:** the `/admin` redesign, starting with the **login** (Mateo: *"dejá anotado que arrancamos por el login"*).
