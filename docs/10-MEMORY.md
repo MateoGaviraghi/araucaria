@@ -478,6 +478,23 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 - **Phone and tablet (below 1080 px):** the isotype alone on the left (the name only from 560 px); the button centred, reading "Disponibilidad" below 560 px and "Consultar disponibilidad" above; on the right the menu as two 26 × 2 px lines with no circle.
 - **Measured:** 70 px tall at 1440 and 1920, 67 px at 1024, 390 and 360; 0 px overflow; 0 errors.
 
+### D-043 · 2026-09-25 · The /admin login is a split screen with the garden photo
+
+**What he asked, in his words:** after a reference round made only of uiverse.io and 21st.dev items, he rejected all of it: *"no me gustó ninguna… jugás con eso como que aparecerán componentes retro, es todo lo contrario a eso… la idea era uno de los ejemplos, no que TODO lo hagas en base a eso"*. Then: *"por cuestiones de tiempo vamos con la 5, adaptala al diseño de Araucaria, sé profesional, no cometas errores"*. Reference 5: [21st · Bhomik · Sign In Page](https://21st.dev/@bhomikproductivitylab/components/sign-in-page) (photo on one side, form on the other).
+
+**Decision** (`app/admin/login/page.tsx`, `login-escena.tsx`, `login-form.tsx`, `login.css`):
+- **Layout.** Desktop (from 900 px): two columns, `minmax(0, 1.15fr) minmax(28rem, 0.85fr)`; the photo fills the left at full height with a clean cut, no gradient. Phone: the photo is a band on top, `38svh` (min 200 px), fading into the deep blue; the form sits right under it. Everything fits in one screen down to 360 × 640 (button bottom at 567 px).
+- **Photo.** `public/media/fotos/jardin.jpg` (the garden with the araucaria), provisional like every photo until `CR-01`.
+- **Panel.** Title "Panel de Araucaria" in Instrument Serif: 2.5rem phone, 3.5rem desktop, 4.5rem from 1600 px. Line "Entrá con la contraseña del salón." The name appears once: no logo in the panel (the badge is dark on the dark blue and repeats the name).
+- **Field.** The public form's underlined field with the label that rises (`components/formulario`), plus a 44 px "Mostrar"/"Ocultar" button (a ≥ 20-character passphrase is typed on a phone). Button: the site's `.boton .boton-en-oscuro`, "Entrar" with an arrow; while waiting it reads "Entrando…" and is disabled.
+- **Messages.** Unchanged copy (`§5`). The error carries a drawn "!" in a circle and the field's line turns red, so it is not only colour; the session-ended notice carries an "i". After any answer the cursor goes back to the field.
+- **Motion (GSAP).** Entrance: a deep-blue curtain slides off the photo, 1.2 s `power3.inOut` (to the right on desktop, downwards on the phone), while the photo settles 1.12 → 1 in 2 s `power2.out`; the two title lines rise from their masks, 1 s `expo.out`, from 0.5 s with 0.08 s between them; the line under them at 0.7 s; the field at 0.85 s (its base line draws from the left, 1 s `expo.out`); the button at 1 s. Error: the field shakes once, 0.45 s, x 0 → −9 → 8 → −6 → 4 → −2 → 0 px, and the message enters in 0.32 s. `GUION_LOGIN` hides the pieces before first paint and removes itself after 3 s. Reduced motion: no curtain and no shake, everything visible at once.
+- **Security unchanged.** `login-action.ts`, `lib/auth/*`, the honeypot, the time trap and the copy are untouched.
+
+**Rejected (do not retry):** the whole first round (`seccion-premium`, 2026-09-25): 1 · uiverse andrew-demchenk0 card with a hard edge; 2 · uiverse 0xnihilism "Smooth Brutalist" input; 3 · uiverse 0xnihilism inverting input; 4 · uiverse Galahhad shaking input as a component; 6 · 21st LN letter-by-letter feedback. In his words, anything **retro or neubrutalist** is "todo lo contrario". Also: a reference round built only from uiverse and 21st (they are one source among all, with `/ui-ideas`, `/web-distintiva`, studios and real sites).
+
+**Reopen if:** the logo (`CR-03`) or the original photos (`CR-01`) arrive: the tokens and the photo change, not the layout.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

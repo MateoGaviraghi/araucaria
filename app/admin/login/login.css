@@ -1,0 +1,306 @@
+/* Login del panel (D-043): pantalla partida, la foto del lugar a un lado y la contraseña al otro, en los
+   colores de la parte pública. Mateo eligió la referencia 5 (21st · Bhomik · Sign In Page) y pidió
+   adaptarla "al diseño de Araucaria, profesional". Colores {{CONFIRMAR}} hasta el logo original (CR-03),
+   los mismos valores que components/nav/nav.css. */
+
+.lg {
+  --ar-azul-hondo: oklch(0.19 0.038 236);
+  --ar-azul: oklch(0.28 0.045 232);
+  --ar-beige: oklch(0.91 0.028 78);
+  --ar-beige-vivo: oklch(0.84 0.06 74);
+  --ar-tinta: oklch(0.99 0.004 90);
+  --lg-linea: oklch(0.91 0.028 78 / 0.32);
+  --lg-error: oklch(0.8 0.12 38);
+
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100svh;
+  background: var(--ar-azul-hondo);
+  color: var(--ar-tinta);
+}
+
+/* ---- La foto */
+
+.lg-foto {
+  position: relative;
+  height: 38svh;
+  min-height: 200px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.lg-foto-img {
+  object-fit: cover;
+  object-position: 30% 58%;
+  transform-origin: 40% 60%;
+}
+
+/* El azul entra en la foto desde el lado del formulario: las dos mitades se leen como una sola pieza. */
+.lg-foto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 45%, var(--ar-azul-hondo));
+  pointer-events: none;
+}
+
+/* El telón que se corre al entrar: la foto se abre, no aparece. */
+.lg-telon {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--ar-azul-hondo);
+  transform: translateY(-101%);
+}
+
+/* ---- El panel */
+
+.lg-panel {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.25rem 1.5rem 2.5rem;
+}
+
+.lg-caja {
+  width: 100%;
+  max-width: 25rem;
+}
+
+.lg-mascara {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+.lg-titulo {
+  margin: 0;
+  font-family: var(--fuente-titulo), Georgia, serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.lg-titulo > .lg-mascara > span {
+  display: block;
+}
+
+.lg-bajada {
+  margin: 0.75rem 0 0;
+  color: var(--ar-beige);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+/* ---- Avisos: sesión terminada (informa) y error (hay que hacer algo). Nunca solo color: llevan dibujo. */
+
+.lg-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 1.5rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.lg-aviso svg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.0625rem;
+}
+
+.lg-aviso-info {
+  color: var(--ar-beige-vivo);
+}
+
+.lg-aviso-error {
+  margin-top: 0.875rem;
+  color: var(--lg-error);
+  font-weight: 500;
+}
+
+/* ---- El campo: el mismo de la consulta pública (components/formulario), subrayado con la etiqueta que sube. */
+
+.lg-form {
+  margin-top: 2rem;
+}
+
+.lg-campo {
+  position: relative;
+  display: block;
+  padding-top: 1.25rem;
+}
+
+.lg-input {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.25rem 3.75rem 0.625rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--ar-tinta);
+  caret-color: var(--ar-beige-vivo);
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  outline: none;
+}
+
+.lg-etiqueta {
+  position: absolute;
+  top: calc(1.25rem + 0.3rem);
+  left: 0;
+  color: var(--ar-beige);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  pointer-events: none;
+  transform-origin: left top;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    letter-spacing 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lg-campo:focus-within .lg-etiqueta,
+.lg-campo[data-lleno] .lg-etiqueta {
+  transform: translateY(-1.3rem) scale(0.68);
+  letter-spacing: 0.06em;
+}
+
+.lg-base,
+.lg-foco {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: var(--lg-linea);
+  transform-origin: left;
+}
+
+.lg-foco {
+  height: 2px;
+  background: var(--ar-beige-vivo);
+  transform: scaleX(0);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lg-campo:focus-within .lg-foco {
+  transform: scaleX(1);
+}
+
+.lg-campo[data-error] .lg-base {
+  height: 2px;
+  background: var(--lg-error);
+}
+
+.lg-ver {
+  position: absolute;
+  right: -0.625rem;
+  bottom: 0.125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 0.625rem;
+  border: 0;
+  background: none;
+  color: var(--ar-beige);
+  font: inherit;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.lg-ver:hover {
+  color: var(--ar-tinta);
+}
+
+.lg :focus-visible {
+  outline: 2px solid var(--ar-beige-vivo);
+  outline-offset: 3px;
+}
+
+.lg-input:focus-visible {
+  outline: none;
+}
+
+.lg-accion {
+  margin-top: 2rem;
+  padding: 0 6px 6px 0;
+}
+
+.lg-accion .boton {
+  width: 100%;
+}
+
+.lg-accion .boton:disabled {
+  cursor: progress;
+}
+
+.lg-flecha {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* ---- Escritorio: la foto a la izquierda, a toda la altura */
+
+@media (min-width: 900px) {
+  .lg {
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1.15fr) minmax(28rem, 0.85fr);
+  }
+
+  .lg-foto {
+    height: auto;
+    min-height: 100svh;
+  }
+
+  /* En escritorio el corte es limpio: la foto entera, sin lavarla hacia el panel. */
+  .lg-foto::after {
+    content: none;
+  }
+
+  .lg-telon {
+    transform: translateX(-101%);
+  }
+
+  .lg-panel {
+    align-items: center;
+    padding: 3rem 4rem;
+  }
+
+  .lg-caja {
+    max-width: 26rem;
+  }
+
+  .lg-titulo {
+    font-size: 3.5rem;
+  }
+
+  .lg-bajada {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .lg-caja {
+    max-width: 32rem;
+  }
+
+  .lg-titulo {
+    font-size: 4.5rem;
+  }
+
+  .lg-bajada {
+    font-size: 1.125rem;
+  }
+
+  .lg-input,
+  .lg-etiqueta {
+    font-size: 1.375rem;
+  }
+}
