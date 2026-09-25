@@ -510,6 +510,58 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Rejected:** none. b (paid Neon plan) stays open if the first submit after idle still feels slow.
 
+### D-045 · 2026-09-25 · The owner panel redesigned whole: brand colours, summary on top, structure rules from CRITERIO-DISENO
+
+**What he asked, in his words:** *"quiero que el próximo paso sea armar todo el dashboard completo, profesional, animado, con reglas de estructura y /diseno; hacela toda vos, sé crítico, revisá todo paso a paso, tomate el tiempo que sea necesario pero no vuelvas hasta que esté terminado al 100"*. Earlier: *"quiero que modifiquemos todo el dashboard admin porque no me gustó nada"*, with his `CRITERIO-DISENO.md` (in his Downloads folder) as the rules.
+
+**Kept (already decided):**
+- "Mitades" and one large toggle per module that saves at once (`D-019`).
+- The Apple-style confirmation with the GSAP ring and tick, "Deshacer" and "Listo" (`D-020`, *"genial, está perfecto"*).
+- The whole width of the screen (`D-032`).
+- The month range and Monday weeks (`D-018`).
+- No Server Action, query or security control changed.
+
+**Decision** (`app/admin/page.tsx`, `app/admin/admin.css`, `components/calendar/admin-calendar.tsx`, `components/ui/bottom-sheet.tsx`):
+- **Look.**
+  - The deep blue and beige of the public site and the login (`D-043`), replacing the provisional teal-on-paper panel.
+  - Surface levels instead of a colour per zone: `--pn-lienzo` 0.17 → `--pn-capa` 0.215 → `--pn-capa-2` 0.255 (OKLCH L, hue 236, chroma ≠ 0), with borders `--pn-borde` / `--pn-borde-2`.
+  - One solid card per screen: the next reservation.
+  - Instrument Serif for dates and figures; the system sans for everything else.
+  - Fixed rem sizes; radii 8 / 12 / 16 px.
+  - No gradients, glass, side stripes, or border plus diffuse shadow.
+- **Bar.** "Araucaria · Panel" (the page's `h1`), "Ver el sitio" (icon only below 40rem) and "Cerrar sesión" (C-10).
+- **First line answers on entry.** "Hoy es viernes 25 de septiembre", then three cards:
+  - *Lo próximo reservado*: day, what, and "mañana" / "en N días"; "Nada" when empty.
+  - *En {mes}*: modules reserved in the month on screen, and the whole free days left.
+  - *Los próximos 7 días*: seven small split days. Tapping one opens it, also across the month change.
+- **Month.**
+  - Name in serif with the year; "Hoy" when away from the current month; arrows, disabled at the ends of the range.
+  - Cells split in two. A reserved half fills beige with a 220 ms sweep and, from a 5.5rem-wide cell (container query), says "Mediodía" / "Noche", so state is not only colour.
+  - Today has a light ring; the chosen day a beige one.
+  - Past days lose the middle line, which read as crossing the number out.
+  - On desktop the cell height is `clamp(3.25rem, (100dvh − 33rem) / 6, 6.5rem)`, so six weeks fit under the summary at 1440 × 900.
+- **Day panel** (side on desktop, bottom sheet on the phone):
+  - "Día elegido" and the long date.
+  - Two toggles with the hours from `01-CONTEXT` ("10 a 17 h", "19 a 02 h"). The state is in words and in a drawing: an empty circle for "Libre", a tick for "Reservado".
+  - "Reservar el día completo" with the site's `.boton` when both are free.
+- **Próximos reservados.** Grouped by day (weekday + dd/mm in serif), with one "Liberar" per module and a full `aria-label`.
+- **Motion.**
+  - Entrance by CSS keyframes when the data arrives: 320 ms ease-out-quart, cards 60 ms apart, days 8 ms apart.
+  - The nodes stay mounted, so `router.refresh()` never replays the entrance; a month change replays only the new days.
+  - GSAP stays for the one big moment, the confirmation.
+  - Reduced motion: no keyframes and no sweep.
+  - Loading: a still skeleton in the same places.
+
+**Verified** on the dev branch, with a test session created for this and revoked by the panel's own "Cerrar sesión":
+- 1440 × 900, 1920 × 1080, 1366 × 650, 375 × 812 and 360 × 640: 0 overflow, 0 console errors.
+- Reserve, "Deshacer", "Reservar el día completo", free from the sheet and from the list, month forward and "Hoy" back, reduced motion, logout.
+- Every text pair ≥ 4.5:1; the lowest is the error red on the light alert card, 5.00.
+- The dev data were left as they were.
+
+**Rejected (do not retry):** the provisional light panel of WU-04 (*"no me gustó nada"*).
+
+**Reopen if:** the logo (`CR-03`) brings final colours (token values only).
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, type CSSProperties } from "react";
 import { blockModules, unblockModule } from "@/app/admin/actions";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ConfirmAlert, type AlertMessage } from "@/components/ui/confirm-alert";
 import type { ActionResult } from "@/lib/action-result";
 import {
+  addDays,
   addMonthsToMonth,
+  formatDayMonth,
   formatLongDate,
   formatMonthTitle,
   formatWeekdayDayMonth,
+  isoWeekday,
   type IsoDate,
   type IsoMonth,
 } from "@/lib/dates";
@@ -28,8 +31,12 @@ import {
 // Owner calendar, "Mitades" (D-019): each day split in two, top = Mediodía, bottom = Noche.
 // Tap a day → sheet (phone) or side panel (desktop) with one toggle per module. Every change saves at
 // once and is confirmed by a centered, animated alert with "Deshacer" (D-020).
+// Layout and look: D-045 (summary on top, the month, the day panel and the list of what is reserved).
 
 const WEEKDAYS = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
+const WEEKDAY_SHORT = ["", "lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
+// docs/01-CONTEXT.md, modules and prices.
+const HOURS: Record<ModuleCode, string> = { mediodia: "10 a 17 h", noche: "19 a 02 h" };
 const STALE_ACTION = "Failed to find Server Action";
 const DESKTOP = "(min-width: 64rem)";
 
@@ -51,6 +58,12 @@ const slot = (date: IsoDate, module: ModuleCode) => `${date}|${module}`;
 // "Sábado 19/09 · Mediodía"
 const describe = (date: IsoDate, choice: BlockChoice) =>
   `${capitalize(formatWeekdayDayMonth(date))} · ${MODULE_WORDS[choice].label}`;
+
+// "Viernes 3 de octubre" (the year only adds noise inside the bookable range).
+const longDay = (date: IsoDate) => capitalize(formatLongDate(date).replace(/ de \d{4}$/, ""));
+const daysBetween = (from: IsoDate, to: IsoDate) =>
+  Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+const inDays = (n: number) => (n === 0 ? "hoy" : n === 1 ? "mañana" : `en ${n} días`);
 
 function dayLabel(cell: DayCell): string {
   const modules = MODULE_ORDER.map((module) => {
@@ -115,7 +128,17 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
     () => buildMonth(month, effective.blocks, today, lastBookable),
     [month, effective.blocks, today, lastBookable],
   );
-  const selected = weeks.flat().find((cell) => cell.date === selectedDate && cell.status === "open") ?? null;
+  // A day of the week strip can be in another month: its modules come from the upcoming list.
+  const cellFor = (date: IsoDate): DayCell => {
+    const inMonth = weeks.flat().find((cell) => cell.date === date && cell.status !== "outside-month");
+    if (inMonth) return inMonth;
+    const modules: DayCell["modules"] = { mediodia: null, noche: null };
+    for (const block of effective.upcoming) if (block.date === date) modules[block.module] = block.id;
+    const status = date < today ? "past" : date > lastBookable ? "beyond-horizon" : "open";
+    return { date, day: Number(date.slice(8, 10)), status, modules };
+  };
+  const selectedCell = selectedDate ? cellFor(selectedDate) : null;
+  const selected = selectedCell?.status === "open" ? selectedCell : null;
 
   function openDay(cell: DayCell) {
     setSelectedDate(cell.date);
@@ -222,14 +245,38 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
 
   const previous = month > firstMonth ? addMonthsToMonth(month, -1) : null;
   const next = month < lastMonth ? addMonthsToMonth(month, 1) : null;
+  const [monthName = ""] = formatMonthTitle(month).split(" de ");
+
+  // ---- Summary: what the owner wants to know when opening the panel.
+  const byDate = new Map<IsoDate, Block[]>();
+  for (const block of effective.upcoming) byDate.set(block.date, [...(byDate.get(block.date) ?? []), block]);
+  const upcomingDays = [...byDate.entries()];
+  const [nextDate, nextBlocks] = upcomingDays[0] ?? [null, []];
+  const nextWhat =
+    nextBlocks.length === MODULE_ORDER.length
+      ? "Día completo"
+      : nextBlocks.map((block) => MODULE_WORDS[block.module].label).join(" y ");
+  const monthCells = weeks.flat().filter((cell) => cell.status !== "outside-month");
+  const reservedInMonth = effective.blocks.length;
+  const freeDaysLeft = monthCells.filter(
+    (cell) => cell.status === "open" && MODULE_ORDER.every((module) => cell.modules[module] === null),
+  ).length;
+  const week = Array.from({ length: 7 }, (_, i) => cellFor(addDays(today, i)));
+
+  const halves = (cell: DayCell, withText: boolean) =>
+    MODULE_ORDER.map((module) => (
+      <span key={module} className="pn-mitad" data-reservado={cell.modules[module] !== null ? "" : undefined}>
+        {withText && cell.modules[module] !== null && <span className="pn-mitad-txt">{MODULE_WORDS[module].label}</span>}
+      </span>
+    ));
 
   const dayActions = (cell: DayCell) => {
     const bothFree = MODULE_ORDER.every((module) => cell.modules[module] === null);
     return (
       <div>
-        <p className="text-sm text-[var(--admin-muted)]">Tocá para reservar o liberar</p>
-        <h2 className="mt-0.5 text-xl font-semibold">{capitalize(formatLongDate(cell.date))}</h2>
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <p className="pn-etiqueta">Día elegido</p>
+        <h2 className="pn-dia-fecha">{longDay(cell.date)}</h2>
+        <div className="pn-modulos">
           {MODULE_ORDER.map((module) => {
             const blockId = cell.modules[module];
             const taken = blockId !== null;
@@ -237,140 +284,221 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
               <button
                 key={module}
                 type="button"
-                className="admin-toggle"
+                className="pn-modulo"
                 aria-pressed={taken}
                 disabled={pending || blockId === ""}
                 onClick={() => toggle(cell.date, module, blockId)}
               >
-                <span className="text-lg font-semibold">{MODULE_WORDS[module].label}</span>
-                <span className="text-sm opacity-80">{taken ? "Reservado" : "Libre"}</span>
+                <span className="pn-modulo-nombre">{MODULE_WORDS[module].label}</span>
+                <span className="pn-modulo-horas">{HOURS[module]}</span>
+                <span className="pn-estado">
+                  <EstadoMarca reservado={taken} />
+                  {taken ? "Reservado" : "Libre"}
+                </span>
               </button>
             );
           })}
         </div>
         {bothFree && (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => blockWholeDay(cell.date)}
-            className="mt-3 min-h-12 w-full rounded-[0.875rem] px-4 text-base font-medium shadow-[inset_0_0_0_1px_var(--admin-free-line)] disabled:opacity-60"
-          >
-            Reservar el día completo
-          </button>
+          <div className="pn-dia-completo">
+            <button type="button" className="boton boton-en-oscuro" disabled={pending} onClick={() => blockWholeDay(cell.date)}>
+              Reservar el día completo
+            </button>
+          </div>
         )}
+        <p className="pn-ayuda">Cada toque se guarda enseguida, y lo podés deshacer desde el aviso.</p>
       </div>
     );
   };
 
   return (
     <>
-      <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-12">
-        <section aria-labelledby="admin-month">
-          <div className="flex items-center justify-between gap-2">
-            <h2 id="admin-month" className="text-2xl font-semibold tracking-tight">
-              {formatMonthTitle(month)}
+      <p className="pn-intro pn-anima">
+        Hoy es <strong>{formatLongDate(today).replace(/ de \d{4}$/, "")}</strong>
+      </p>
+
+      <div className="pn-resumen">
+        <section className="pn-tarjeta pn-tarjeta-solida pn-anima" style={orden(1)} aria-labelledby="pn-proximo">
+          <h2 id="pn-proximo" className="pn-etiqueta">
+            Lo próximo reservado
+          </h2>
+          {nextDate ? (
+            <>
+              <p className="pn-cifra">
+                {capitalize(WEEKDAY_SHORT[isoWeekday(nextDate)] ?? "")} {formatDayMonth(nextDate)}
+              </p>
+              <p className="pn-tarjeta-pie">
+                <strong>{nextWhat}</strong> · {inDays(daysBetween(today, nextDate))}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="pn-cifra">Nada</p>
+              <p className="pn-tarjeta-pie">No hay módulos reservados desde hoy.</p>
+            </>
+          )}
+        </section>
+
+        <section className="pn-tarjeta pn-anima" style={orden(2)} aria-labelledby="pn-mes-resumen">
+          <h2 id="pn-mes-resumen" className="pn-etiqueta">
+            En {monthName.toLowerCase()}
+          </h2>
+          <p className="pn-cifra">
+            {reservedInMonth}
+            <small>{reservedInMonth === 1 ? "módulo reservado" : "módulos reservados"}</small>
+          </p>
+          <p className="pn-tarjeta-pie">
+            <strong>{freeDaysLeft}</strong> {freeDaysLeft === 1 ? "día libre entero" : "días libres enteros"} de acá a fin de mes
+          </p>
+        </section>
+
+        <section className="pn-tarjeta pn-anima" style={orden(3)} aria-labelledby="pn-semana">
+          <h2 id="pn-semana" className="pn-etiqueta">
+            Los próximos 7 días
+          </h2>
+          <div className="pn-semana">
+            {week.map((cell) => (
+              <button
+                key={cell.date}
+                type="button"
+                className="pn-semana-dia"
+                data-hoy={cell.date === today ? "" : undefined}
+                aria-label={dayLabel(cell)}
+                disabled={cell.status !== "open"}
+                onClick={() => openDay(cell)}
+              >
+                <span className="pn-semana-nombre">{WEEKDAY_SHORT[isoWeekday(cell.date)]}</span>
+                <span className="pn-semana-mitades">
+                  {halves(cell, false)}
+                  <span className="pn-semana-num">{cell.day}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="pn-principal">
+        <section className="pn-cal pn-anima" style={orden(4)} aria-labelledby="admin-month">
+          <div className="pn-cal-cabeza">
+            <h2 id="admin-month" className="pn-mes">
+              {monthName}
+              <small>{month.slice(0, 4)}</small>
             </h2>
-            <div className="flex gap-2">
+            <div className="pn-nav">
+              {month !== firstMonth && (
+                <Link href="/admin" scroll={false} className="pn-nav-boton">
+                  Hoy
+                </Link>
+              )}
               {previous ? (
-                <Link
-                  href={`/admin?mes=${previous}`}
-                  scroll={false}
-                  aria-label="Mes anterior"
-                  className="grid size-11 place-items-center rounded-full shadow-[inset_0_0_0_1px_var(--admin-free-line)]"
-                >
-                  ←
+                <Link href={`/admin?mes=${previous}`} scroll={false} aria-label="Mes anterior" className="pn-nav-boton">
+                  <Flecha izquierda />
                 </Link>
               ) : (
-                <span className="size-11" />
+                <span className="pn-nav-boton" aria-disabled="true" aria-label="Mes anterior">
+                  <Flecha izquierda />
+                </span>
               )}
               {next ? (
-                <Link
-                  href={`/admin?mes=${next}`}
-                  scroll={false}
-                  aria-label="Mes siguiente"
-                  className="grid size-11 place-items-center rounded-full shadow-[inset_0_0_0_1px_var(--admin-free-line)]"
-                >
-                  →
+                <Link href={`/admin?mes=${next}`} scroll={false} aria-label="Mes siguiente" className="pn-nav-boton">
+                  <Flecha />
                 </Link>
               ) : (
-                <span className="size-11" />
+                <span className="pn-nav-boton" aria-disabled="true" aria-label="Mes siguiente">
+                  <Flecha />
+                </span>
               )}
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-7 gap-1 text-center text-xs text-[var(--admin-muted)] lg:gap-2" aria-hidden="true">
+          <div className="pn-semanario" aria-hidden="true">
             {WEEKDAYS.map((weekday) => (
               <span key={weekday}>{weekday}</span>
             ))}
           </div>
-          <ol className="mt-2 grid grid-cols-7 gap-1 lg:gap-2">
-            {weeks.flat().map((cell) =>
+          <ol className="pn-dias">
+            {weeks.flat().map((cell, index) =>
               cell.status === "outside-month" ? (
                 <li key={cell.date} aria-hidden="true" />
               ) : (
-                <li key={cell.date}>
+                <li key={cell.date} style={orden(index)}>
                   <button
                     type="button"
-                    className="admin-day"
+                    className="pn-dia"
                     disabled={cell.status !== "open"}
-                    data-today={cell.date === today ? "" : undefined}
-                    data-selected={cell.date === selectedDate ? "" : undefined}
+                    data-hoy={cell.date === today ? "" : undefined}
+                    data-elegido={cell.date === selectedDate ? "" : undefined}
                     aria-label={dayLabel(cell)}
+                    aria-pressed={cell.date === selectedDate}
                     onClick={() => openDay(cell)}
                   >
-                    <span className="admin-half top-0" data-taken={cell.modules.mediodia !== null ? "" : undefined} />
-                    <span className="admin-half bottom-0" data-taken={cell.modules.noche !== null ? "" : undefined} />
-                    <span className="absolute inset-x-1 top-1/2 h-px bg-[var(--admin-paper)]" aria-hidden="true" />
-                    <span className="admin-day-number">{cell.day}</span>
+                    {halves(cell, true)}
+                    <span className="pn-num">{cell.day}</span>
                   </button>
                 </li>
               ),
             )}
           </ol>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--admin-muted)]">
-            <span className="flex items-center gap-1.5">
-              <span className="size-3 rounded-sm bg-[var(--admin-free)] shadow-[inset_0_0_0_1px_var(--admin-free-line)]" />{" "}
-              Libre
+          <p className="pn-leyenda">
+            <span>
+              <span className="pn-muestra" /> Libre
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-3 rounded-sm bg-[var(--admin-taken)]" /> Reservado
+            <span>
+              <span className="pn-muestra" data-reservado="" /> Reservado
             </span>
             <span>Arriba mediodía · abajo noche</span>
-          </div>
+          </p>
         </section>
 
-        <aside className="mt-10 lg:sticky lg:top-8 lg:mt-0">
-          <div className="hidden rounded-[1.25rem] p-5 shadow-[inset_0_0_0_1px_var(--admin-free-line)] lg:block">
+        <aside className="pn-lado pn-anima" style={orden(5)}>
+          <div className="pn-bloque pn-panel">
             {selected ? (
               dayActions(selected)
             ) : (
-              <p className="text-[var(--admin-muted)]">Tocá un día del calendario para reservar o liberar.</p>
+              <>
+                <p className="pn-etiqueta">Día elegido</p>
+                <p className="pn-vacio">Tocá un día del calendario, o de los próximos 7 días, para reservar o liberar sus módulos.</p>
+              </>
             )}
           </div>
 
-          <section aria-labelledby="admin-upcoming" className="lg:mt-8">
-            <h2 id="admin-upcoming" className="text-lg font-semibold">
+          <section className="pn-bloque" aria-labelledby="admin-upcoming">
+            <h2 id="admin-upcoming" className="pn-bloque-titulo">
               Próximos reservados
+              {effective.upcoming.length > 0 && (
+                <small>
+                  {effective.upcoming.length} {effective.upcoming.length === 1 ? "módulo" : "módulos"}
+                </small>
+              )}
             </h2>
-            {effective.upcoming.length === 0 ? (
-              <p className="mt-2 text-sm text-[var(--admin-muted)]">No hay módulos reservados desde hoy.</p>
+            {upcomingDays.length === 0 ? (
+              <p className="pn-vacio">No hay módulos reservados desde hoy.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-[var(--admin-free-line)]">
-                {effective.upcoming.map((block) => (
-                  <li key={`${block.date}-${block.module}`} className="flex min-h-14 items-center justify-between gap-3">
-                    <span>
-                      <span className="font-medium">{capitalize(formatWeekdayDayMonth(block.date))}</span>
-                      <span className="text-[var(--admin-muted)]"> · {MODULE_WORDS[block.module].label}</span>
-                    </span>
-                    <button
-                      type="button"
-                      disabled={pending || block.id === ""}
-                      onClick={() => toggle(block.date, block.module, block.id)}
-                      className="min-h-11 rounded-full px-4 text-sm font-medium shadow-[inset_0_0_0_1px_var(--admin-free-line)] disabled:opacity-60"
-                    >
-                      Liberar
-                    </button>
+              <ul className="pn-lista">
+                {upcomingDays.map(([date, list]) => (
+                  <li key={date} className="pn-item">
+                    <p className="pn-item-fecha">
+                      <span>{WEEKDAY_SHORT[isoWeekday(date)]}</span>
+                      <strong>{formatDayMonth(date)}</strong>
+                    </p>
+                    <div className="pn-item-modulos">
+                      {list.map((block) => (
+                        <div key={block.module} className="pn-item-modulo">
+                          <span>{MODULE_WORDS[block.module].label}</span>
+                          <button
+                            type="button"
+                            className="pn-liberar"
+                            disabled={pending || block.id === ""}
+                            aria-label={`Liberar ${MODULE_WORDS[block.module].label} del ${formatWeekdayDayMonth(block.date)}`}
+                            onClick={() => toggle(block.date, block.module, block.id)}
+                          >
+                            Liberar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -379,18 +507,10 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
         </aside>
       </div>
 
-      <BottomSheet
-        open={sheetOpen}
-        label={selected ? capitalize(formatLongDate(selected.date)) : "Día"}
-        onClose={() => setSheetOpen(false)}
-      >
+      <BottomSheet open={sheetOpen} label={selected ? longDay(selected.date) : "Día"} onClose={() => setSheetOpen(false)}>
         {selected && dayActions(selected)}
-        <button
-          type="button"
-          onClick={() => setSheetOpen(false)}
-          className="mt-3 min-h-11 w-full rounded-[0.875rem] text-sm text-[var(--admin-muted)]"
-        >
-          Listo
+        <button type="button" className="pn-sheet-cerrar" onClick={() => setSheetOpen(false)}>
+          Cerrar
         </button>
       </BottomSheet>
 
@@ -404,5 +524,30 @@ export function AdminCalendar({ month, blocks, upcoming, today, lastBookable, fi
         />
       )}
     </>
+  );
+}
+
+// Entrance order for the CSS stagger in admin.css (`--i`).
+const orden = (i: number) => ({ "--i": i }) as CSSProperties;
+
+// The state said with a drawing too: an empty circle is free, a tick is reserved.
+function EstadoMarca({ reservado }: { reservado: boolean }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={reservado ? 1.8 : 1.6} aria-hidden="true">
+      <circle cx="10" cy="10" r="8.2" />
+      {reservado && <path d="M6.2 10.4 8.8 13l5-5.6" strokeLinecap="round" strokeLinejoin="round" />}
+    </svg>
+  );
+}
+
+function Flecha({ izquierda }: { izquierda?: boolean }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+      <path
+        d={izquierda ? "M16 10H4.5M9 5.5 4.5 10 9 14.5" : "M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5"}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

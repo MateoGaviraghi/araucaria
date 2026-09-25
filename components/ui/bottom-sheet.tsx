@@ -34,7 +34,7 @@ export function BottomSheet({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-[var(--admin-free-line)]" aria-hidden="true" />
+      <div className="admin-sheet-manija" aria-hidden="true" />
       {children}
     </dialog>
   );
