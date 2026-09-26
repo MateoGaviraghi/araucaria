@@ -675,7 +675,7 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 ### D-049 · 2026-09-26 · The admin password is one the owners can remember, at least 13 characters (replaces the length rule of `C-01`)
 
-**What he asked, in his words:** *"bajala a esa, sino siempre es un quilombo acordarse para ellos"*, about a 13-character password he chose, after I warned that it was under the 20-character minimum and easy to guess (the salon's name plus its address).
+**What he asked, in his words:** *"bajala a esa, sino siempre es un quilombo acordarse para ellos"*, about a password he chose, after I warned that it was under the 20-character minimum and easy to guess. **Never describe the password's content in this repo: it is public.**
 
 **Decision:**
 - `MIN_PASSPHRASE_LENGTH` in `lib/auth/config.ts`: 20 → 13. `scripts/rotate-password.ts` enforces it; the login itself never checked the length.
