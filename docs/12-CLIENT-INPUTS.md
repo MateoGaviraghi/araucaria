@@ -12,7 +12,7 @@ Status: `PENDIENTE` · `PARCIAL` · `RECIBIDO` · `WAIVED` · `CANCELADO`.
 
 | ID | What | Format / spec | Appears in | Blocks | Urgency | Status | Tier | Owner | Asked | Due | Consequence |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| CI-01 | WhatsApp number that receives inquiries | One of 3425450336 / 3425465599, or another; must be on a phone someone answers | Every `wa.me` link | Launch | High | PENDIENTE | SHIP-BLOCK | Client | — | Before WU-09 | Without it, inquiries go to Mateo's test number |
+| CI-01 | WhatsApp number that receives inquiries | One of 3425450336 / 3425465599, or another; must be on a phone someone answers | Every `wa.me` link | Launch | High | PROVISIONAL (2026-09-26: 3425450336, `D-048`) | SHIP-BLOCK | Client | — | Before WU-09 | If the client wants another number, change `NEXT_PUBLIC_WHATSAPP_NUMBER` in Vercel and redeploy |
 | CI-02 | Name of the contact person and of who holds the admin password | Full name + phone | Password handover, this ledger | Launch | High | PENDIENTE | SHIP-BLOCK | Client | — | Before WU-09 | No handover of the panel |
 | CI-03 | Commitment to keep the calendar accurate | Written OK: every confirmed booking is crossed out the same day | The public calendar | Launch | High | PENDIENTE | SHIP-BLOCK | Client | — | Before WU-09 | A stale calendar tells people taken dates are free (`G-003`) |
 | CI-04 | Booking horizon and earliest date | E.g. "hasta 12 meses", "desde hoy" or "desde mañana" | Calendar range | — | Low | PENDIENTE | DEFERRABLE | Client | — | Before WU-08 | Default used: from today, 12 months ahead |

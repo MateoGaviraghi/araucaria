@@ -9,12 +9,12 @@
 | | |
 |---|---|
 | **Current task** | Phase 1 of the Araucaria site.<br>**Public page:** finished (see `WU-10`).<br>**Owner panel:** rebuilt in this chat.<br>• `/admin/login`: split screen with the garden photo (`D-043`); the form is in the static shell (`D-044`).<br>• `/admin`: a dashboard with a side menu (a bottom tab bar on the phone), with Inicio, Reservas and Calendario (`D-046`).<br>• Reservations carry the client's name and an optional phone. The table is `reservations`; name and phone are cleared 90 days after the date (C-16).<br>• "Nueva reserva" picks the date on a month calendar beside the day's modules (`D-047`).<br>**Next piece of work:** Mateo names it (never propose it) |
-| **Real status** | `main` = `origin/main` = `d89ddfe`, pushed 2026-09-25, 23:07 ART; Vercel served it ~30 s later. This `/cerrar` record is **uncommitted**.<br>**Migration `0001_swift_grim_reaper`** (`reservations` + `module_blocks.reservation_id`) is applied to **dev and production**. Before production: Neon branch `backup-pre-0001-reservas` (`br-lingering-fog-acsbxjny`).<br>**Production data:**<br>• `admin_credential` exists now: version 1, loaded by Mateo on 2026-09-25 at 20:17 ART. Before that it was missing (`G-058`).<br>• 3 modules loaded with the old panel, shown as "Sin datos del cliente".<br>**Dev data:** 0 reservations, its 3 original modules, no live test session.<br>**Verified by Mateo on his iPhone:** the login, the panel and the date calendar. Verified by me with headless Chromium against dev at 1920 / 1440 / 1366 / 375 / 360, with 0 overflow and 0 console errors. Only branch: `main` |
+| **Real status** | `main` = `origin/main`: code at `d89ddfe` (pushed 2026-09-25, 23:07 ART), record at `bd2d57b` and the `TD-010` note after it. Production was redeployed by Mateo on 2026-09-26 with the new `DATABASE_URL`.<br>**Migration `0001_swift_grim_reaper`** (`reservations` + `module_blocks.reservation_id`) is applied to **dev and production**. Before production: Neon branch `backup-pre-0001-reservas` (`br-lingering-fog-acsbxjny`).<br>**Production data:**<br>• `admin_credential` exists now: version 1, loaded by Mateo on 2026-09-25 at 20:17 ART. Before that it was missing (`G-058`).<br>• 3 modules loaded with the old panel, shown as "Sin datos del cliente".<br>**Dev data:** 0 reservations, its 3 original modules, no live test session.<br>**Verified by Mateo on his iPhone:** the login, the panel and the date calendar. Verified by me with headless Chromium against dev at 1920 / 1440 / 1366 / 375 / 360, with 0 overflow and 0 console errors. Only branch: `main` |
 | **Last chat** | 2026-09-25 (began with `/retomar`): semgrep scan, the login (`D-043`, `D-044`), the panel (`D-045`, rejected; `D-046`; `D-047`) |
 | **Waiting on me (Claude)** | Nothing |
-| **Waiting on Mateo** | (a) Whether to commit (and push) this `/cerrar` record.<br>(b) **Rotate the production database password** (`TD-010`): the `neondb_owner` connection string was shown in this chat. Neon → project araucaria → branch production → reset the role password; then update `DATABASE_URL` in Vercel (Production).<br>(c) Whether to look into the ~3.2 s first load after idle (`OQ-10`) or pay for a Neon plan that does not scale to zero. He chose to move on ("seguir").<br>(d) The next piece of work |
+| **Waiting on Mateo** | (a) **Set `NEXT_PUBLIC_WHATSAPP_NUMBER` = `5493425450336` in Vercel (Production) and redeploy** (`D-048`). Until then the WhatsApp links still go to his test number.<br>(b) Whether to look into the ~3.2 s first load after idle (`OQ-10`).<br>(c) The next piece of work.<br>**Done 2026-09-26:** the production database password was rotated (`TD-010` paid) |
 | **Waiting on third parties** | The client owes:<br>• `CI-01`, the WhatsApp number. Production still uses Mateo's test number.<br>• `CI-02` and `CI-03`.<br>• `CI-05`, VAT and price validity, still `{{CONFIRMAR}}`.<br>• `CR-01` … `CR-03`: original photos, videos and logo. All colours, including the panel's, stay `{{CONFIRMAR}}` until the logo arrives.<br>• `CR-04`: Instagram says 3650.<br>**If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
-| **Next action** | **On `/retomar`:** ask about (a) and (b) above, then wait for Mateo to name the next piece of work.<br>**Any panel change:**<br>• read `D-046` and `D-047` first; they replace `D-019` and `D-045`;<br>• a test session on the **dev** branch works: insert the sha256 of a random token into `admin_sessions` with the current `credential_version`, and log out with the panel's own button at the end;<br>• never touch the production branch for tests.<br>**Any migration:** back up production with a Neon branch first, run `DATABASE_URL=<prod> npm run db:migrate` (`.env.local` does not override a variable already set), and check `drizzle.__drizzle_migrations` |
+| **Next action** | **On `/retomar`:** wait for Mateo to name the next piece of work.<br>**Any panel change:**<br>• read `D-046` and `D-047` first; they replace `D-019` and `D-045`;<br>• a test session on the **dev** branch works: insert the sha256 of a random token into `admin_sessions` with the current `credential_version`, and log out with the panel's own button at the end;<br>• never touch the production branch for tests.<br>**Any migration:** back up production with a Neon branch first, run `DATABASE_URL=<prod> npm run db:migrate` (`.env.local` does not override a variable already set), and check `drizzle.__drizzle_migrations` |
 | **Do not touch** | • Pushing `main` without Mateo's word.<br>• `.env.local`: **not even to count or grep a variable**.<br>• The Vercel environment variables.<br>• The production Neon branch, except with Mateo's explicit "sí" for that action (a migration there is class `R3`).<br>• The Neon branches `backup-pre-0000-init` and `backup-pre-0001-reservas`.<br>• The two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche).<br>• `components/cierre/mapa-datos.ts` by hand (it is generated from OpenStreetMap, see `D-036`).<br>• **The designs already rejected** in `D-023`, `D-025`, `D-027`, `D-029`, `D-030`, `D-033`, `D-034`, `D-036`, `D-037`, `D-040`, `D-041`, `D-043`, `D-045`, `D-046` and `D-047`. Among them:<br>  • anything retro or neubrutalist;<br>  • a reference round made only of uiverse and 21st (memory `referencias-uiverse-21st`);<br>  • the split "Mitades" cells as the way to book;<br>  • a dashboard without a side menu;<br>  • the native date input |
 
 ## 2. LOG
@@ -872,3 +872,36 @@ Then Mateo: **"commitea eso primero y deja anotado para cuando yo te pida el com
 **Gates:** lint ✓ · typecheck ✓ · build ✓ before every push.
 
 **Sigue:** Mateo decides whether to commit this record, rotates the production database password (`TD-010`), and names the next piece of work.
+
+### 2026-09-26 · WU-11 (cierre) · la clave de la base de producción, rotada
+
+**Asked:** *"por favor cerremos eso ahora así terminamos"* (`TD-010`).
+
+**Done:** step by step and by Mateo, so the new value never passed through the chat:
+- Neon, production branch: Roles → `neondb_owner` → Reset password.
+- Vercel: `DATABASE_URL` (Production) replaced, then Redeploy.
+- I only updated the record.
+
+**Verified** in production with headless Chromium:
+- the public calendar reads availability (32 days, no failure notice);
+- `/admin/login` renders and enables "Entrar", with its streamed session check and no error screen.
+- The old connection string is refused: `password authentication failed for user 'neondb_owner'`.
+- The dev branch keeps its own role copy; the local `.env.local` was not touched.
+
+**Gates:** none run (no code changed).
+
+**Sigue:** Mateo names the next piece of work.
+
+### 2026-09-26 · WU-11 (cierre) · el número de contacto, provisional (D-048)
+
+**Asked:** *"utilizá este número para lo que es contactos en todo, de última luego que el cliente me diga si quiero cambiarlo, y luego de eso sí commit y push"* (3425450336).
+
+**Done:**
+- `D-048`; `docs/01-CONTEXT.md` (WhatsApp row); `docs/12-CLIENT-INPUTS.md` (`CI-01` PROVISIONAL).
+- `components/admin/nueva-reserva.tsx` and `lib/reservas.ts`: the example phone no longer shows Mateo's own number.
+- "Llamar" already used 3425450336.
+- The WhatsApp links read `NEXT_PUBLIC_WHATSAPP_NUMBER`, which only Mateo sets, in Vercel.
+
+**Sin verificar:** the WhatsApp links in production, until Mateo changes the variable and redeploys.
+
+**Gates:** lint ✓ (the touched files).

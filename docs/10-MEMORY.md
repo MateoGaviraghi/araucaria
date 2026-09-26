@@ -661,6 +661,18 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Rejected:** the native date input (*"no me gusta… cómo elegir la fecha"*); the Apple Calendar Picker (all red, with a time field this salon does not use).
 
+### D-048 · 2026-09-26 · Every contact uses 3425450336, provisionally, until the client decides (`CI-01`)
+
+**What he asked, in his words:** *"utilizá este número para lo que es contactos en todo, de última luego que el cliente me diga si quiero cambiarlo"* (a screenshot with 3425450336).
+
+**Decision:**
+- WhatsApp: `NEXT_PUBLIC_WHATSAPP_NUMBER` = `5493425450336`, in `wa.me` format. It feeds the inquiry form, the footer and the phone menu's WhatsApp logo. The value lives only in Vercel, and Mateo sets it there (Production, then Redeploy, because `NEXT_PUBLIC_*` is inlined at build).
+- "Llamar" already used 3425450336 (`components/cierre/cierre.tsx`), which is one of the two phones in `01-CONTEXT`.
+- The panel's phone placeholder no longer shows Mateo's own number: it reads "342 123 4567".
+- `CI-01` becomes PROVISIONAL.
+
+**Reopen if:** the client names another number. Change only the Vercel variable and redeploy; no code change.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |
@@ -762,7 +774,7 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 | TD-007 | The hero video is 720 px wide, so on a 1920 screen it is enlarged 2.7×. The treatment (the brand tint plus the gradients) disguises it, and on a phone there is no enlargement at all | 1080 at CRF 26 measured 14.6 MB per 8 s, against a 25 MB budget for all media (`D-022`), and the source itself is only 1080 wide | When `CR-02` arrives with real footage, or if the budget moves to object storage |
 | TD-008 | The two superseded gallery variants (`galeria-mosaico.tsx`, `galeria-corre.tsx`, the pinned walkthrough of `D-026`) were never committed and now live only in this session's scratchpad at `…/scratchpad/variantes-viejas/`. A temp cleanup loses them | They broke `typecheck` once the picker stopped importing them, and deleting without a copy is not reversible | If Mateo asks for either back, or when the gallery is finally merged and the folder can be dropped for good. **Paid 2026-09-23:** Mateo said *"si"* to dropping them; the folder was deleted |
 | TD-009 | The rejected gallery code of this round was deleted from the repo after being copied, and the copies live only in the session scratchpad: `variantes-viejas/ronda-d027/` (A · Fila, B · Calma, C · Una por vez, their `galeria.css` and `pieza.tsx`, and the four files of `app/prototipo-galeria/`) and `variantes-viejas/ronda-d028/` (the stack with fixed-size takes: `pieza.tsx`, `tarjeta.tsx`, `galeria.tsx`, `galeria.css`). The versions of `D-028` that reached a commit are none — `3a0989f` already has `D-030`. A temp cleanup loses them | Keeping rejected variants in the repo breaks `typecheck` and invites reusing what Mateo rejected | If Mateo asks for any of them back; otherwise drop them for good with `TD-008`. **Paid 2026-09-23** with `TD-008`: deleted |
-| TD-010 | The production database's `neondb_owner` connection string (with its password) was printed in the 2026-09-25 chat, to build the env file for `rotate-password` | Mateo could not copy it to a file himself; he approved me doing it | When Mateo resets the role password in Neon and updates `DATABASE_URL` in Vercel (Production) |
+| TD-010 | The production database's `neondb_owner` connection string (with its password) was printed in the 2026-09-25 chat, to build the env file for `rotate-password` | Mateo could not copy it to a file himself; he approved me doing it | When Mateo resets the role password in Neon and updates `DATABASE_URL` in Vercel (Production). **Paid 2026-09-26:** Mateo reset `neondb_owner` on the production branch, updated `DATABASE_URL` (Production) and redeployed. Checked: the public calendar reads availability (no failure notice, 32 days), the login streams its session check without error, and the old password is refused (`password authentication failed`) |
 
 ## Dependencies reviewed
 

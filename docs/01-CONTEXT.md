@@ -82,7 +82,7 @@ Nothing is paid online in phase 1.
 | Phones | 3425450336 · 3425465599 |
 | Email | Araucaria3650@gmail.com |
 | Instagram | `@araucariamultiespacio` |
-| WhatsApp that receives inquiries | **Undecided** (`CI-01`). Testing uses Mateo's number, 3425162081 |
+| WhatsApp that receives inquiries | **3425450336, provisional** (`D-048`, 2026-09-26): Mateo's choice until the client confirms or changes it (`CI-01`). Before that, testing used Mateo's own number |
 
 ## Assets on hand
 

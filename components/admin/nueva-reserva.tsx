@@ -248,7 +248,7 @@ export function NuevaReserva({
               type="tel"
               inputMode="tel"
               autoComplete="off"
-              placeholder="342 516 2081"
+              placeholder="342 123 4567"
               maxLength={16}
               value={clientPhone}
               onChange={(event) => setClientPhone(event.currentTarget.value)}

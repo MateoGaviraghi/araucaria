@@ -74,7 +74,7 @@ export const diaCorto = (date: IsoDate) => `${DIA_CORTO[isoWeekday(date)]} ${for
 /** "sábado 26/09" */
 export const diaLargo = (date: IsoDate) => `${DIA_LARGO[isoWeekday(date)]} ${formatDayMonth(date)}`;
 
-/** "+54 342 516-2081" for reading; the stored value is "+543425162081". */
+/** "+54 342 123-4567" for reading; the stored value is "+543421234567". */
 export function telefonoTexto(phone: string): string {
   const d = phone.replace(/^\+54/, "");
   return `+54 ${d.slice(0, 3)} ${d.slice(3, 6)}-${d.slice(6)}`;
