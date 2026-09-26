@@ -562,6 +562,78 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the logo (`CR-03`) brings final colours (token values only).
 
+### D-046 · 2026-09-25 · The owner panel is a real dashboard: side menu, reservations with the client's name and phone (replaces D-045 and the "Mitades" of D-019)
+
+**What he asked, in his words:** on `D-045` in production, *"no me gusta nada el diseño de reserva, súper difícil de entender, súper difícil de cancelar, súper desorganizado, no se entiende nada, no hay un navbar al costado, esto no es un dashboard; te dije que te tomes el tiempo que sea necesario, no que hagas cualquier cosa"*. Plan questions: *"1 - nombre y teléfono 2 - esas tres"* (Inicio, Reservas, Calendario). References round (7 panels, tested) → *"la 1 con la 3"*. Plan → *"1 - sí 2 - no 3 - go"*:
+- he answered "sí" to clearing the name and phone 90 days after the date;
+- he answered "no" to making the phone required.
+
+**Sources:**
+- [shadcnuikit · Hotel Management](https://shadcnuikit.com/dashboard/hotel) (reference 1): the structure.
+- [Origin UI (Cal.com) · Event Calendar](https://full-calendar-steel.vercel.app/) (reference 3): the calendar, with each event written in its day and opened by a tap.
+
+**Decision:**
+- **Data** (migration `drizzle/0001_swift_grim_reaper.sql`, additive; applied to the dev branch on 2026-09-25):
+  - a new table `reservations` (id, date, client name 1–80, optional phone `+54` + 10 digits, created_at);
+  - `module_blocks.reservation_id`, with `on delete cascade`.
+  - Creating a reservation is one batch: the reservation, its modules and the audit row. The unique `(date, module)` still decides conflicts.
+  - Cancelling deletes the reservation and, with it, its modules.
+  - Modules loaded before this have no reservation. They show "Sin datos del cliente" and are cancelled with `unblockModule`.
+  - The purge after login clears the name and phone 90 days after the date (C-16).
+  - The audit rows carry no name or phone.
+- **Actions** (`app/admin/actions.ts`): `createReservation`, `cancelReservation`, `unblockModule` (legacy) and `takenModules`. Each has `requireAdmin()` first and then zod. `blockModules` is gone.
+  - `logout` no longer redirects: the panel loads `/admin/login` as a full page, so the login's pre-paint script runs (it did not after a client navigation, which logged a React warning).
+- **Routes:** `app/admin/(panel)/` with `layout.tsx` (the frame), `page.tsx` (Inicio), `reservas/` and `calendario/`. Each page runs `requireAdmin()` inside its own `Suspense`, behind a still skeleton. The login stays outside the group.
+- **Frame** (`components/admin/panel-marco.tsx`):
+  - **Desktop:** a 16rem side menu with "+ Nueva reserva", Inicio / Reservas / Calendario (the current one in `capa-2` with a beige icon), "Ver el sitio" and "Cerrar sesión" (C-10).
+  - **Phone:** a top bar (brand, site, logout) and a bottom tab bar (Inicio, Reservas, Calendario, "+ Nueva").
+  - Shared dialogs on a native `<dialog>` (`dialogo.tsx`): Nueva reserva, the detail, and the cancel question. Then the `D-020` alert with "Deshacer":
+    - undoing a new reservation cancels it;
+    - undoing a cancel creates it again with the same name and phone.
+- **Sections** (`components/admin/secciones.tsx`), where everything is said in words ("Noche · Juan Pérez"), never a colour or half a square:
+  - **Inicio:**
+    - cards: "Próxima reserva" (the one solid card), reservations this month, whole free days left;
+    - "Los próximos 7 días", where each day lists its reservations or "Libre · reservar";
+    - "Próximas reservas" (5).
+  - **Reservas:** Próximas / Pasadas tabs, a search by name or phone, and rows with date, client, module and hours, a WhatsApp phone and "Cancelar".
+  - **Calendario:**
+    - desktop: a month grid, each reservation a beige label in its day, and "+ Reservar" on a free day;
+    - phone: an agenda of the month that starts today.
+- **Nueva reserva** (`nueva-reserva.tsx`):
+  - native date input;
+  - module radio cards, where modules already taken that day (read with `takenModules`) are disabled and say "Ocupado";
+  - name (required) and phone (optional, with a fixed +54);
+  - errors under each field with a drawn "!".
+- **Look** (`app/admin/admin.css`):
+  - the tokens of `D-045`, plus `--pn-fondo` for the menu;
+  - buttons: 10 px radius; primary solid beige; cancel outlined in the error colour; "Sí, cancelar" filled;
+  - `:where()` for the button base, so each class keeps its own size;
+  - entrance by CSS keyframes once, and dialogs 220 ms.
+
+**Verified** on the dev branch with a test session, later revoked by the panel's own logout:
+- Flows:
+  - three reservations created (Noche with phone; Día completo without phone; Mediodía);
+  - "Noche" of an already-booked day shown disabled;
+  - three validation errors on an empty form;
+  - search "ana" → 1 and "516" → 1;
+  - cancel from the calendar detail with the question, then "Deshacer" brought it back;
+  - the three cancelled from the phone list.
+- Sizes: 1440 × 900, 1920 × 1080, 1366 × 650, 375 × 812 and 360 × 640, with 0 overflow and 0 console errors.
+- The public calendar still loads.
+- Contrast: every pair ≥ 4.5:1; the lowest is white on the "Sí, cancelar" red, 4.86.
+- The dev branch ended with 0 reservations and its 3 original modules.
+- **Not verified:** the production migration, and the real iPhone.
+
+**Rejected (do not retry):**
+- `D-045` whole: the split "Mitades" cells as the way to book, "Liberar" hidden in a list or in the same toggle, a dashboard with no side menu. In his words: *"súper difícil de entender, súper difícil de cancelar… no hay un navbar al costado, esto no es un dashboard"*.
+- Also, from the reference round:
+  - calendarcn (an hourly agenda);
+  - ReUI (repeats 3, paid);
+  - uiverse sidebars (toy-like or retro);
+  - generic SaaS dashboards.
+
+**Reopen if:** the owner needs more than one reservation per module (it cannot happen: the unique constraint), or wants to edit a reservation instead of cancelling and creating it again.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

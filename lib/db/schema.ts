@@ -29,7 +29,29 @@ export const AUDIT_ACTIONS = [
   "password_rotated",
 ] as const;
 
-// Availability: one row per crossed-out module. "Día completo" is both rows (D-003).
+// A reservation the owner loads in the panel (D-046): who booked a date. Its modules are rows of
+// module_blocks pointing here. Personal data, admin-only: never read by the public page (C-15), and
+// name and phone are cleared 90 days after the date (docs/04-DATA-MODEL.md §Purges).
+export const reservations = pgTable(
+  "reservations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    date: date("date", { mode: "string" }).notNull(),
+    // null only after the 90-day purge
+    clientName: text("client_name"),
+    // "+54" followed by the 10 national digits (D-034), or null when not given
+    clientPhone: text("client_phone"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check("reservations_client_name_check", sql`char_length(${t.clientName}) between 1 and 80`),
+    check("reservations_client_phone_check", sql`${t.clientPhone} ~ '^[+]54[0-9]{10}$'`),
+    index("reservations_date_idx").on(t.date),
+  ],
+);
+
+// Availability: one row per crossed-out module. "Día completo" is both rows (D-003). Rows loaded
+// before D-046 have no reservation.
 export const moduleBlocks = pgTable(
   "module_blocks",
   {
@@ -37,11 +59,14 @@ export const moduleBlocks = pgTable(
     // "string" mode keeps 'YYYY-MM-DD' untouched; a JS Date would shift the day by timezone (G-010).
     date: date("date", { mode: "string" }).notNull(),
     module: text("module", { enum: MODULE_CODES }).notNull(),
+    // Cancelling a reservation deletes its modules with it.
+    reservationId: uuid("reservation_id").references(() => reservations.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     unique("module_blocks_date_module_key").on(t.date, t.module),
     check("module_blocks_module_check", sql`${t.module} in ('mediodia', 'noche')`),
+    index("module_blocks_reservation_id_idx").on(t.reservationId),
   ],
 );
 

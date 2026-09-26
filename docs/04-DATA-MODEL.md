@@ -1,18 +1,28 @@
 # 04 — Data model
 
-> The five tables of phase 1, the invariants the database enforces, the indexes and why each exists, and how data is purged.
+> The six tables of phase 1, the invariants the database enforces, the indexes and why each exists, and how data is purged.
 
 Data tier: small `D4`. A real database exists only for the owner panel. **No customer or inquiry data is stored.** Dates are Postgres `date` (no timezone). Timestamps are `timestamptz`, compared in UTC; "today" for availability is computed in `America/Argentina/Buenos_Aires`.
 
 ## Tables
 
 ```sql
--- Availability: one row per crossed-out module.
+-- A reservation the owner loads in the panel (D-046, migration 0001). Personal data, admin-only.
+create table reservations (
+  id            uuid primary key default gen_random_uuid(),
+  date          date not null,
+  client_name   text check (char_length(client_name) between 1 and 80), -- null only after the 90-day purge
+  client_phone  text check (client_phone ~ '^[+]54[0-9]{10}$'),          -- optional; "+54" + 10 digits (D-034)
+  created_at    timestamptz not null default now()
+);
+
+-- Availability: one row per crossed-out module. Rows loaded before D-046 have no reservation.
 create table module_blocks (
-  id          uuid primary key default gen_random_uuid(),
-  date        date not null,
-  module      text not null check (module in ('mediodia', 'noche')),
-  created_at  timestamptz not null default now(),
+  id              uuid primary key default gen_random_uuid(),
+  date            date not null,
+  module          text not null check (module in ('mediodia', 'noche')),
+  reservation_id  uuid references reservations(id) on delete cascade, -- cancelling deletes its modules
+  created_at      timestamptz not null default now(),
   unique (date, module)
 );
 
@@ -87,6 +97,7 @@ Purges run **inside the successful-login Server Action**, after the session is c
 | `admin_sessions` | Until expired or revoked | `delete where expires_at < now() or revoked_at is not null` |
 | `admin_audit` | 12 months | `delete where at < now() - interval '12 months'` |
 | `module_blocks` | Indefinitely (tiny) | None in phase 1 |
+| `reservations.client_name`, `client_phone` | Until 90 days after the date (`D-046`) | `update set client_name = null, client_phone = null where date < current_date - 90` (the row and its modules stay) |
 
 ## Migrations
 

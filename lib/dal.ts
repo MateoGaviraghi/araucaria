@@ -1,7 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, gt, gte, isNotNull, isNull, lt, lte, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, isNotNull, isNull, lt, lte, or, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { cache } from "react";
@@ -12,10 +12,11 @@ import {
   SESSION_DAYS,
 } from "@/lib/auth/config";
 import { hashSessionToken, isWellFormedSessionToken } from "@/lib/auth/tokens";
-import type { AvailabilityEntry, Block, ModuleCode } from "@/components/calendar/month";
+import type { AvailabilityEntry, ModuleCode } from "@/components/calendar/month";
 import { addMonthsToMonth, firstDayOfMonth, lastBookableDate, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { db } from "@/lib/db/client";
-import { adminAudit, adminCredential, adminSessions, loginAttempts, moduleBlocks } from "@/lib/db/schema";
+import { adminAudit, adminCredential, adminSessions, loginAttempts, moduleBlocks, reservations } from "@/lib/db/schema";
+import { agrupar, type FilaReserva, type Reserva } from "@/lib/reservas";
 
 // The only module that imports the database client (docs/09-RULES.md §2).
 
@@ -109,6 +110,11 @@ export async function purgeAfterLogin(): Promise<void> {
     db.delete(loginAttempts).where(lt(loginAttempts.at, sql`now() - interval '24 hours'`)),
     db.delete(adminSessions).where(or(lt(adminSessions.expiresAt, sql`now()`), isNotNull(adminSessions.revokedAt))),
     db.delete(adminAudit).where(lt(adminAudit.at, sql`now() - interval '12 months'`)),
+    // D-046: the client's name and phone are kept until 90 days after the date; the modules stay.
+    db
+      .update(reservations)
+      .set({ clientName: null, clientPhone: null })
+      .where(and(lt(reservations.date, sql`current_date - 90`), or(isNotNull(reservations.clientName), isNotNull(reservations.clientPhone)))),
   ]);
 }
 
@@ -138,28 +144,51 @@ export async function getAvailability(today: IsoDate): Promise<AvailabilityEntry
   }
 }
 
-// ---- Availability (owner panel). Callers run requireAdmin() first.
+// ---- Reservations (owner panel, D-046). Callers run requireAdmin() first.
 
-export async function getBlocksForMonth(month: IsoMonth): Promise<Block[]> {
-  return db
-    .select({ id: moduleBlocks.id, date: moduleBlocks.date, module: moduleBlocks.module })
+const filaReserva = {
+  blockId: moduleBlocks.id,
+  date: moduleBlocks.date,
+  module: moduleBlocks.module,
+  reservationId: moduleBlocks.reservationId,
+  clientName: reservations.clientName,
+  clientPhone: reservations.clientPhone,
+};
+
+async function leerReservas(where: ReturnType<typeof and>, orden: "asc" | "desc", limite: number): Promise<Reserva[]> {
+  const filas: FilaReserva[] = await db
+    .select(filaReserva)
     .from(moduleBlocks)
-    .where(
-      and(
-        gte(moduleBlocks.date, firstDayOfMonth(month)),
-        lt(moduleBlocks.date, firstDayOfMonth(addMonthsToMonth(month, 1))),
-      ),
-    )
-    .orderBy(asc(moduleBlocks.date), asc(moduleBlocks.module));
+    .leftJoin(reservations, eq(reservations.id, moduleBlocks.reservationId))
+    .where(where)
+    .orderBy(orden === "asc" ? asc(moduleBlocks.date) : desc(moduleBlocks.date), asc(moduleBlocks.module))
+    .limit(limite);
+  return agrupar(filas);
 }
 
-export async function getUpcomingBlocks(today: IsoDate, limit = 30): Promise<Block[]> {
-  return db
-    .select({ id: moduleBlocks.id, date: moduleBlocks.date, module: moduleBlocks.module })
-    .from(moduleBlocks)
-    .where(gte(moduleBlocks.date, today))
-    .orderBy(asc(moduleBlocks.date), asc(moduleBlocks.module))
-    .limit(limit);
+/** Every reservation of a month, in date order. */
+export function getReservationsForMonth(month: IsoMonth): Promise<Reserva[]> {
+  return leerReservas(
+    and(gte(moduleBlocks.date, firstDayOfMonth(month)), lt(moduleBlocks.date, firstDayOfMonth(addMonthsToMonth(month, 1)))),
+    "asc",
+    200,
+  );
+}
+
+/** From today on, in date order. The bookable range is 12 months, so 800 modules is every one. */
+export function getUpcomingReservations(today: IsoDate): Promise<Reserva[]> {
+  return leerReservas(and(gte(moduleBlocks.date, today)), "asc", 800);
+}
+
+/** Before today, newest first. */
+export function getPastReservations(today: IsoDate, limite = 200): Promise<Reserva[]> {
+  return leerReservas(and(lt(moduleBlocks.date, today)), "desc", limite);
+}
+
+/** The modules already taken on one date (for the "Nueva reserva" form). */
+export async function getTakenModules(date: IsoDate): Promise<ModuleCode[]> {
+  const filas = await db.select({ module: moduleBlocks.module }).from(moduleBlocks).where(eq(moduleBlocks.date, date));
+  return filas.map((fila) => fila.module);
 }
 
 function isUniqueViolation(error: unknown): boolean {
@@ -169,32 +198,54 @@ function isUniqueViolation(error: unknown): boolean {
   return false;
 }
 
-// One INSERT of one or two rows plus its audit row, in one transaction: "día completo" is atomic and
-// the unique (date, module) constraint decides conflicts (D-003, G-006). Returns the new ids (for Deshacer).
-export async function insertBlocks(input: {
+// The reservation, its one or two modules and the audit row in one batch (one transaction on the HTTP
+// driver): "día completo" is atomic and the unique (date, module) constraint decides conflicts (D-003,
+// G-006). The audit row carries no name or phone: it is kept 12 months, the client data only 90 days.
+export async function insertReservation(input: {
   date: IsoDate;
   modules: ModuleCode[];
+  clientName: string;
+  clientPhone: string | null;
   sessionId: string;
   ipHash: string;
-}): Promise<string[] | "taken"> {
+}): Promise<string | "taken"> {
+  const id = randomUUID();
   try {
-    const [inserted] = await db.batch([
-      db
-        .insert(moduleBlocks)
-        .values(input.modules.map((module) => ({ date: input.date, module })))
-        .returning({ id: moduleBlocks.id }),
+    await db.batch([
+      db.insert(reservations).values({ id, date: input.date, clientName: input.clientName, clientPhone: input.clientPhone }),
+      db.insert(moduleBlocks).values(input.modules.map((module) => ({ date: input.date, module, reservationId: id }))),
       db.insert(adminAudit).values({
         action: "block",
-        detail: { date: input.date, modules: input.modules },
+        detail: { date: input.date, modules: input.modules, reservation: id },
         ipHash: input.ipHash,
         sessionId: input.sessionId,
       }),
     ]);
-    return inserted.map((row) => row.id);
+    return id;
   } catch (error) {
     if (isUniqueViolation(error)) return "taken";
     throw error;
   }
+}
+
+// Deleting the reservation deletes its modules (on delete cascade); audited in the same statement.
+// null when it no longer exists.
+export async function deleteReservation(input: { id: string; sessionId: string; ipHash: string }): Promise<{ date: IsoDate } | null> {
+  const result = await db.execute<{ date: IsoDate }>(sql`
+    with modulos as (
+      select coalesce(jsonb_agg(${moduleBlocks.module} order by ${moduleBlocks.module}), '[]'::jsonb) as lista
+      from ${moduleBlocks} where ${moduleBlocks.reservationId} = ${input.id}
+    ),
+    deleted as (
+      delete from ${reservations} where ${reservations.id} = ${input.id}
+      returning ${reservations.date}
+    )
+    insert into ${adminAudit} (action, detail, ip_hash, session_id)
+    select 'unblock', jsonb_build_object('date', deleted.date, 'modules', modulos.lista, 'reservation', ${input.id}::text), ${input.ipHash}, ${input.sessionId}
+    from deleted, modulos
+    returning detail ->> 'date' as date
+  `);
+  return result.rows[0] ?? null;
 }
 
 // Delete and audit in one statement; null when the block no longer exists.
