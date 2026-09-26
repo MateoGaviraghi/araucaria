@@ -29,7 +29,7 @@ Out of scope: denial of service at network scale (Vercel's default mitigation), 
 | `login` | ✅ (rate-limited) | ✅ |
 | `logout` | ❌ | ✅ |
 | Panel reads (reservations with name and phone) | ❌ | ✅ |
-| `takenModules` | ❌ | ✅ |
+| `takenInMonth` | ❌ | ✅ |
 | `createReservation` | ❌ | ✅ |
 | `cancelReservation` | ❌ | ✅ |
 | `unblockModule` (modules loaded before `D-046`) | ❌ | ✅ |

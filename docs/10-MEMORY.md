@@ -634,6 +634,33 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the owner needs more than one reservation per module (it cannot happen: the unique constraint), or wants to edit a reservation instead of cancelling and creating it again.
 
+### D-047 · 2026-09-25 · "Nueva reserva" picks the date on a month calendar beside the day's modules
+
+**What he asked, in his words:** trying `D-046` on the iPhone, *"no me gusta en la página de reserva cómo elegir la fecha, quiero que aparezca un calendario profesional para elegir; lo demás está bien"*. Round of 4 date pickers (Origin UI Appointment picker, shadcn/ui Calendar date picker, coss Calendar, Apple Calendar Picker) → *"la 1, go"*.
+
+**Decision** (`components/admin/nueva-reserva.tsx`, `components/admin/dialogo.tsx` `amplio`, `app/admin/actions.ts` `takenInMonth`, `lib/dal.ts` `getTakenInMonth`, `app/admin/admin.css` `.pn-cal-mini*`):
+- The native date input is gone. The dialog widens to 46rem.
+- **Left: the month.**
+  - Arrows are limited to the bookable range; today is ringed; the chosen day is beige.
+  - A day with one module reserved carries a beige dot. A full day is struck out in the error red and cannot be chosen.
+  - Past days are only dimmed. At first they were struck too, and read like "Completo".
+  - Each day's `aria-label` says its state ("sábado 26, con un módulo reservado").
+  - 44 px targets, also at 360 px.
+- **Right: the chosen day.** Its long date and the three modules, with the taken ones disabled and saying "Ocupado".
+- The month's taken modules come from `takenInMonth` (date and module only, after `requireAdmin()`); it replaces `takenModules`.
+- The name and phone fields sit side by side from 40rem.
+- A free day tapped in the Calendario opens the dialog with that day chosen.
+
+**Verified** on the dev branch, with a test session revoked by the panel's own logout and the test reservations cancelled:
+- 26/09 Noche and 27/09 Día completo reserved from the new calendar.
+- Then: 26 had the dot and its Noche and Día completo were disabled; 27 was struck and disabled; past days were disabled.
+- Month forward and back, with the back arrow disabled on the first month.
+- The day comes chosen from the Calendario.
+- At 375 and 360: 0 overflow and 44 px days. 0 console errors.
+- Found and fixed: the hover style beat the chosen day's beige (dark text on dark while the pointer stayed on it).
+
+**Rejected:** the native date input (*"no me gusta… cómo elegir la fecha"*); the Apple Calendar Picker (all red, with a time field this salon does not use).
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

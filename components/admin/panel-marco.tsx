@@ -233,8 +233,9 @@ export function PanelMarco({ children }: { children: ReactNode }) {
 
       <Dialogo
         abierto={nueva !== null}
+        amplio
         titulo="Nueva reserva"
-        subtitulo="Queda guardada al tocar «Guardar reserva» y el día se ve ocupado en el sitio."
+        subtitulo="Elegí el día y el módulo. Al guardar, el día se ve ocupado en el sitio."
         alCerrar={() => setNueva(null)}
       >
         <NuevaReserva

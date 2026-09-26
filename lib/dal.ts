@@ -185,10 +185,13 @@ export function getPastReservations(today: IsoDate, limite = 200): Promise<Reser
   return leerReservas(and(lt(moduleBlocks.date, today)), "desc", limite);
 }
 
-/** The modules already taken on one date (for the "Nueva reserva" form). */
-export async function getTakenModules(date: IsoDate): Promise<ModuleCode[]> {
-  const filas = await db.select({ module: moduleBlocks.module }).from(moduleBlocks).where(eq(moduleBlocks.date, date));
-  return filas.map((fila) => fila.module);
+/** Every module taken in a month, for the calendar of "Nueva reserva" (D-047). */
+export function getTakenInMonth(month: IsoMonth): Promise<AvailabilityEntry[]> {
+  return db
+    .select({ date: moduleBlocks.date, module: moduleBlocks.module })
+    .from(moduleBlocks)
+    .where(and(gte(moduleBlocks.date, firstDayOfMonth(month)), lt(moduleBlocks.date, firstDayOfMonth(addMonthsToMonth(month, 1)))))
+    .orderBy(asc(moduleBlocks.date), asc(moduleBlocks.module));
 }
 
 function isUniqueViolation(error: unknown): boolean {

@@ -1131,6 +1131,172 @@
   flex: 1 1 8rem;
 }
 
+/* Nueva reserva (D-047): el mes a un lado y los módulos del día al otro, como el Appointment picker de
+   Origin UI. Completo = tachado; algo reservado = un punto; el estado también va en la etiqueta. */
+
+.pn-dialogo[data-amplio] {
+  width: min(46rem, calc(100% - 2rem));
+}
+
+.pn-agendar {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.pn-cal-mini {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--pn-borde-2);
+  border-radius: 12px;
+  background: var(--pn-lienzo);
+}
+
+.pn-cal-mini-cabeza {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+}
+
+.pn-cal-mini-cabeza .pn-icono-boton:disabled {
+  color: var(--pn-borde-2);
+  background: transparent;
+}
+
+.pn-cal-mini-mes {
+  margin: 0;
+  font-family: var(--pn-serif);
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.pn-cal-mini-semana,
+.pn-cal-mini-dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.125rem;
+}
+
+.pn-cal-mini-semana span {
+  color: var(--pn-tinta-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.pn-cal-mini-dia {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--pn-tinta);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 150ms var(--pn-curva), border-color 150ms var(--pn-curva), color 150ms var(--pn-curva);
+}
+
+.pn-cal-mini-dia:hover:not(:disabled) {
+  border-color: var(--pn-borde-2);
+  background: var(--pn-capa-2);
+}
+
+/* Pasado o fuera de fecha: apagado. Tachado queda solo para "Completo", así no se confunden. */
+.pn-cal-mini-dia:disabled {
+  color: var(--pn-tinta-3);
+  font-weight: 400;
+}
+
+.pn-cal-mini-dia[data-lleno] {
+  text-decoration: line-through;
+  text-decoration-color: var(--pn-error);
+  text-decoration-thickness: 1.5px;
+}
+
+/* Un módulo reservado: un punto debajo del número */
+.pn-cal-mini-dia[data-algo]::after,
+.pn-cal-mini-leyenda i[data-algo] {
+  content: "";
+  position: absolute;
+  bottom: 0.3125rem;
+  left: 50%;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: 999px;
+  background: var(--pn-beige);
+  transform: translateX(-50%);
+}
+
+.pn-cal-mini-dia[data-hoy] {
+  border-color: var(--pn-tinta-2);
+}
+
+.pn-cal-mini-dia[data-elegido],
+.pn-cal-mini-dia[data-elegido]:hover:not(:disabled) {
+  border-color: var(--pn-beige);
+  background: var(--pn-beige);
+  color: var(--pn-beige-tinta);
+  font-weight: 700;
+}
+
+.pn-cal-mini-dia[data-elegido][data-algo]::after {
+  background: var(--pn-beige-tinta);
+}
+
+.pn-cal-mini-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0.25rem 0 0;
+  color: var(--pn-tinta-2);
+  font-size: 0.75rem;
+}
+
+.pn-cal-mini-leyenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.pn-cal-mini-leyenda i[data-algo] {
+  position: static;
+  display: inline-block;
+  transform: none;
+}
+
+.pn-cal-mini-leyenda s {
+  color: var(--pn-tinta-3);
+  text-decoration-color: var(--pn-error);
+  text-decoration-thickness: 1.5px;
+}
+
+.pn-agendar-modulos {
+  align-content: start;
+}
+
+.pn-form-fila {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 40rem) {
+  .pn-agendar {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .pn-form-fila {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
 /* Detalle de una reserva */
 
 .pn-datos {

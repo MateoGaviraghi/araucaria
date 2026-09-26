@@ -3,7 +3,7 @@
 import { updateTag } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { z } from "zod";
-import type { ModuleCode } from "@/components/calendar/month";
+import type { AvailabilityEntry, ModuleCode } from "@/components/calendar/month";
 import type { ActionResult } from "@/lib/action-result";
 import { SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from "@/lib/auth/config";
 import { clientIp, hashIp } from "@/lib/auth/ip";
@@ -11,12 +11,12 @@ import {
   AVAILABILITY_TAG,
   deleteBlock,
   deleteReservation,
-  getTakenModules,
+  getTakenInMonth,
   insertReservation,
   requireAdmin,
   revokeSession,
 } from "@/lib/dal";
-import { isValidIsoDate, lastBookableDate, todayInBuenosAires } from "@/lib/dates";
+import { isValidIsoDate, isValidIsoMonth, lastBookableDate, todayInBuenosAires } from "@/lib/dates";
 
 // Admin Server Actions are public endpoints: requireAdmin() comes first (C-05), then zod (C-08).
 
@@ -115,18 +115,18 @@ export async function unblockModule(input: { id: string }): Promise<ActionResult
   }
 }
 
-/** Which modules are already taken on a date, for the "Nueva reserva" form. */
-export async function takenModules(input: { date: string }): Promise<ActionResult<{ modules: ModuleCode[] }>> {
+/** The modules taken in a month, for the calendar of "Nueva reserva" (D-047). Date and module only. */
+export async function takenInMonth(input: { month: string }): Promise<ActionResult<{ taken: AvailabilityEntry[] }>> {
   const session = await requireAdmin();
   if (!session) return { ok: false, code: "UNAUTHORIZED" };
 
-  const parsed = z.object({ date: Fecha }).safeParse(input);
+  const parsed = z.object({ month: z.string().refine(isValidIsoMonth) }).safeParse(input);
   if (!parsed.success) return { ok: false, code: "INVALID_INPUT" };
 
   try {
-    return { ok: true, data: { modules: await getTakenModules(parsed.data.date) } };
+    return { ok: true, data: { taken: await getTakenInMonth(parsed.data.month) } };
   } catch (error) {
-    console.error("takenModules: unexpected failure", error);
+    console.error("takenInMonth: unexpected failure", error);
     return { ok: false, code: "RETRY" };
   }
 }

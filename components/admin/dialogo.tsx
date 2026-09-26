@@ -13,6 +13,7 @@ export function Dialogo({
   alCerrar,
   children,
   alerta = false,
+  amplio = false,
 }: {
   abierto: boolean;
   titulo: string;
@@ -21,6 +22,8 @@ export function Dialogo({
   children: ReactNode;
   /** A question that needs an answer (role alertdialog), not a form. */
   alerta?: boolean;
+  /** Room for two columns (the calendar of "Nueva reserva", D-047). */
+  amplio?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const tituloId = useId();
@@ -37,6 +40,7 @@ export function Dialogo({
     <dialog
       ref={ref}
       className="pn-dialogo"
+      data-amplio={amplio ? "" : undefined}
       role={alerta ? "alertdialog" : undefined}
       aria-labelledby={tituloId}
       aria-describedby={subtitulo ? subtituloId : undefined}

@@ -36,7 +36,7 @@ Expected failures are returned values. Only programmer errors throw. The UI maps
 | `login(formData)` | Anonymous | `password: string (1–200)`, `website: string` (honeypot, must be empty), `renderedAt: number` (time trap) | §5 order of `08-SECURITY.md`. Success → session + cookie + audit + purges → redirect `/admin` | `ActionResult` |
 | `logout()` | Admin | none | `requireAdmin()` → set `revoked_at` → clear cookie → audit. The panel then loads `/admin/login` as a full page (`D-046`) | `void` |
 | Panel reads (`getUpcomingReservations`, `getPastReservations`, `getReservationsForMonth`) | Admin (server read in each `/admin` page after `requireAdmin()`) | today / `month: 'YYYY-MM'` | Modules joined with their reservation, grouped per reservation (`lib/reservas.ts`) | `Reserva[]`: `{ id \| null; blockIds; date; modules; clientName; clientPhone }` |
-| `takenModules(input)` | Admin | `date: 'YYYY-MM-DD'` | `requireAdmin()` → the modules already taken that day, for the "Nueva reserva" form | `ActionResult<{ modules: ('mediodia' \| 'noche')[] }>` |
+| `takenInMonth(input)` | Admin | `month: 'YYYY-MM'` | `requireAdmin()` → every module taken that month, date and module only (`D-047`) | `ActionResult<{ taken: { date; module }[] }>` |
 | `createReservation(input)` | Admin | `date` (today_AR ≤ date ≤ today_AR + 12 months) · `choice: 'mediodia' \| 'noche' \| 'dia-completo'` · `clientName: string (trimmed, 1–80)` · `clientPhone: string` (10 national digits without 0 or 15, or empty) | `requireAdmin()` → one batch: the reservation, its 1 or 2 modules, audit `block` (date, modules, reservation id; **no name or phone**) → on unique violation `ALREADY_TAKEN` → `updateTag('availability')` | `ActionResult<{ id: string }>`: the id, so the panel can undo at once |
 | `cancelReservation(input)` | Admin | `id: uuid` | `requireAdmin()` → delete the reservation (its modules go with it) and audit `unblock` in one statement → `updateTag('availability')` | `ActionResult`; `NOT_FOUND` when already gone |
 | `unblockModule(input)` | Admin | `id: uuid` (a module row) | Only for modules loaded before `D-046`, which have no reservation: `requireAdmin()` → delete by id → audit `unblock` → `updateTag('availability')` | `ActionResult` |
@@ -47,7 +47,7 @@ Signatures take **identifiers and changes, never whole objects**. Nothing the cl
 export async function createReservation(input: { date: string; choice: string; clientName: string; clientPhone: string }): Promise<ActionResult<{ id: string }>>
 export async function cancelReservation(input: { id: string }): Promise<ActionResult>
 export async function unblockModule(input: { id: string }): Promise<ActionResult>
-export async function takenModules(input: { date: string }): Promise<ActionResult<{ modules: ModuleCode[] }>>
+export async function takenInMonth(input: { month: string }): Promise<ActionResult<{ taken: AvailabilityEntry[] }>>
 ```
 
 ## 3. The WhatsApp handoff
