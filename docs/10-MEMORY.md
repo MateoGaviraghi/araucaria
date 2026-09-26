@@ -673,6 +673,19 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the client names another number. Change only the Vercel variable and redeploy; no code change.
 
+### D-049 · 2026-09-26 · The admin password is one the owners can remember, at least 13 characters (replaces the length rule of `C-01`)
+
+**What he asked, in his words:** *"bajala a esa, sino siempre es un quilombo acordarse para ellos"*, about a 13-character password he chose, after I warned that it was under the 20-character minimum and easy to guess (the salon's name plus its address).
+
+**Decision:**
+- `MIN_PASSPHRASE_LENGTH` in `lib/auth/config.ts`: 20 → 13. `scripts/rotate-password.ts` enforces it; the login itself never checked the length.
+- The production credential was rotated to version 2 on 2026-09-26: I hashed it locally with `lib/auth/password.ts` and ran the script's own upsert-and-audit statement on the `production` branch through the Neon tool, so no connection string was used or printed. Checked with headless Chromium: it logs in to `/admin` in production, and the session was closed with "Cerrar sesión".
+- What still protects it: 5 failures per IP every 15 min and 20 in total per hour (`08-SECURITY.md` §5), scrypt, and the rotation that logs everyone out.
+
+**Accepted risk:** a guessable password. The per-IP limit keeps guessing slow, and the global one can lock the owner out for up to an hour if someone tries on purpose (the trade-off already written in §5). The password was also written in this chat.
+
+**Reopen if:** the audit shows `login_locked` from strangers, or the client wants a stronger one. Rotate it with `npm run rotate-password -- <env file>`.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

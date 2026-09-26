@@ -26,5 +26,5 @@ export const MIN_FORM_FILL_MS = 2000;
 
 export const PASSWORD_MAX_LENGTH = 200;
 
-// C-01: 6 random words or at least 20 random characters.
-export const MIN_PASSPHRASE_LENGTH = 20;
+// C-01 (D-049): chosen by Mateo, at least 13 characters, so the owners can remember it.
+export const MIN_PASSPHRASE_LENGTH = 13;
