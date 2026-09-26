@@ -3,9 +3,14 @@
 // Dibujados a mano en SVG, sin librería: WhatsApp, Gmail, Google Maps e Instagram. El teléfono va como el
 // ícono de la app Teléfono, con el mismo tubo que WhatsApp.
 
+import { useId } from "react";
+
 export type Marca = "whatsapp" | "gmail" | "maps" | "instagram" | "telefono" | "reloj";
 
 export function Logo({ marca, className = "" }: { marca: Marca; className?: string }) {
+  // G-068: cada logo con su propio id de degradé o recorte. Con un id fijo, el primero de la página
+  // gana; si vive dentro de algo oculto (el menú del celular en escritorio), el degradé no se pinta.
+  const uid = `logo${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   switch (marca) {
     case "whatsapp":
       return (
@@ -37,11 +42,11 @@ export function Logo({ marca, className = "" }: { marca: Marca; className?: stri
       return (
         <svg className={className} viewBox="0 0 48 48" aria-hidden="true">
           <defs>
-            <clipPath id="logo-maps-pin">
+            <clipPath id={`${uid}-pin`}>
               <path d="M24 3C16 3 9.5 9.3 9.5 17.2 9.5 28 24 45 24 45s14.5-17 14.5-27.8C38.5 9.3 32 3 24 3z" />
             </clipPath>
           </defs>
-          <g clipPath="url(#logo-maps-pin)">
+          <g clipPath={`url(#${uid}-pin)`}>
             <rect width="48" height="48" fill="#34A853" />
             <path fill="#1A73E8" d="M0 0h24v17.2L12 25H0z" />
             <path fill="#EA4335" d="M24 0h24v12L24 17.2z" />
@@ -54,7 +59,7 @@ export function Logo({ marca, className = "" }: { marca: Marca; className?: stri
       return (
         <svg className={className} viewBox="0 0 32 32" aria-hidden="true">
           <defs>
-            <radialGradient id="logo-ig" cx="30%" cy="107%" r="150%">
+            <radialGradient id={`${uid}-ig`} cx="30%" cy="107%" r="150%">
               <stop offset="0" stopColor="#fdf497" />
               <stop offset="0.05" stopColor="#fdf497" />
               <stop offset="0.45" stopColor="#fd5949" />
@@ -62,7 +67,7 @@ export function Logo({ marca, className = "" }: { marca: Marca; className?: stri
               <stop offset="0.9" stopColor="#285aeb" />
             </radialGradient>
           </defs>
-          <rect width="32" height="32" rx="8" fill="url(#logo-ig)" />
+          <rect width="32" height="32" rx="8" fill={`url(#${uid}-ig)`} />
           <rect x="7" y="7" width="18" height="18" rx="5.2" fill="none" stroke="#fff" strokeWidth="2" />
           <circle cx="16" cy="16" r="4.3" fill="none" stroke="#fff" strokeWidth="2" />
           <circle cx="21.4" cy="10.6" r="1.3" fill="#fff" />
@@ -75,12 +80,12 @@ export function Logo({ marca, className = "" }: { marca: Marca; className?: stri
       return (
         <svg className={className} viewBox="0 0 32 32" aria-hidden="true">
           <defs>
-            <linearGradient id="logo-tel" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${uid}-tel`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor="#5AF575" />
               <stop offset="1" stopColor="#12BF3E" />
             </linearGradient>
           </defs>
-          <rect width="32" height="32" rx="8" fill="url(#logo-tel)" />
+          <rect width="32" height="32" rx="8" fill={`url(#${uid}-tel)`} />
           <path
             fill="#fff"
             transform="translate(-0.4 -0.6) scale(1.02)"

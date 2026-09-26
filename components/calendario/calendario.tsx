@@ -154,6 +154,9 @@ export function Calendario(datos: Datos) {
           setLlego(true);
         },
       });
+      // G-067: el calendario llega transmitido, a veces segundos después que el resto (la base arranca
+      // dormida). Reemplaza un bloque de espera de otro alto: todo lo que se midió debajo se vuelve a medir.
+      ScrollTrigger.refresh();
     },
     { scope: raiz },
   );

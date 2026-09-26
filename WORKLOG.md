@@ -905,3 +905,34 @@ Then Mateo: **"commitea eso primero y deja anotado para cuando yo te pida el com
 **Sin verificar:** the WhatsApp links in production, until Mateo changes the variable and redeploys.
 
 **Gates:** lint ✓ (the touched files).
+
+### 2026-09-26 · WU-11 (cierre) · el header marca la sección correcta (G-067)
+
+**Asked:** *"en desktop, cuando vas pasando en secciones, el header no subraya la sección que corresponde; en la captura estoy en disponibilidad pero está subrayado qué incluye"*.
+
+**Done:**
+- `components/nav/nav.tsx`: the active link is the section crossing mid-screen, looked up on every scroll update. It replaces the four per-section ScrollTriggers.
+- `components/calendario/calendario.tsx`: `ScrollTrigger.refresh()` when the streamed calendar arrives.
+- `G-067`.
+
+**Verified:**
+- Production before the fix: reproduced. At 1440 × 900, "Disponibilidad" was never marked; clicking it left "Qué incluye" or "Dónde estamos" marked.
+- Locally, with a temporary 4 s delay in `Disponibilidad` (removed after): the old code failed twice; the fix gives 0 mismatches at 1920 × 911 and 1440 × 900, scrolling, clicking every header link and with the wheel.
+- **Sin verificar:** production after the push.
+
+**Gates:** lint ✓ · typecheck ✓ (touched files).
+
+### 2026-09-26 · WU-11 (cierre) · el logo de Instagram vuelve a su degradé (G-068)
+
+**Asked:** *"el logo de Instagram también está bugueado, no se muestra el que habíamos puesto; luego sí commit y push"*.
+
+**Done:**
+- `components/cierre/logos.tsx`: gradient and clip ids per instance with `useId()`.
+- `G-068`.
+
+**Verified** locally at 1920 and 375:
+- 0 duplicate ids on the page.
+- The footer logo's pixels show the Instagram gradient.
+- 0 console errors.
+
+**Gates:** lint ✓ · typecheck ✓.

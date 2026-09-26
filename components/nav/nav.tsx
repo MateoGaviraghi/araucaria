@@ -84,18 +84,19 @@ export function Nav() {
       });
     }
 
-    // El link de la sección en la que se está queda marcado.
-    for (const l of LINKS) {
-      const s = document.querySelector(l.href);
-      if (!s) continue;
-      ScrollTrigger.create({
-        trigger: s,
-        start: "top 50%",
-        end: "bottom 50%",
-        onToggle: (st) => st.isActive && setActiva(l.href),
-        onLeaveBack: () => l.href === "#espacio" && setActiva(null),
+    // El link de la sección en la que se está queda marcado: la que cruza la mitad de la pantalla.
+    // Se busca cada vez en la página y no se engancha a un elemento fijo: el calendario llega después
+    // y reemplaza a su bloque de espera, que tiene el mismo id (G-067).
+    const marcar = () => {
+      const mitad = window.innerHeight / 2;
+      const actual = LINKS.find((l) => {
+        const r = document.querySelector(l.href)?.getBoundingClientRect();
+        return r !== undefined && r.top <= mitad && r.bottom > mitad;
       });
-    }
+      setActiva(actual?.href ?? null);
+    };
+    ScrollTrigger.create({ start: 0, end: "max", onUpdate: marcar, onRefresh: marcar });
+    marcar();
   });
 
   // El panel del celular: entra desde la derecha (0,8 s) mientras su borde se estira hacia afuera y
