@@ -4,18 +4,18 @@
 
 ## 1. STATE
 
-**Updated:** 2026-09-25. **The public page is complete, in production, and checked by Mateo on his iPhone** (*"ya lo vi en el iphone, está todo bien"*). **Next: the `/admin` redesign, starting with the login screen.**
+**Updated:** 2026-09-25 (late). **The public page and the owner panel are complete, in production, and checked by Mateo on his iPhone** (*"ya lo vi en el iphone, está todo bien"*).
 
 | | |
 |---|---|
-| **Current task** | Phase 1 of the Araucaria site. The public page is finished. Live, in order: **fixed header** (block 1, `D-041` + `D-042`, Sanalys-style: logo · centred links · "Consultar disponibilidad"; it hides only while the gallery passes) · `HERO` · gallery (block 3) · "Lo que incluye el alquiler" (block 4, `D-037`, with its button to the calendar, `D-040`) · availability calendar with the inquiry form (block 6; on the phone the day panel parks under the header and fills the screen, `D-038`/`D-039`/`D-041`) · closing "Dónde nos encontramos" + footer card (blocks 7 + 8, `D-036`; ARAUCARIA outline as CSS text, `D-038`). No `PRICING-TABLE` (block 5, `D-036`). **Next piece of work: the owner panel `/admin` redesign** |
-| **Real status** | `main` = `origin/main` = `57a4812` (pushed 2026-09-25; Vercel served it ~40 s later), plus this `/cerrar` record (committed and pushed right after). **Verified in production** (`araucaria-multiespacio.vercel.app`) with headless Chromium at 1440 / 1920 / 1024 / 390 / 360: header 70 px on desktop and 67 on the phone after scrolling, 0 px overflow, 0 errors. **Verified by Mateo on his iPhone (2026-09-25):** the header, the menu, the gallery, the day panel and the form, and the footer's ARAUCARIA — *"está todo bien"*. Only branch: `main`. The WhatsApp number in Vercel is still Mateo's test number |
-| **Last chat** | 2026-09-24 → 2026-09-25 (began with `/retomar`): blocks 4 and 1, and the phone corrections `D-037` … `D-042` |
+| **Current task** | Phase 1 of the Araucaria site.<br>**Public page:** finished (see `WU-10`).<br>**Owner panel:** rebuilt in this chat.<br>• `/admin/login`: split screen with the garden photo (`D-043`); the form is in the static shell (`D-044`).<br>• `/admin`: a dashboard with a side menu (a bottom tab bar on the phone), with Inicio, Reservas and Calendario (`D-046`).<br>• Reservations carry the client's name and an optional phone. The table is `reservations`; name and phone are cleared 90 days after the date (C-16).<br>• "Nueva reserva" picks the date on a month calendar beside the day's modules (`D-047`).<br>**Next piece of work:** Mateo names it (never propose it) |
+| **Real status** | `main` = `origin/main` = `d89ddfe`, pushed 2026-09-25, 23:07 ART; Vercel served it ~30 s later. This `/cerrar` record is **uncommitted**.<br>**Migration `0001_swift_grim_reaper`** (`reservations` + `module_blocks.reservation_id`) is applied to **dev and production**. Before production: Neon branch `backup-pre-0001-reservas` (`br-lingering-fog-acsbxjny`).<br>**Production data:**<br>• `admin_credential` exists now: version 1, loaded by Mateo on 2026-09-25 at 20:17 ART. Before that it was missing (`G-058`).<br>• 3 modules loaded with the old panel, shown as "Sin datos del cliente".<br>**Dev data:** 0 reservations, its 3 original modules, no live test session.<br>**Verified by Mateo on his iPhone:** the login, the panel and the date calendar. Verified by me with headless Chromium against dev at 1920 / 1440 / 1366 / 375 / 360, with 0 overflow and 0 console errors. Only branch: `main` |
+| **Last chat** | 2026-09-25 (began with `/retomar`): semgrep scan, the login (`D-043`, `D-044`), the panel (`D-045`, rejected; `D-046`; `D-047`) |
 | **Waiting on me (Claude)** | Nothing |
-| **Waiting on Mateo** | (a) ~~Commit this record~~ — done (Mateo: *"sí, commit y push primero"*). (b) **The first `/admin` screen is decided: the LOGIN** (Mateo, 2026-09-25: *"dejá anotado que arrancamos por el login"*). He asked for the redesign "luego": *"quiero que modifiquemos todo el dashboard admin porque no me gustó nada, y que implementemos /diseno, /web-distintiva y los mejores criterios para dashboard de `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`, usando animación de alertas, GSAP, etc."* |
-| **Waiting on third parties** | The client owes:<br>• `CI-01`, the WhatsApp number. Until then production uses Mateo's test number: in the form, in the footer, and in the phone menu's WhatsApp logo.<br>• `CI-02` and `CI-03`.<br>• `CI-05`, VAT and price validity, still `{{CONFIRMAR}}`.<br>• `CR-01` … `CR-03`: original photos, videos and logo. All colours stay `{{CONFIRMAR}}` until the logo arrives.<br>• `CR-04`: Instagram says 3650.<br>**If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
-| **Next action** | **On `/retomar`: start the `/admin` redesign with the LOGIN screen** (`app/admin/login/`, Mateo chose it on 2026-09-25). Before touching anything:<br>• read `docs/08-SECURITY.md` and load `/seguridad`: every Server Action is a public endpoint, with `requireAdmin()` on the first line;<br>• read the panel rows of `docs/06-UI-UX.md` and `D-018`, `D-019` ("Mitades" + undo), `D-020` (Apple-style alert with the GSAP tick, which Mateo liked: *"genial, está perfecto"*) and `D-032` (full width);<br>• read Mateo's `C:\\Users\\mateo\\Downloads\\CRITERIO-DISENO.md`.<br>Then a `seccion-premium` round through `/diseno`, with uiverse.io and 21st.dev first (memory `referencias-uiverse-21st`) |
-| **Do not touch** | • Pushing `main` without Mateo's word.<br>• `.env.local` — **not even to count or grep a variable**.<br>• The Vercel environment variables.<br>• The production Neon branch (a migration there is class `R3`).<br>• The two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche).<br>• The Neon branch `backup-pre-0000-init`.<br>• `components/cierre/mapa-datos.ts` by hand (it is generated from OpenStreetMap, see `D-036`).<br>• **The designs already rejected** in `D-023`, `D-025`, `D-027`, `D-029`, `D-030`, `D-033`, `D-034`, `D-036`, `D-037`, `D-040` and `D-041`: see each entry's "Rejected" list. Among them: a navbar that is only a round button; hover-only amenity previews; the SVG-text footer outline |
+| **Waiting on Mateo** | (a) Whether to commit (and push) this `/cerrar` record.<br>(b) **Rotate the production database password** (`TD-010`): the `neondb_owner` connection string was shown in this chat. Neon → project araucaria → branch production → reset the role password; then update `DATABASE_URL` in Vercel (Production).<br>(c) Whether to look into the ~3.2 s first load after idle (`OQ-10`) or pay for a Neon plan that does not scale to zero. He chose to move on ("seguir").<br>(d) The next piece of work |
+| **Waiting on third parties** | The client owes:<br>• `CI-01`, the WhatsApp number. Production still uses Mateo's test number.<br>• `CI-02` and `CI-03`.<br>• `CI-05`, VAT and price validity, still `{{CONFIRMAR}}`.<br>• `CR-01` … `CR-03`: original photos, videos and logo. All colours, including the panel's, stay `{{CONFIRMAR}}` until the logo arrives.<br>• `CR-04`: Instagram says 3650.<br>**If `CR-02` arrives filmed wide, `D-027` … `D-030` reopen** |
+| **Next action** | **On `/retomar`:** ask about (a) and (b) above, then wait for Mateo to name the next piece of work.<br>**Any panel change:**<br>• read `D-046` and `D-047` first; they replace `D-019` and `D-045`;<br>• a test session on the **dev** branch works: insert the sha256 of a random token into `admin_sessions` with the current `credential_version`, and log out with the panel's own button at the end;<br>• never touch the production branch for tests.<br>**Any migration:** back up production with a Neon branch first, run `DATABASE_URL=<prod> npm run db:migrate` (`.env.local` does not override a variable already set), and check `drizzle.__drizzle_migrations` |
+| **Do not touch** | • Pushing `main` without Mateo's word.<br>• `.env.local`: **not even to count or grep a variable**.<br>• The Vercel environment variables.<br>• The production Neon branch, except with Mateo's explicit "sí" for that action (a migration there is class `R3`).<br>• The Neon branches `backup-pre-0000-init` and `backup-pre-0001-reservas`.<br>• The two real blocks in the `dev` branch (2026-09-19 Mediodía, 2026-09-20 Noche).<br>• `components/cierre/mapa-datos.ts` by hand (it is generated from OpenStreetMap, see `D-036`).<br>• **The designs already rejected** in `D-023`, `D-025`, `D-027`, `D-029`, `D-030`, `D-033`, `D-034`, `D-036`, `D-037`, `D-040`, `D-041`, `D-043`, `D-045`, `D-046` and `D-047`. Among them:<br>  • anything retro or neubrutalist;<br>  • a reference round made only of uiverse and 21st (memory `referencias-uiverse-21st`);<br>  • the split "Mitades" cells as the way to book;<br>  • a dashboard without a side menu;<br>  • the native date input |
 
 ## 2. LOG
 
@@ -798,3 +798,77 @@ Then Mateo: **"commitea eso primero y deja anotado para cuando yo te pida el com
 **Gates:** none run for this record (docs only).
 
 **Sigue:** the `/admin` redesign, starting with the **login** (Mateo: *"dejá anotado que arrancamos por el login"*).
+
+### 2026-09-25 · WU-11 · semgrep, the login and the owner panel rebuilt, to production
+
+**Asked (Mateo's words, in order):**
+- `/retomar`.
+- *"si a las dos pero antes ten en cuenta esto para la seguridad"*: the `entra-app-registration` and `semgrep` skills. I advised against the first; he answered *"si, instalalo y escaneá"* for semgrep, and *"vamos"* for the login round.
+- Login round, all rejected: *"no me gustó ninguna… componentes retro… la idea era uno de los ejemplos, no que TODO lo hagas en base a eso… vamos con la 5, adaptala al diseño de Araucaria… no me devuelvas hasta tenerlo al 100… /loop"*. Then *"sí commit y push"*.
+- *"demora MUCHÍSIMO en entrar o decir contraseña incorrecta, y puse la supuesta contraseña y me dio error"* → *"a, go"* → *"sí commit y push"*.
+- Production password: *"no pude cargarla, no me deja, hagamos paso a paso"* … *"sí"* (to me building the env file from Neon) … *"listo"* … *"sí, entré"*.
+- *"seguir… quiero que el próximo paso sea armar todo el dashboard completo, profesional, animado, con reglas de estructura y /diseno, hacela toda vos, sé crítico… no vuelvas hasta que esté terminado al 100 /loop"* → *"sí commit y push"*.
+- *"no me gusta nada… súper difícil de entender, súper difícil de cancelar… no hay un navbar al costado, esto no es un dashboard"* → *"1 - nombre y teléfono 2 - esas tres"* → *"la 1 con la 3"* → *"1 - sí 2 - no 3 - go"* → *"1 - sí 2 - sí"* (production migration, then commit and push).
+- *"no me gusta en la página de reserva cómo elegir la fecha, quiero que aparezca un calendario profesional… lo demás está bien"* → *"la 1, go"* → *"sí commit y push"* → *"ya lo vi en el iphone, está todo bien /cerrar"*.
+
+**Done:**
+- **Security scan.**
+  - semgrep 1.178 (pip, user site) and the Trail of Bits `semgrep` skill installed globally (`~/.claude/skills/semgrep`).
+  - Full-repo scan, 9 rulesets including Trail of Bits: **0 findings**. `p/nextjs` covered 0 files, reported as such.
+  - A planted-bug control file caught 1 of 4, so 0 means "no obvious pattern bugs", not "audited".
+  - jq installed with winget (`G-060`). Results only in the scratchpad.
+- **Login** (`D-043`, commit `500bbae`): split screen with `public/media/fotos/jardin.jpg`, the public form's field, "Mostrar"/"Ocultar", the site's `.boton`, a GSAP curtain entrance and one shake on error. Files: `app/admin/login/page.tsx`, `login-form.tsx`, `login-escena.tsx` (new) and `login.css` (new).
+- **Login speed and the missing password** (`D-044`, commit `b2ceca6`).
+  - The form moved to the static shell; `Sesion` and `MarcaDeTiempo` (C-09 server time) are streamed, and "Entrar" waits for the mark.
+  - Production had no `admin_credential` row (`G-058`). Mateo loaded it with `npm run rotate-password -- .env.produccion.local`; I wrote that file from Neon's connection string and deleted it after.
+  - Cold first load is still ~3.2 s (`OQ-10`).
+- **Panel v1** (`D-045`, commit `24d8451`): brand colours and a summary on top. **Rejected** by Mateo on the iPhone.
+- **Panel v2** (`D-046`, commit `1cd0f26`).
+  - Migration `drizzle/0001_swift_grim_reaper.sql`: `reservations`, and `module_blocks.reservation_id` on delete cascade.
+  - `lib/reservas.ts` (new), `lib/dal.ts` (reads, `insertReservation`, `deleteReservation`, and the 90-day purge in `purgeAfterLogin`).
+  - `app/admin/actions.ts`: `createReservation`, `cancelReservation`, `unblockModule` for legacy modules. `logout` no longer redirects.
+  - Routes `app/admin/(panel)/layout.tsx`, `page.tsx`, `reservas/page.tsx`, `calendario/page.tsx`, `esqueleto.tsx`.
+  - `components/admin/`: `panel-marco.tsx`, `secciones.tsx`, `dialogo.tsx`, `nueva-reserva.tsx`, `iconos.tsx`.
+  - `app/admin/admin.css` rewritten.
+  - Deleted: `app/admin/page.tsx`, `components/calendar/admin-calendar.tsx`, `components/ui/bottom-sheet.tsx`.
+  - Production migration applied after the backup branch.
+- **Date calendar** (`D-047`, commit `d89ddfe`): `nueva-reserva.tsx` (the month beside the day's modules), `takenInMonth` in place of `takenModules`, and `Dialogo amplio`.
+- **Docs:** `04-DATA-MODEL` (table, purge), `05-API-CONTRACTS` (actions), `06-UI-UX` (§5 rows), `08-SECURITY` (access matrix, C-16, checklist), and `10-MEMORY` (`D-043` … `D-047`, `G-058` … `G-066`, `TD-010`, `OQ-10`).
+- **Memory updated:** `referencias-uiverse-21st`. uiverse and 21st are one source among all, and nothing retro.
+
+**Verified:**
+- **Login:**
+  - 1920 / 1440 / 1366 / 375 / 390 / 360: 0 overflow and 0 errors.
+  - The entrance measured frame by frame.
+  - The wrong-password shake, and the focus back in the field.
+  - Reduced motion.
+  - The session notice.
+- **Production timing:**
+  - form at 0.3–0.5 s warm and 3.2–3.6 s cold;
+  - a wrong password answers in 0.75 s.
+- **Panel v2 and the date calendar** (dev branch, test sessions revoked by the panel's logout):
+  - create with and without a phone, and a whole day;
+  - a taken module disabled; validation;
+  - search; cancel with the question; "Deshacer";
+  - cancel from the phone;
+  - the calendar states (dot, struck, past), month navigation, and a free day opening the dialog with that day chosen.
+  - Sizes 1920 / 1440 / 1366 / 375 / 360: 0 overflow and 0 errors. The public calendar still loads.
+  - Contrast: every pair ≥ 4.5:1; the lowest is white on "Sí, cancelar", 4.86.
+- **Mateo on his iPhone:** *"está todo bien"*.
+- **Sin verificar:**
+  - what causes the 3.2 s cold first load;
+  - a real client's WhatsApp link from the panel;
+  - the 90-day purge on real data (no reservation is 90 days old yet).
+
+**Resolved on the way (real causes):**
+- `G-058`: the password was missing in production.
+- `G-059`: false hydration mismatch from Playwright's caret hiding.
+- `G-060`: jq CRLF broke the semgrep runner.
+- `G-061`: a drizzle `sql` template lost the regex backslash.
+- `G-062`: the login's inline script after a client navigation.
+- `G-063`: `font: inherit` beating the button classes.
+- The chosen day lost its beige under the hover rule.
+
+**Gates:** lint ✓ · typecheck ✓ · build ✓ before every push.
+
+**Sigue:** Mateo decides whether to commit this record, rotates the production database password (`TD-010`), and names the next piece of work.
