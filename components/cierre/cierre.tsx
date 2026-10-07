@@ -25,7 +25,7 @@ const TELEFONOS = [
 ];
 const MAIL = "Araucaria3650@gmail.com";
 const INSTAGRAM = { ver: "@araucariamultiespacio", url: "https://www.instagram.com/araucariamultiespacio/" };
-const HORARIOS = MODULOS.filter((m) => m.codigo !== "dia-completo");
+const HORARIOS = MODULOS.filter((m) => m.codigo === "mediodia" || m.codigo === "noche");
 
 const CURVA = "power3.out";
 const ABRE = 0.9;

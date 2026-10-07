@@ -50,6 +50,7 @@ When two sources disagree, the row says so and names the winner.
 | `mediodia` | Módulo mediodía | 10:00 a 17:00 hs | **$240.000** |
 | `noche` | Módulo noche | 19:00 a 02:00 hs (ends the next day) | **$240.000** |
 | — (both modules) | Día completo | 10:00 a 02:00 hs | **$400.000** |
+| `personalizado` (`D-050`) | Personalizado | Agreed with the client on WhatsApp ("Horario a coordinar") | **A coordinar** |
 
 - The price **includes cleaning** ("El valor final incluye la limpieza del lugar").
 - VAT included or not, and how long prices are valid: `{{CONFIRMAR}}` (`CI-05`).

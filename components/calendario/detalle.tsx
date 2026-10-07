@@ -1,20 +1,20 @@
 "use client";
 
 import { useRef } from "react";
-import { MODULE_WORDS, enabledChoices, type BlockChoice } from "@/components/calendar/month";
+import { MODULE_WORDS, enabledChoices, type Choice } from "@/components/calendar/month";
 import { MODULOS } from "@/content/modulos";
 import { gsap, useGSAP } from "@/lib/gsap";
 import type { Estado } from "./calendario";
 import { ABRE, CURVA, ENTRE_LINEAS, ESCONDIDO, Mascara, partesDelDia, quieto } from "./comun";
 
 // El día elegido: la fecha en grande y los tres módulos con horario y precio (content/modulos.ts,
-// de docs/01-CONTEXT.md). Lo que no se puede pedir queda tachado y dice por qué. Cada vez que se
+// de docs/01-CONTEXT.md), más "Personalizado", a coordinar por WhatsApp (D-050). Lo que no se puede pedir queda tachado y dice por qué. Cada vez que se
 // elige otro día, las líneas se abren desde su máscara, una detrás de otra.
 //
 // "Seguir con mis datos" lleva al formulario (bloque 6) con el día y el módulo elegidos. El
 // calendario no sale a producción sin el formulario (Mateo, 2026-09-23).
 
-function noDisponible(codigo: BlockChoice) {
+function noDisponible(codigo: Choice) {
   if (codigo === "dia-completo") return "No disponible";
   const palabra = MODULE_WORDS[codigo].crossed;
   return palabra.charAt(0).toUpperCase() + palabra.slice(1);

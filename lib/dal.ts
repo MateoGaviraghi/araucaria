@@ -1,7 +1,8 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, asc, desc, eq, gt, gte, isNotNull, isNull, lt, lte, or, sql } from "drizzle-orm";
+import { and, asc, eq, gt, gte, isNotNull, isNull, lt, lte, ne, or, sql, type SQL } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 import { cacheLife, cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { cache } from "react";
@@ -110,11 +111,17 @@ export async function purgeAfterLogin(): Promise<void> {
     db.delete(loginAttempts).where(lt(loginAttempts.at, sql`now() - interval '24 hours'`)),
     db.delete(adminSessions).where(or(lt(adminSessions.expiresAt, sql`now()`), isNotNull(adminSessions.revokedAt))),
     db.delete(adminAudit).where(lt(adminAudit.at, sql`now() - interval '12 months'`)),
-    // D-046: the client's name and phone are kept until 90 days after the date; the modules stay.
+    // D-046, D-050: the client's name, phone and the notes are kept until 90 days after the date; the
+    // modules and the hours stay.
     db
       .update(reservations)
-      .set({ clientName: null, clientPhone: null })
-      .where(and(lt(reservations.date, sql`current_date - 90`), or(isNotNull(reservations.clientName), isNotNull(reservations.clientPhone)))),
+      .set({ clientName: null, clientPhone: null, notes: null })
+      .where(
+        and(
+          lt(reservations.date, sql`current_date - 90`),
+          or(isNotNull(reservations.clientName), isNotNull(reservations.clientPhone), isNotNull(reservations.notes)),
+        ),
+      ),
   ]);
 }
 
@@ -146,77 +153,127 @@ export async function getAvailability(today: IsoDate): Promise<AvailabilityEntry
 
 // ---- Reservations (owner panel, D-046). Callers run requireAdmin() first.
 
-const filaReserva = {
-  blockId: moduleBlocks.id,
-  date: moduleBlocks.date,
-  module: moduleBlocks.module,
-  reservationId: moduleBlocks.reservationId,
-  clientName: reservations.clientName,
-  clientPhone: reservations.clientPhone,
-};
+type Rango = { desde?: IsoDate; antesDe?: IsoDate };
 
-async function leerReservas(where: ReturnType<typeof and>, orden: "asc" | "desc", limite: number): Promise<Reserva[]> {
-  const filas: FilaReserva[] = await db
-    .select(filaReserva)
-    .from(moduleBlocks)
-    .leftJoin(reservations, eq(reservations.id, moduleBlocks.reservationId))
-    .where(where)
-    .orderBy(orden === "asc" ? asc(moduleBlocks.date) : desc(moduleBlocks.date), asc(moduleBlocks.module))
-    .limit(limite);
-  return agrupar(filas);
+function enRango(columna: typeof reservations.date | typeof moduleBlocks.date, rango: Rango): SQL | undefined {
+  return and(rango.desde ? gte(columna, rango.desde) : undefined, rango.antesDe ? lt(columna, rango.antesDe) : undefined);
+}
+
+// From the reservations, so a "personalizado" that blocks no module is listed too (D-050), plus the
+// modules loaded before D-046, which have no reservation.
+async function leerReservas(rango: Rango, orden: "asc" | "desc", limite: number): Promise<Reserva[]> {
+  const [conDatos, sueltos] = await Promise.all([
+    db
+      .select({
+        blockId: moduleBlocks.id,
+        date: reservations.date,
+        module: moduleBlocks.module,
+        reservationId: reservations.id,
+        clientName: reservations.clientName,
+        clientPhone: reservations.clientPhone,
+        notes: reservations.notes,
+        customFrom: reservations.customFrom,
+        customTo: reservations.customTo,
+      })
+      .from(reservations)
+      .leftJoin(moduleBlocks, eq(moduleBlocks.reservationId, reservations.id))
+      .where(enRango(reservations.date, rango))
+      .limit(limite),
+    db
+      .select({ blockId: moduleBlocks.id, date: moduleBlocks.date, module: moduleBlocks.module })
+      .from(moduleBlocks)
+      .where(and(isNull(moduleBlocks.reservationId), enRango(moduleBlocks.date, rango)))
+      .limit(limite),
+  ]);
+  const filas: FilaReserva[] = [
+    ...conDatos,
+    ...sueltos.map((f) => ({ ...f, reservationId: null, clientName: null, clientPhone: null, notes: null, customFrom: null, customTo: null })),
+  ];
+  const inicio = (r: Reserva) => r.customFrom ?? (r.modules[0] === "noche" ? 1140 : 600);
+  const signo = orden === "asc" ? 1 : -1;
+  return agrupar(filas)
+    .sort((a, b) => signo * (a.date.localeCompare(b.date) || inicio(a) - inicio(b)))
+    .slice(0, limite);
 }
 
 /** Every reservation of a month, in date order. */
 export function getReservationsForMonth(month: IsoMonth): Promise<Reserva[]> {
-  return leerReservas(
-    and(gte(moduleBlocks.date, firstDayOfMonth(month)), lt(moduleBlocks.date, firstDayOfMonth(addMonthsToMonth(month, 1)))),
-    "asc",
-    200,
-  );
+  return leerReservas({ desde: firstDayOfMonth(month), antesDe: firstDayOfMonth(addMonthsToMonth(month, 1)) }, "asc", 200);
 }
 
-/** From today on, in date order. The bookable range is 12 months, so 800 modules is every one. */
+/** From today on, in date order. The bookable range is 12 months, so 800 rows is every one. */
 export function getUpcomingReservations(today: IsoDate): Promise<Reserva[]> {
-  return leerReservas(and(gte(moduleBlocks.date, today)), "asc", 800);
+  return leerReservas({ desde: today }, "asc", 800);
 }
 
 /** Before today, newest first. */
 export function getPastReservations(today: IsoDate, limite = 200): Promise<Reserva[]> {
-  return leerReservas(and(lt(moduleBlocks.date, today)), "desc", limite);
+  return leerReservas({ antesDe: today }, "desc", limite);
 }
 
-/** Every module taken in a month, for the calendar of "Nueva reserva" (D-047). */
-export function getTakenInMonth(month: IsoMonth): Promise<AvailabilityEntry[]> {
+/**
+ * Every module taken in a month, for the calendar of "Nueva reserva" (D-047). While editing, the
+ * reservation's own modules count as free (D-050).
+ */
+export function getTakenInMonth(month: IsoMonth, except?: string): Promise<AvailabilityEntry[]> {
   return db
     .select({ date: moduleBlocks.date, module: moduleBlocks.module })
     .from(moduleBlocks)
-    .where(and(gte(moduleBlocks.date, firstDayOfMonth(month)), lt(moduleBlocks.date, firstDayOfMonth(addMonthsToMonth(month, 1)))))
+    .where(
+      and(
+        enRango(moduleBlocks.date, { desde: firstDayOfMonth(month), antesDe: firstDayOfMonth(addMonthsToMonth(month, 1)) }),
+        except ? or(isNull(moduleBlocks.reservationId), ne(moduleBlocks.reservationId, except)) : undefined,
+      ),
+    )
     .orderBy(asc(moduleBlocks.date), asc(moduleBlocks.module));
 }
 
-function isUniqueViolation(error: unknown): boolean {
+function hasCode(error: unknown, code: string): boolean {
   for (let current: unknown = error; current; current = (current as { cause?: unknown }).cause) {
-    if ((current as { code?: unknown }).code === "23505") return true;
+    if ((current as { code?: unknown }).code === code) return true;
   }
   return false;
 }
 
-// The reservation, its one or two modules and the audit row in one batch (one transaction on the HTTP
-// driver): "día completo" is atomic and the unique (date, module) constraint decides conflicts (D-003,
-// G-006). The audit row carries no name or phone: it is kept 12 months, the client data only 90 days.
-export async function insertReservation(input: {
+const isUniqueViolation = (error: unknown) => hasCode(error, "23505");
+
+/** What the owner loads in "Nueva reserva" and "Editar reserva". */
+export type DatosDeReserva = {
   date: IsoDate;
+  /** The modules it blocks: one, both, or for a "personalizado" the ones its hours overlap (maybe none). */
   modules: ModuleCode[];
   clientName: string;
   clientPhone: string | null;
-  sessionId: string;
-  ipHash: string;
-}): Promise<string | "taken"> {
+  notes: string | null;
+  customFrom: number | null;
+  customTo: number | null;
+};
+
+type Batch = [BatchItem<"pg">, ...BatchItem<"pg">[]];
+
+const filaDeReserva = (datos: DatosDeReserva) => ({
+  date: datos.date,
+  clientName: datos.clientName,
+  clientPhone: datos.clientPhone,
+  notes: datos.notes,
+  customFrom: datos.customFrom,
+  customTo: datos.customTo,
+});
+
+const bloquesDe = (id: string, datos: DatosDeReserva) =>
+  datos.modules.length
+    ? [db.insert(moduleBlocks).values(datos.modules.map((module) => ({ date: datos.date, module, reservationId: id })))]
+    : [];
+
+// The reservation, its one or two modules and the audit row in one batch (one transaction on the HTTP
+// driver): "día completo" is atomic and the unique (date, module) constraint decides conflicts (D-003,
+// G-006). The audit row carries no name or phone: it is kept 12 months, the client data only 90 days.
+export async function insertReservation(input: DatosDeReserva & { sessionId: string; ipHash: string }): Promise<string | "taken"> {
   const id = randomUUID();
   try {
     await db.batch([
-      db.insert(reservations).values({ id, date: input.date, clientName: input.clientName, clientPhone: input.clientPhone }),
-      db.insert(moduleBlocks).values(input.modules.map((module) => ({ date: input.date, module, reservationId: id }))),
+      db.insert(reservations).values({ id, ...filaDeReserva(input) }),
+      ...bloquesDe(id, input),
       db.insert(adminAudit).values({
         action: "block",
         detail: { date: input.date, modules: input.modules, reservation: id },
@@ -227,6 +284,34 @@ export async function insertReservation(input: {
     return id;
   } catch (error) {
     if (isUniqueViolation(error)) return "taken";
+    throw error;
+  }
+}
+
+// The reservation, its modules and the audit row in one batch (one transaction): the old modules go and
+// the new ones come in, so a taken date fails as a whole and nothing changes (D-050). The audit row is
+// written only if the reservation still exists, and like "block" it carries no name, phone or notes.
+export async function updateReservation(
+  input: DatosDeReserva & { id: string; sessionId: string; ipHash: string },
+): Promise<"ok" | "taken" | "missing"> {
+  const detalle = JSON.stringify({ date: input.date, modules: input.modules, reservation: input.id });
+  const batch: Batch = [
+    db.update(reservations).set(filaDeReserva(input)).where(eq(reservations.id, input.id)).returning({ id: reservations.id }),
+    db.delete(moduleBlocks).where(eq(moduleBlocks.reservationId, input.id)),
+    ...bloquesDe(input.id, input),
+    db.execute(sql`
+      insert into ${adminAudit} (action, detail, ip_hash, session_id)
+      select 'edit', ${detalle}::jsonb, ${input.ipHash}, ${input.sessionId}
+      where exists (select 1 from ${reservations} where ${reservations.id} = ${input.id})
+    `),
+  ];
+  try {
+    const [actualizadas] = (await db.batch(batch)) as unknown as [{ id: string }[]];
+    return actualizadas.length ? "ok" : "missing";
+  } catch (error) {
+    if (isUniqueViolation(error)) return "taken";
+    // Its new modules point to a reservation cancelled meanwhile.
+    if (hasCode(error, "23503")) return "missing";
     throw error;
   }
 }

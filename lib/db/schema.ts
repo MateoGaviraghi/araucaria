@@ -27,11 +27,13 @@ export const AUDIT_ACTIONS = [
   "block",
   "unblock",
   "password_rotated",
+  "edit",
 ] as const;
 
 // A reservation the owner loads in the panel (D-046): who booked a date. Its modules are rows of
 // module_blocks pointing here. Personal data, admin-only: never read by the public page (C-15), and
-// name and phone are cleared 90 days after the date (docs/04-DATA-MODEL.md §Purges).
+// name, phone and notes are cleared 90 days after the date (docs/04-DATA-MODEL.md §Purges).
+// A "personalizado" one (D-050) carries its hours and blocks the modules they overlap, maybe none.
 export const reservations = pgTable(
   "reservations",
   {
@@ -41,11 +43,22 @@ export const reservations = pgTable(
     clientName: text("client_name"),
     // "+54" followed by the 10 national digits (D-034), or null when not given
     clientPhone: text("client_phone"),
+    // what the owner writes down about it (D-050), or null
+    notes: text("notes"),
+    // "Personalizado" hours, in minutes from 00:00 of the date; past 1440 is the next day (D-050).
+    // Both null for a module, "día completo", or a reservation loaded before D-050.
+    customFrom: smallint("custom_from"),
+    customTo: smallint("custom_to"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     check("reservations_client_name_check", sql`char_length(${t.clientName}) between 1 and 80`),
     check("reservations_client_phone_check", sql`${t.clientPhone} ~ '^[+]54[0-9]{10}$'`),
+    check("reservations_notes_check", sql`char_length(${t.notes}) between 1 and 500`),
+    check(
+      "reservations_custom_hours_check",
+      sql`(${t.customFrom} is null and ${t.customTo} is null) or (${t.customFrom} between 480 and 1410 and ${t.customTo} > ${t.customFrom} and ${t.customTo} <= 1800 and ${t.customFrom} % 30 = 0 and ${t.customTo} % 30 = 0)`,
+    ),
     index("reservations_date_idx").on(t.date),
   ],
 );
@@ -124,7 +137,7 @@ export const adminAudit = pgTable(
   (t) => [
     check(
       "admin_audit_action_check",
-      sql`${t.action} in ('login_ok', 'login_fail', 'login_locked', 'logout', 'block', 'unblock', 'password_rotated')`,
+      sql`${t.action} in ('login_ok', 'login_fail', 'login_locked', 'logout', 'block', 'unblock', 'password_rotated', 'edit')`,
     ),
     index("admin_audit_at_idx").on(t.at),
   ],

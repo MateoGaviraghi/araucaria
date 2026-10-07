@@ -2,7 +2,7 @@
 
 import { useLenis } from "lenis/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildMonth, type AvailabilityEntry, type BlockChoice, type DayCell } from "@/components/calendar/month";
+import { buildMonth, type AvailabilityEntry, type Choice, type DayCell } from "@/components/calendar/month";
 import { addMonthsToMonth, monthOf, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { Formulario } from "@/components/formulario/formulario";
 import { altoNav } from "@/components/nav/nav";
@@ -29,7 +29,7 @@ const CORTINA = 1.1; // s, power3.inOut: la misma cortina de las historias de la
 export type Datos = { today: IsoDate; lastBookable: IsoDate; entradas: readonly AvailabilityEntry[] | null };
 
 /** Lo que el calendario le pasa al formulario al tocar "Seguir con mis datos". */
-export type Seleccion = { fecha: IsoDate; modulo: BlockChoice };
+export type Seleccion = { fecha: IsoDate; modulo: Choice };
 
 function useEstado({ today, lastBookable, entradas }: Datos) {
   const primero = monthOf(today);
@@ -37,7 +37,7 @@ function useEstado({ today, lastBookable, entradas }: Datos) {
   const [mes, setMes] = useState<IsoMonth>(primero);
   const [sentido, setSentido] = useState(1);
   const [dia, setDia] = useState<DayCell | null>(null);
-  const [modulo, setModulo] = useState<BlockChoice | null>(null);
+  const [modulo, setModulo] = useState<Choice | null>(null);
   const semanas = useMemo(() => buildMonth(mes, entradas ?? [], today, lastBookable), [mes, entradas, today, lastBookable]);
 
   function mover(n: 1 | -1) {

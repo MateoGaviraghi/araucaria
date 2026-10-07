@@ -686,6 +686,24 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the audit shows `login_locked` from strangers, or the client wants a stronger one. Rotate it with `npm run rotate-password -- <env file>`.
 
+### D-050 · 2026-10-07 · Notes on a reservation, a "Personalizado" option with its own hours, and editing a reservation
+
+**What he asked, in his words (from the client):** *"cuando anote una reserva haya un campo de notas, porque ahí es donde marca algunas cosas"* · *"agregar a los tres modos de jornada completa, mediodía o noche, una que sea personalizada… la persona pone personalizado y cuando le llega el mensaje habla… desde WhatsApp como venimos haciendo y ahí pueda cerrar el horario personalizado; en el admin… que ponga de qué hora a qué hora"* · *"hay que poder modificar una reserva"*. To the plan's questions: **"1 - auto 2 - reusar 3 - go"**.
+
+**Decision:**
+- **Notes:** optional, 1–500 characters, in `reservations.notes`. Shown in the detail and on one line in each row of Reservas. Personal data: cleared with name and phone 90 days after the date (`C-16`, §Purges). Never in the audit.
+- **Personalizado, public side:** a fourth option on any day that can be picked, "Personalizado · Horario a coordinar · A coordinar". The WhatsApp message says `Módulo: Personalizado (Horario a coordinar)` and `Valor: A coordinar`. No price or hours are stated: the owner agrees them on WhatsApp. It is not listed among the footer's hours (`components/cierre/cierre.tsx` shows only Mediodía and Noche).
+- **Personalizado, panel side:** the owner picks Desde (08:00 … 23:30) and Hasta (up to 06:00 of the next day), in half hours. Stored as `custom_from` / `custom_to`, minutes from 00:00 of the date (past 1440 = next day), checked by zod (`horarioValido`) and by the database.
+- **What a personalizado blocks ("auto", Mateo's answer 1):** the modules its hours overlap, mediodía 10–17 h and noche 19–02 h (`lib/reservas.ts` `modulosDeHorario`). 14 to 18 → Mediodía; 15 to 21 → both; 17 to 19 → none, and the day stays free on the site. The form says which before saving, and refuses hours over a module already taken. The unique `(date, module)` stays the authority.
+- **Reads:** the panel now reads from `reservations` (left join `module_blocks`) plus the modules with no reservation, because a personalizado can have no module rows.
+- **Editing:** "Editar" in each upcoming row and in the detail opens the same form filled in (`inicial`). `editReservation` updates the row, deletes its modules and inserts the new ones in one batch (one transaction), so a taken date changes nothing (`ALREADY_TAKEN`); audit `edit` with date, modules and id, written only if the reservation still exists (`NOT_FOUND` otherwise). The reservation's own modules count as free in the mini calendar (`takenInMonth({ except })`). "Deshacer" edits it back. Not offered for past reservations (the bookable range refuses them) nor for modules loaded before `D-046`.
+- **Design ("reusar", answer 2):** no reference round. Built from the panel's own pieces: the `.pn-opcion` options, `.pn-input` for two native selects and the textarea, `.pn-datos` for the notes.
+- Migration `0002_whole_dust` (`notes`, `custom_from`, `custom_to`, two checks, `'edit'` in the audit check).
+
+**Rejected / not done:** a reference round for the hour picker (Mateo: "reusar"); blocking the whole day for every personalizado (Mateo chose "auto").
+
+**Reopen if:** the salon wants a price for personalizado, other hour limits than 08:00 → 06:00, or a personalizado that overlaps nothing should still show the day as taken.
+
 ## Open questions
 
 | ID | Question | Why it matters | Default until answered |

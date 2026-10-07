@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useState, useTransition, type ReactNode } from "react";
-import { cancelReservation, createReservation, logout, unblockModule } from "@/app/admin/actions";
+import { cancelReservation, createReservation, editReservation, logout, unblockModule } from "@/app/admin/actions";
 import { MODULE_WORDS } from "@/components/calendar/month";
 import { ConfirmAlert, type AlertMessage } from "@/components/ui/confirm-alert";
 import type { ActionResult } from "@/lib/action-result";
-import type { IsoDate } from "@/lib/dates";
+import { todayInBuenosAires, type IsoDate } from "@/lib/dates";
 import {
-  HORARIO,
   diaLargo,
-  eleccionDe,
+  entradaDe,
+  horarioTexto,
   moduloTexto,
   nombreTexto,
   telefonoTexto,
@@ -25,10 +25,12 @@ import { NuevaReserva, type DatosReserva } from "./nueva-reserva";
 // The frame of the owner panel (D-046): the side menu (a bottom tab bar on the phone), "Nueva reserva"
 // always at hand, and the three shared moments every section uses: create, look at, and cancel a
 // reservation. Each change saves at once and is confirmed by the alert of D-020, with "Deshacer".
+// D-050: and edit one, in the same form as "Nueva reserva", filled in.
 
 type Panel = {
   nuevaReserva: (fecha?: IsoDate) => void;
   verReserva: (reserva: Reserva) => void;
+  editarReserva: (reserva: Reserva) => void;
   cancelarReserva: (reserva: Reserva) => void;
   ocupado: boolean;
 };
@@ -60,12 +62,16 @@ const detalleDe = (date: IsoDate, modulo: string, nombre: string) => `${capitali
 
 type Deshacer = () => Promise<ActionResult<unknown>>;
 
+/** Only a reservation with its data, from today on: the actions refuse past dates. */
+const editable = (reserva: Reserva) => reserva.id !== null && reserva.date >= todayInBuenosAires();
+
 export function PanelMarco({ children }: { children: ReactNode }) {
   const router = useRouter();
   const ruta = usePathname();
   const [ocupado, startTransition] = useTransition();
   const [nueva, setNueva] = useState<{ fecha: IsoDate | null; vez: number } | null>(null);
   const [detalle, setDetalle] = useState<Reserva | null>(null);
+  const [editando, setEditando] = useState<Reserva | null>(null);
   const [aCancelar, setACancelar] = useState<Reserva | null>(null);
   const [aviso, setAviso] = useState<AlertMessage | null>(null);
   const [deshacer, setDeshacer] = useState<Deshacer | null>(null);
@@ -114,21 +120,28 @@ export function PanelMarco({ children }: { children: ReactNode }) {
     );
   }
 
+  // "Deshacer" puts the reservation back as it was.
+  function guardarCambios(original: Reserva, datos: DatosReserva) {
+    const id = original.id;
+    if (!id) return;
+    const detalleTexto = detalleDe(datos.date, MODULE_WORDS[datos.choice].label, datos.clientName);
+    correr(
+      () => editReservation({ ...datos, id }),
+      () => {
+        setEditando(null);
+        avisar("success", "Reserva actualizada", detalleTexto, () => editReservation({ ...entradaDe(original), id }));
+      },
+      detalleTexto,
+    );
+  }
+
   function cancelar(reserva: Reserva) {
-    const detalleTexto = detalleDe(reserva.date, moduloTexto(reserva.modules), nombreTexto(reserva));
+    const detalleTexto = detalleDe(reserva.date, moduloTexto(reserva), nombreTexto(reserva));
     setACancelar(null);
     setDetalle(null);
     if (reserva.id) {
       const id = reserva.id;
-      const rehacer: Deshacer | null = reserva.clientName
-        ? () =>
-            createReservation({
-              date: reserva.date,
-              choice: eleccionDe(reserva.modules),
-              clientName: reserva.clientName ?? "",
-              clientPhone: reserva.clientPhone?.replace(/^\+54/, "") ?? "",
-            })
-        : null;
+      const rehacer: Deshacer | null = reserva.clientName ? () => createReservation(entradaDe(reserva)) : null;
       correr(() => cancelReservation({ id }), () => avisar("success", "Reserva cancelada", detalleTexto, rehacer), detalleTexto);
       return;
     }
@@ -157,6 +170,10 @@ export function PanelMarco({ children }: { children: ReactNode }) {
   const panel: Panel = {
     nuevaReserva: (fecha) => setNueva((actual) => ({ fecha: fecha ?? null, vez: (actual?.vez ?? 0) + 1 })),
     verReserva: setDetalle,
+    editarReserva: (reserva) => {
+      setDetalle(null);
+      setEditando(reserva);
+    },
     cancelarReserva: setACancelar,
     ocupado,
   };
@@ -248,6 +265,25 @@ export function PanelMarco({ children }: { children: ReactNode }) {
       </Dialogo>
 
       <Dialogo
+        abierto={editando !== null}
+        amplio
+        titulo="Editar reserva"
+        subtitulo={editando ? `${nombreTexto(editando)} · ${capitalizar(diaLargo(editando.date))}` : undefined}
+        alCerrar={() => setEditando(null)}
+      >
+        {editando && (
+          <NuevaReserva
+            key={editando.clave}
+            fecha={null}
+            inicial={editando}
+            guardando={ocupado}
+            alGuardar={(datos) => guardarCambios(editando, datos)}
+            alCancelar={() => setEditando(null)}
+          />
+        )}
+      </Dialogo>
+
+      <Dialogo
         abierto={detalle !== null}
         titulo={detalle ? nombreTexto(detalle) : "Reserva"}
         subtitulo={detalle ? capitalizar(diaLargo(detalle.date)) : undefined}
@@ -259,7 +295,7 @@ export function PanelMarco({ children }: { children: ReactNode }) {
               <div>
                 <dt>Módulo</dt>
                 <dd>
-                  {moduloTexto(detalle.modules)} <span>· {HORARIO[eleccionDe(detalle.modules)]}</span>
+                  {moduloTexto(detalle)} <span>· {horarioTexto(detalle)}</span>
                 </dd>
               </div>
               <div>
@@ -275,11 +311,22 @@ export function PanelMarco({ children }: { children: ReactNode }) {
                   )}
                 </dd>
               </div>
+              {detalle.notes && (
+                <div>
+                  <dt>Notas</dt>
+                  <dd className="pn-datos-notas">{detalle.notes}</dd>
+                </div>
+              )}
             </dl>
             <div className="pn-form-acciones">
               <button type="button" className="pn-boton" onClick={() => setDetalle(null)}>
                 Cerrar
               </button>
+              {editable(detalle) && (
+                <button type="button" className="pn-boton" onClick={() => panel.editarReserva(detalle)}>
+                  Editar
+                </button>
+              )}
               <button type="button" className="pn-boton pn-boton-peligro" onClick={() => setACancelar(detalle)}>
                 Cancelar reserva
               </button>
@@ -294,7 +341,7 @@ export function PanelMarco({ children }: { children: ReactNode }) {
         titulo="¿Cancelar esta reserva?"
         subtitulo={
           aCancelar
-            ? `${nombreTexto(aCancelar)} · ${capitalizar(diaLargo(aCancelar.date))} · ${moduloTexto(aCancelar.modules)}. El día vuelve a verse libre en el sitio.`
+            ? `${nombreTexto(aCancelar)} · ${capitalizar(diaLargo(aCancelar.date))} · ${moduloTexto(aCancelar)}. El día vuelve a verse libre en el sitio.`
             : undefined
         }
         alCerrar={() => setACancelar(null)}

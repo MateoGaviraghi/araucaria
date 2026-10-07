@@ -14,12 +14,11 @@ import {
   type IsoMonth,
 } from "@/lib/dates";
 import {
-  HORARIO,
   cuandoTexto,
   diaCorto,
   diaLargo,
   diasEntre,
-  eleccionDe,
+  horarioTexto,
   moduloTexto,
   nombreTexto,
   telefonoTexto,
@@ -71,14 +70,14 @@ function Telefono({ phone }: { phone: string | null }) {
 function Modulo({ reserva }: { reserva: Reserva }) {
   return (
     <span className="pn-modulo-texto">
-      {moduloTexto(reserva.modules)} <span>{HORARIO[eleccionDe(reserva.modules)]}</span>
+      {moduloTexto(reserva)} <span>{horarioTexto(reserva)}</span>
     </span>
   );
 }
 
 /** One reservation in a list: date, who, module, phone and "Cancelar". */
 function FilaReserva({ reserva, pasada = false }: { reserva: Reserva; pasada?: boolean }) {
-  const { verReserva, cancelarReserva, ocupado } = usePanel();
+  const { verReserva, editarReserva, cancelarReserva, ocupado } = usePanel();
   return (
     <li className="pn-fila">
       <button type="button" className="pn-fila-fecha" onClick={() => verReserva(reserva)} aria-label={`Ver la reserva de ${nombreTexto(reserva)}`}>
@@ -93,11 +92,20 @@ function FilaReserva({ reserva, pasada = false }: { reserva: Reserva; pasada?: b
           <Modulo reserva={reserva} />
           <Telefono phone={reserva.clientPhone} />
         </p>
+        {reserva.notes && <p className="pn-fila-notas">{reserva.notes}</p>}
       </div>
       {!pasada && (
-        <button type="button" className="pn-boton pn-boton-peligro" disabled={ocupado} onClick={() => cancelarReserva(reserva)}>
-          Cancelar
-        </button>
+        <div className="pn-fila-acciones">
+          {/* Loaded before D-046: no reservation to edit, only modules to free. */}
+          {reserva.id && (
+            <button type="button" className="pn-boton" disabled={ocupado} onClick={() => editarReserva(reserva)}>
+              Editar
+            </button>
+          )}
+          <button type="button" className="pn-boton pn-boton-peligro" disabled={ocupado} onClick={() => cancelarReserva(reserva)}>
+            Cancelar
+          </button>
+        </div>
       )}
     </li>
   );
@@ -143,7 +151,7 @@ export function Inicio({
             <button type="button" className="pn-tarjeta-accion" onClick={() => verReserva(siguiente)}>
               <span className="pn-cifra">{diaCorto(siguiente.date)}</span>
               <span className="pn-tarjeta-pie">
-                <strong>{moduloTexto(siguiente.modules)}</strong> · {nombreTexto(siguiente)} · {cuandoTexto(diasEntre(today, siguiente.date))}
+                <strong>{moduloTexto(siguiente)}</strong> · {nombreTexto(siguiente)} · {cuandoTexto(diasEntre(today, siguiente.date))}
               </span>
             </button>
           ) : (
@@ -191,7 +199,7 @@ export function Inicio({
                 <div className="pn-semana-reservas">
                   {reservas.map((r) => (
                     <button key={r.clave} type="button" className="pn-chip" onClick={() => verReserva(r)}>
-                      <strong>{moduloTexto(r.modules)}</strong>
+                      <strong>{moduloTexto(r)}</strong>
                       <span>{nombreTexto(r)}</span>
                     </button>
                   ))}
@@ -381,7 +389,7 @@ export function Calendario({
                 <div className="pn-celda-reservas">
                   {delDia(cell.date).map((r) => (
                     <button key={r.clave} type="button" className="pn-chip" onClick={() => verReserva(r)}>
-                      <strong>{moduloTexto(r.modules)}</strong>
+                      <strong>{moduloTexto(r)}</strong>
                       <span>{nombreTexto(r)}</span>
                     </button>
                   ))}
@@ -420,7 +428,7 @@ export function Calendario({
                 <div className="pn-agenda-reservas">
                   {lista.map((r) => (
                     <button key={r.clave} type="button" className="pn-chip" onClick={() => verReserva(r)}>
-                      <strong>{moduloTexto(r.modules)}</strong>
+                      <strong>{moduloTexto(r)}</strong>
                       <span>{nombreTexto(r)}</span>
                     </button>
                   ))}

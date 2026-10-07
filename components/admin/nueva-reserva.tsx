@@ -7,7 +7,7 @@ import {
   MODULE_WORDS,
   buildMonth,
   type AvailabilityEntry,
-  type BlockChoice,
+  type Choice,
   type ModuleCode,
 } from "@/components/calendar/month";
 import {
@@ -20,12 +20,40 @@ import {
   type IsoDate,
   type IsoMonth,
 } from "@/lib/dates";
-import { HORARIO } from "@/lib/reservas";
+import {
+  DESDE_MAX,
+  DESDE_MIN,
+  HASTA_MAX,
+  HORARIO,
+  PASO,
+  eleccionDe,
+  hora,
+  horarioDeHoras,
+  modulosDeHorario,
+  type Reserva,
+} from "@/lib/reservas";
 import { IconoFlecha } from "./iconos";
 
-export type DatosReserva = { date: IsoDate; choice: BlockChoice; clientName: string; clientPhone: string };
+export type DatosReserva = {
+  date: IsoDate;
+  choice: Choice;
+  /** "Personalizado" hours in minutes from 00:00 of the date (D-050); null otherwise. */
+  customFrom: number | null;
+  customTo: number | null;
+  clientName: string;
+  clientPhone: string;
+  notes: string;
+};
 
-const OPCIONES: BlockChoice[] = ["mediodia", "noche", "dia-completo"];
+const OPCIONES: Choice[] = ["mediodia", "noche", "dia-completo", "personalizado"];
+const NOTAS_MAX = 500;
+
+/** From..to in steps of PASO minutes. */
+const pasos = (desde: number, hasta: number) => Array.from({ length: (hasta - desde) / PASO + 1 }, (_, i) => desde + i * PASO);
+const HORAS_DESDE = pasos(DESDE_MIN, DESDE_MAX);
+
+/** "Mediodía y Noche" */
+const modulosEnPalabras = (modules: readonly ModuleCode[]) => modules.map((m) => MODULE_WORDS[m].label).join(" y ");
 const SEMANA = ["L", "M", "M", "J", "V", "S", "D"];
 const SEMANA_LARGA = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
 
@@ -34,13 +62,17 @@ const capitalizar = (texto: string) => `${texto.charAt(0).toUpperCase()}${texto.
 // "Nueva reserva" (D-046, D-047): the month on one side, the chosen day's modules on the other, as in
 // Origin UI's Appointment picker. Full days are struck out, days with something reserved carry a dot,
 // and the modules already taken say "Ocupado": the owner picks a date already seeing what is free.
+// D-050: a fourth choice, "Personalizado", with the hours agreed on WhatsApp; the notes; and the same
+// form, filled in, edits a reservation (`inicial`), whose own modules then count as free.
 export function NuevaReserva({
   fecha,
+  inicial,
   guardando,
   alGuardar,
   alCancelar,
 }: {
   fecha: IsoDate | null;
+  inicial?: Reserva;
   guardando: boolean;
   alGuardar: (datos: DatosReserva) => void;
   alCancelar: () => void;
@@ -50,39 +82,56 @@ export function NuevaReserva({
   const primerMes = monthOf(hoy);
   const ultimoMes = monthOf(ultimo);
 
-  const [mes, setMes] = useState<IsoMonth>(monthOf(fecha ?? hoy));
-  const [date, setDate] = useState<IsoDate | null>(fecha);
-  const [choice, setChoice] = useState<BlockChoice | null>(null);
-  const [clientName, setClientName] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
+  const [mes, setMes] = useState<IsoMonth>(monthOf(inicial?.date ?? fecha ?? hoy));
+  const [date, setDate] = useState<IsoDate | null>(inicial?.date ?? fecha);
+  const [choice, setChoice] = useState<Choice | null>(inicial ? eleccionDe(inicial) : null);
+  const [desde, setDesde] = useState<number | null>(inicial?.customFrom ?? null);
+  const [hasta, setHasta] = useState<number | null>(inicial?.customTo ?? null);
+  const [clientName, setClientName] = useState(inicial?.clientName ?? "");
+  const [clientPhone, setClientPhone] = useState(inicial?.clientPhone?.replace(/^\+54/, "") ?? "");
+  const [notes, setNotes] = useState(inicial?.notes ?? "");
   const [ocupados, setOcupados] = useState<{ mes: IsoMonth; lista: AvailabilityEntry[] } | null>(null);
   const [intento, setIntento] = useState(false);
   const id = useId();
 
   useEffect(() => {
     let vigente = true;
-    takenInMonth({ month: mes }).then((result) => {
+    takenInMonth({ month: mes, except: inicial?.id ?? undefined }).then((result) => {
       if (vigente && result.ok && result.data) setOcupados({ mes, lista: result.data.taken });
     });
     return () => {
       vigente = false;
     };
-  }, [mes]);
+  }, [mes, inicial?.id]);
 
   const cargando = ocupados?.mes !== mes;
   const semanas = buildMonth(mes, cargando ? [] : (ocupados?.lista ?? []), hoy, ultimo);
   const celdaElegida = date ? semanas.flat().find((c) => c.date === date && c.status !== "outside-month") : undefined;
   // The chosen day can be in another month than the one on screen: its modules are unknown until it is shown.
   const tomados: ModuleCode[] | null = celdaElegida && !cargando ? MODULE_ORDER.filter((m) => celdaElegida.modules[m] !== null) : null;
-  const libre = (opcion: BlockChoice) =>
-    tomados !== null && (opcion === "dia-completo" ? MODULE_ORDER.every((m) => !tomados.includes(m)) : !tomados.includes(opcion));
+  // "Personalizado" fits any open day; whether its hours fit is checked below.
+  const libre = (opcion: Choice) =>
+    tomados !== null &&
+    (opcion === "personalizado" ||
+      (opcion === "dia-completo" ? MODULE_ORDER.every((m) => !tomados.includes(m)) : !tomados.includes(opcion)));
   const eleccion = choice && libre(choice) ? choice : null;
+  const personalizado = eleccion === "personalizado";
+  const conHoras = desde !== null && hasta !== null;
+  const ocupa = conHoras ? modulosDeHorario(desde, hasta) : [];
+  const pisa = ocupa.filter((m) => tomados?.includes(m));
   const digitos = clientPhone.replace(/\D/g, "");
   const [nombreMes = ""] = formatMonthTitle(mes).split(" de ");
 
   const errores = {
     date: !date ? "Elegí un día en el calendario." : null,
     choice: date && !eleccion ? "Elegí el módulo." : null,
+    horas: !personalizado
+      ? null
+      : !conHoras
+        ? "Elegí desde y hasta qué hora."
+        : pisa.length
+          ? `Ese horario se superpone con ${modulosEnPalabras(pisa)}, ya reservado.`
+          : null,
     clientName: !clientName.trim() ? "Escribí el nombre de quien reserva." : null,
     clientPhone: digitos && !/^[1-9][0-9]{9}$/.test(digitos) ? "Son 10 números, sin el 0 ni el 15." : null,
   };
@@ -101,7 +150,15 @@ export function NuevaReserva({
         event.preventDefault();
         setIntento(true);
         if (!valido || !eleccion || !date || guardando) return;
-        alGuardar({ date, choice: eleccion, clientName: clientName.trim(), clientPhone: digitos });
+        alGuardar({
+          date,
+          choice: eleccion,
+          customFrom: personalizado ? desde : null,
+          customTo: personalizado ? hasta : null,
+          clientName: clientName.trim(),
+          clientPhone: digitos,
+          notes: notes.trim(),
+        });
       }}
     >
       <div className="pn-agendar">
@@ -207,13 +264,81 @@ export function NuevaReserva({
                       onChange={() => setChoice(opcion)}
                     />
                     <span className="pn-opcion-nombre">{MODULE_WORDS[opcion].label}</span>
-                    <span className="pn-opcion-detalle">{tomados === null ? "Revisando…" : disponible ? HORARIO[opcion] : "Ocupado"}</span>
+                    <span className="pn-opcion-detalle">
+                      {tomados === null
+                        ? "Revisando…"
+                        : !disponible
+                          ? "Ocupado"
+                          : opcion !== "personalizado"
+                            ? HORARIO[opcion]
+                            : conHoras
+                              ? horarioDeHoras(desde, hasta)
+                              : "Otro horario"}
+                    </span>
                   </label>
                 );
               })}
             </div>
           )}
           {intento && errores.choice && <p className="pn-campo-error">{errores.choice}</p>}
+          {personalizado && (
+            <div className="pn-horas">
+              <div className="pn-campo">
+                <label className="pn-campo-etiqueta" htmlFor={`${id}-desde`}>
+                  Desde
+                </label>
+                <select
+                  id={`${id}-desde`}
+                  className="pn-input"
+                  value={desde ?? ""}
+                  aria-invalid={intento && errores.horas && desde === null ? true : undefined}
+                  onChange={(event) => {
+                    const nuevo = Number(event.currentTarget.value);
+                    setDesde(nuevo);
+                    if (hasta !== null && hasta <= nuevo) setHasta(null);
+                  }}
+                >
+                  <option value="" disabled>
+                    Hora
+                  </option>
+                  {HORAS_DESDE.map((m) => (
+                    <option key={m} value={m}>
+                      {hora(m)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="pn-campo">
+                <label className="pn-campo-etiqueta" htmlFor={`${id}-hasta`}>
+                  Hasta
+                </label>
+                <select
+                  id={`${id}-hasta`}
+                  className="pn-input"
+                  value={hasta ?? ""}
+                  aria-invalid={intento && errores.horas && hasta === null ? true : undefined}
+                  onChange={(event) => setHasta(Number(event.currentTarget.value))}
+                >
+                  <option value="" disabled>
+                    Hora
+                  </option>
+                  {pasos((desde ?? DESDE_MIN) + PASO, HASTA_MAX).map((m) => (
+                    <option key={m} value={m}>
+                      {m >= 1440 ? `${hora(m)} (día siguiente)` : hora(m)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {conHoras && !pisa.length && (
+                <p className="pn-campo-nota pn-horas-nota">
+                  {ocupa.length
+                    ? `En el sitio se ve ocupado: ${modulosEnPalabras(ocupa)}.`
+                    : "No pisa ningún módulo: en el sitio el día sigue libre."}
+                </p>
+              )}
+              {intento && errores.horas && <p className="pn-campo-error pn-horas-nota">{errores.horas}</p>}
+            </div>
+          )}
         </fieldset>
       </div>
 
@@ -263,12 +388,31 @@ export function NuevaReserva({
         </div>
       </div>
 
+      <div className="pn-campo">
+        <label className="pn-campo-etiqueta" htmlFor={`${id}-notas`}>
+          Notas <span className="pn-opcional">(opcional)</span>
+        </label>
+        <textarea
+          id={`${id}-notas`}
+          className="pn-input pn-notas"
+          rows={3}
+          maxLength={NOTAS_MAX}
+          placeholder="Lo que tengas que recordar de esta reserva"
+          value={notes}
+          onChange={(event) => setNotes(event.currentTarget.value)}
+          aria-describedby={`${id}-notas-ayuda`}
+        />
+        <p id={`${id}-notas-ayuda`} className="pn-campo-nota">
+          Se borran solas 90 días después de la fecha, como el nombre y el teléfono.
+        </p>
+      </div>
+
       <div className="pn-form-acciones">
         <button type="button" className="pn-boton" onClick={alCancelar}>
           Volver
         </button>
         <button type="submit" className="pn-boton pn-boton-primario" disabled={guardando}>
-          {guardando ? "Guardando…" : "Guardar reserva"}
+          {guardando ? "Guardando…" : inicial ? "Guardar cambios" : "Guardar reserva"}
         </button>
       </div>
     </form>

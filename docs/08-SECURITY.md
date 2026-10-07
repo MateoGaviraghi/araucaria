@@ -31,6 +31,7 @@ Out of scope: denial of service at network scale (Vercel's default mitigation), 
 | Panel reads (reservations with name and phone) | ❌ | ✅ |
 | `takenInMonth` | ❌ | ✅ |
 | `createReservation` | ❌ | ✅ |
+| `editReservation` | ❌ | ✅ |
 | `cancelReservation` | ❌ | ✅ |
 | `unblockModule` (modules loaded before `D-046`) | ❌ | ✅ |
 | Rotate password | ❌ (not an app feature) | ❌ (operator script, §6) |
@@ -49,12 +50,12 @@ Out of scope: denial of service at network scale (Vercel's default mitigation), 
 | C-08 | Input validation | zod on every action; dates within today_AR … today_AR + 12 months; module from an enum; ids are uuids | Malformed POST returns `INVALID_INPUT` |
 | C-09 | Bot filter on login | Honeypot field `website` must be empty; submissions < 2 s after render are rejected as `INVALID_CREDENTIALS` | Filling the hidden field fails |
 | C-10 | Logout | Sets `revoked_at`, clears the cookie, audits. A **visible "Cerrar sesión"** in the panel topbar | Session row revoked after logout |
-| C-11 | Audit | `admin_audit` rows for `login_ok`, `login_fail`, `login_locked`, `logout`, `block`, `unblock`, `password_rotated`, with `ip_hash` and session id. Kept 12 months | Rows appear for each action |
+| C-11 | Audit | `admin_audit` rows for `login_ok`, `login_fail`, `login_locked`, `logout`, `block`, `unblock`, `edit` (`D-050`), `password_rotated`, with `ip_hash` and session id. Kept 12 months | Rows appear for each action |
 | C-12 | Errors | Generic messages to the user; details only in server logs. No stack traces in production | Forced error shows the generic copy |
 | C-13 | Headers | `07-INFRASTRUCTURE.md` §Security headers; `/admin/*` also `noindex` + `no-store` | Response headers in DevTools |
 | C-14 | Secrets | Only `DATABASE_URL` and `IP_HASH_SALT` are secret. Post-build grep of `.next/` for each secret value returns zero hits | Grep before launch |
 | C-15 | Public read minimalism | `getAvailability()` returns only `date` and `module`; it never joins `reservations` | Response payload inspected |
-| C-16 | Client data (`D-046`) | The panel stores the client's name and, optionally, phone (Ley 25.326 personal data). Read only by `/admin` pages after `requireAdmin()`; never in the public read, the audit `detail`, logs or error messages. Name 1–80 characters, phone `+54` + 10 digits, both checked by zod and by the database. Cleared 90 days after the date (`04-DATA-MODEL.md` §Purges) | `select` on `admin_audit.detail` shows no names; a reservation 91 days old has `client_name` null after the next login |
+| C-16 | Client data (`D-046`, `D-050`) | The panel stores the client's name and, optionally, phone and notes (Ley 25.326 personal data; notes may name people or details). Notes: 1–500 characters, cleared with name and phone. Read only by `/admin` pages after `requireAdmin()`; never in the public read, the audit `detail`, logs or error messages. Name 1–80 characters, phone `+54` + 10 digits, both checked by zod and by the database. Cleared 90 days after the date (`04-DATA-MODEL.md` §Purges) | `select` on `admin_audit.detail` shows no names; a reservation 91 days old has `client_name` null after the next login |
 
 ## 5. Login order and limits
 

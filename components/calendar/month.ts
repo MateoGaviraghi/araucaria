@@ -5,14 +5,17 @@ import { addDays, firstDayOfMonth, isoWeekday, monthOf, type IsoDate, type IsoMo
 
 export type ModuleCode = (typeof MODULE_CODES)[number];
 export type BlockChoice = ModuleCode | "dia-completo";
+/** What a visitor or the owner picks: a module, both, or hours of their own (D-050). */
+export type Choice = BlockChoice | "personalizado";
 
 export const MODULE_ORDER: readonly ModuleCode[] = ["mediodia", "noche"];
 
 // UI vocabulary of docs/06-UI-UX.md §5 ("Reservado", D-020), with the grammatical gender it needs.
-export const MODULE_WORDS: Record<BlockChoice, { label: string; crossed: string; freed: string }> = {
+export const MODULE_WORDS: Record<Choice, { label: string; crossed: string; freed: string }> = {
   mediodia: { label: "Mediodía", crossed: "reservado", freed: "liberado" },
   noche: { label: "Noche", crossed: "reservada", freed: "liberada" },
   "dia-completo": { label: "Día completo", crossed: "reservado", freed: "liberado" },
+  personalizado: { label: "Personalizado", crossed: "reservado", freed: "liberado" },
 };
 
 export type Block = { id: string; date: IsoDate; module: ModuleCode };
@@ -96,8 +99,11 @@ export function isSelectableDay(state: PublicDayState): boolean {
   return state === "free" || state === "partial" || state === "unknown";
 }
 
-/** Modules a visitor can ask for: each free one, plus "día completo" only when both are free. */
-export function enabledChoices(cell: DayCell, availabilityLoaded: boolean): BlockChoice[] {
-  if (!availabilityLoaded) return [...MODULE_ORDER, "dia-completo"];
-  return availableChoices(cell);
+/**
+ * What a visitor can ask for: each free module, "día completo" only when both are free, and
+ * "personalizado" on any day they can pick, since its hours are agreed on WhatsApp (D-050).
+ */
+export function enabledChoices(cell: DayCell, availabilityLoaded: boolean): Choice[] {
+  if (!availabilityLoaded) return [...MODULE_ORDER, "dia-completo", "personalizado"];
+  return [...availableChoices(cell), "personalizado"];
 }

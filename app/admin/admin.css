@@ -523,8 +523,14 @@
   border-top: 0;
 }
 
-.pn-fila > .pn-boton {
+.pn-fila-acciones {
+  display: flex;
   grid-column: 1 / -1;
+  gap: 0.5rem;
+}
+
+.pn-fila-acciones .pn-boton {
+  flex: 1;
 }
 
 .pn-fila-fecha {
@@ -614,6 +620,15 @@
 .pn-telefono-link svg {
   width: 1rem;
   height: 1rem;
+}
+
+.pn-fila-notas {
+  overflow: hidden;
+  margin: 0;
+  color: var(--pn-tinta-2);
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pn-fila-meta .pn-apagado {
@@ -1285,6 +1300,29 @@
   gap: 1.25rem;
 }
 
+/* Personalizado (D-050): desde y hasta, de a media hora, debajo de las opciones */
+.pn-horas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.pn-horas-nota {
+  grid-column: 1 / -1;
+}
+
+select.pn-input {
+  cursor: pointer;
+}
+
+.pn-notas {
+  min-height: 5.5rem;
+  padding: 0.625rem 0.75rem;
+  line-height: 1.45;
+  resize: vertical;
+}
+
 @media (min-width: 40rem) {
   .pn-agendar {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
@@ -1331,6 +1369,12 @@
 .pn-datos dd span {
   color: var(--pn-tinta-2);
   font-weight: 400;
+}
+
+.pn-datos dd.pn-datos-notas {
+  font-weight: 400;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .pn-datos dd a {
@@ -1531,8 +1575,12 @@
     grid-template-columns: auto 1fr auto;
   }
 
-  .pn-fila > .pn-boton {
+  .pn-fila-acciones {
     grid-column: auto;
+  }
+
+  .pn-fila-acciones .pn-boton {
+    flex: none;
   }
 
   .pn-herramientas {

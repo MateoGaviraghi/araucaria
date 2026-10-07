@@ -13,8 +13,18 @@ create table reservations (
   date          date not null,
   client_name   text check (char_length(client_name) between 1 and 80), -- null only after the 90-day purge
   client_phone  text check (client_phone ~ '^[+]54[0-9]{10}$'),          -- optional; "+54" + 10 digits (D-034)
-  created_at    timestamptz not null default now()
+  notes         text check (char_length(notes) between 1 and 500),     -- optional (D-050, migration 0002)
+  -- "Personalizado" hours (D-050), minutes from 00:00 of the date; past 1440 is the next day.
+  -- Both null for a module or "día completo". Starts 08:00–23:30, ends by 06:00 next day, half hours.
+  custom_from   smallint,
+  custom_to     smallint,
+  created_at    timestamptz not null default now(),
+  check ((custom_from is null and custom_to is null) or
+         (custom_from between 480 and 1410 and custom_to > custom_from and custom_to <= 1800
+          and custom_from % 30 = 0 and custom_to % 30 = 0))
 );
+-- A "personalizado" blocks the modules its hours overlap (mediodía 10–17 h, noche 19–02 h), maybe none:
+-- the app computes them (lib/reservas.ts modulosDeHorario) and writes them as module_blocks rows.
 
 -- Availability: one row per crossed-out module. Rows loaded before D-046 have no reservation.
 create table module_blocks (
@@ -58,7 +68,7 @@ create table admin_audit (
   at          timestamptz not null default now(),
   action      text not null check (action in
                 ('login_ok','login_fail','login_locked','logout',
-                 'block','unblock','password_rotated')),
+                 'block','unblock','password_rotated','edit')),  -- 'edit': D-050, migration 0002
   detail      jsonb not null default '{}',  -- e.g. {"date":"2026-10-18","modules":["mediodia","noche"]}
   ip_hash     text,
   session_id  uuid
@@ -97,7 +107,7 @@ Purges run **inside the successful-login Server Action**, after the session is c
 | `admin_sessions` | Until expired or revoked | `delete where expires_at < now() or revoked_at is not null` |
 | `admin_audit` | 12 months | `delete where at < now() - interval '12 months'` |
 | `module_blocks` | Indefinitely (tiny) | None in phase 1 |
-| `reservations.client_name`, `client_phone` | Until 90 days after the date (`D-046`) | `update set client_name = null, client_phone = null where date < current_date - 90` (the row and its modules stay) |
+| `reservations.client_name`, `client_phone`, `notes` | Until 90 days after the date (`D-046`, `D-050`) | `update set client_name = null, client_phone = null, notes = null where date < current_date - 90` (the row, its hours and its modules stay) |
 
 ## Migrations
 
