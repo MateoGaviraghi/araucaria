@@ -1312,8 +1312,135 @@
   grid-column: 1 / -1;
 }
 
-select.pn-input {
+/* El desplegable de horas (components/admin/selector-hora.tsx): el campo del panel y una lista propia,
+   no la gris del navegador. */
+.pn-hora {
+  position: relative;
+}
+
+.pn-hora-campo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
   cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.pn-hora-campo:hover {
+  border-color: var(--pn-tinta-2);
+}
+
+.pn-hora[data-abierto] .pn-hora-campo,
+.pn-hora-campo:focus-visible {
+  border-color: var(--pn-beige);
+  outline: none;
+}
+
+.pn-hora-campo[data-invalido] {
+  border-color: var(--pn-error);
+}
+
+.pn-hora-vacia {
+  color: var(--pn-tinta-3);
+  font-weight: 400;
+}
+
+.pn-hora-flecha {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  margin-left: auto;
+  color: var(--pn-tinta-2);
+  transition: transform 180ms var(--pn-curva);
+}
+
+.pn-hora[data-abierto] .pn-hora-flecha {
+  transform: rotate(180deg);
+}
+
+.pn-hora-nota {
+  color: var(--pn-tinta-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pn-hora-lista {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  display: grid;
+  /* Wider than a half-width field, so "00:30  día siguiente" fits on one line. */
+  width: max(100%, 12.5rem);
+  max-height: 14.5rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.375rem;
+  border: 1px solid var(--pn-borde-2);
+  border-radius: 12px;
+  background: var(--pn-capa-2);
+  box-shadow: 0 18px 40px -12px rgb(0 0 0 / 0.6);
+  list-style: none;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pn-borde-2) transparent;
+}
+
+/* "Hasta" is the right column: its list grows to the left, inside the dialog. */
+.pn-horas > .pn-campo:nth-child(2) .pn-hora-lista {
+  right: 0;
+  left: auto;
+}
+
+.pn-hora-lista:focus {
+  outline: none;
+}
+
+.pn-hora-lista li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.pn-hora-lista li[data-activa] {
+  background: var(--pn-lienzo);
+}
+
+.pn-hora-lista li[data-apagada] {
+  color: var(--pn-tinta-3);
+}
+
+.pn-hora-lista li[aria-selected="true"] {
+  background: var(--pn-beige);
+  color: var(--pn-beige-tinta);
+  font-weight: 700;
+}
+
+.pn-hora-lista li[aria-selected="true"] .pn-hora-nota {
+  color: var(--pn-beige-tinta);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pn-hora-lista {
+    animation: pn-hora-abre 160ms var(--pn-curva);
+  }
+}
+
+@keyframes pn-hora-abre {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 
 .pn-notas {

@@ -26,6 +26,7 @@ import {
   HASTA_MAX,
   HORARIO,
   PASO,
+  VENTANA,
   eleccionDe,
   hora,
   horarioDeHoras,
@@ -33,6 +34,7 @@ import {
   type Reserva,
 } from "@/lib/reservas";
 import { IconoFlecha } from "./iconos";
+import { SelectorHora } from "./selector-hora";
 
 export type DatosReserva = {
   date: IsoDate;
@@ -119,6 +121,12 @@ export function NuevaReserva({
   const conHoras = desde !== null && hasta !== null;
   const ocupa = conHoras ? modulosDeHorario(desde, hasta) : [];
   const pisa = ocupa.filter((m) => tomados?.includes(m));
+  // An hour inside a module already taken: a start can't be in [inicio, fin), an end in (inicio, fin].
+  const pisaHora = (minutos: number, extremo: "desde" | "hasta") =>
+    (tomados ?? []).some((m) => {
+      const [inicio, fin] = VENTANA[m];
+      return extremo === "desde" ? minutos >= inicio && minutos < fin : minutos > inicio && minutos <= fin;
+    });
   const digitos = clientPhone.replace(/\D/g, "");
   const [nombreMes = ""] = formatMonthTitle(mes).split(" de ");
 
@@ -284,50 +292,39 @@ export function NuevaReserva({
           {personalizado && (
             <div className="pn-horas">
               <div className="pn-campo">
-                <label className="pn-campo-etiqueta" htmlFor={`${id}-desde`}>
+                <span className="pn-campo-etiqueta" id={`${id}-desde-etiqueta`}>
                   Desde
-                </label>
-                <select
+                </span>
+                <SelectorHora
                   id={`${id}-desde`}
-                  className="pn-input"
-                  value={desde ?? ""}
-                  aria-invalid={intento && errores.horas && desde === null ? true : undefined}
-                  onChange={(event) => {
-                    const nuevo = Number(event.currentTarget.value);
+                  etiquetaId={`${id}-desde-etiqueta`}
+                  valor={desde}
+                  opciones={HORAS_DESDE.map((m) => ({ valor: m, texto: hora(m), apagada: pisaHora(m, "desde") }))}
+                  invalido={Boolean(intento && errores.horas && desde === null)}
+                  alCambiar={(nuevo) => {
                     setDesde(nuevo);
                     if (hasta !== null && hasta <= nuevo) setHasta(null);
                   }}
-                >
-                  <option value="" disabled>
-                    Hora
-                  </option>
-                  {HORAS_DESDE.map((m) => (
-                    <option key={m} value={m}>
-                      {hora(m)}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
               <div className="pn-campo">
-                <label className="pn-campo-etiqueta" htmlFor={`${id}-hasta`}>
+                <span className="pn-campo-etiqueta" id={`${id}-hasta-etiqueta`}>
                   Hasta
-                </label>
-                <select
+                </span>
+                <SelectorHora
                   id={`${id}-hasta`}
-                  className="pn-input"
-                  value={hasta ?? ""}
-                  aria-invalid={intento && errores.horas && hasta === null ? true : undefined}
-                  onChange={(event) => setHasta(Number(event.currentTarget.value))}
-                >
-                  <option value="" disabled>
-                    Hora
-                  </option>
-                  {pasos((desde ?? DESDE_MIN) + PASO, HASTA_MAX).map((m) => (
-                    <option key={m} value={m}>
-                      {m >= 1440 ? `${hora(m)} (día siguiente)` : hora(m)}
-                    </option>
-                  ))}
-                </select>
+                  etiquetaId={`${id}-hasta-etiqueta`}
+                  valor={hasta}
+                  opciones={pasos((desde ?? DESDE_MIN) + PASO, HASTA_MAX).map((m) => ({
+                    valor: m,
+                    texto: hora(m),
+                    nota: m >= 1440 ? "día siguiente" : undefined,
+                    notaCorta: m >= 1440 ? "+1 día" : undefined,
+                    apagada: pisaHora(m, "hasta"),
+                  }))}
+                  invalido={Boolean(intento && errores.horas && hasta === null)}
+                  alCambiar={setHasta}
+                />
               </div>
               {conHoras && !pisa.length && (
                 <p className="pn-campo-nota pn-horas-nota">

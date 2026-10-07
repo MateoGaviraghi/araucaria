@@ -80,7 +80,7 @@ export const HORARIO: Record<BlockChoice, string> = {
 // ---- "Personalizado" (D-050): hours agreed on WhatsApp, in minutes from 00:00 of the date.
 
 /** Where each module sits, in the same minutes: "noche" ends at 02:00 of the next day (26 h). */
-const VENTANA: Record<ModuleCode, readonly [number, number]> = { mediodia: [600, 1020], noche: [1140, 1560] };
+export const VENTANA: Record<ModuleCode, readonly [number, number]> = { mediodia: [600, 1020], noche: [1140, 1560] };
 
 export const PASO = 30;
 /** Starts from 08:00 to 23:30; ends up to 06:00 of the next day (the database checks the same). */

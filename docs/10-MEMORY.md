@@ -704,7 +704,15 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the salon wants a price for personalizado, other hour limits than 08:00 → 06:00, or a personalizado that overlaps nothing should still show the day as taken.
 
-## Open questions
+### D-051 · 2026-10-07 · The "Personalizado" hours are the panel's own dropdown, not the browser's (replaces the native selects of D-050)
+
+**What he said:** *"hacé un diseño más lindo a la hora de mostrar los horarios en el formulario cuando elige personalizado, no esa pedorrada; lo demás está bien"*. I brought a reference round (a two-handle time slider, Origin UI's slot column, shadcn's slots with a summary, a slot grid, iPhone wheels); his answer: *"solo quería que cambies el dropdown de las horas"* → **"go"**.
+
+**Decision:** `components/admin/selector-hora.tsx`: a button styled as the panel's field (hour, a chevron that turns) opens a listbox in the panel's colours (`--pn-capa-2`, 12 px radius, 160 ms entrance, none with reduced motion), scrolled to the chosen hour, which is beige. Hours inside a module already taken are dimmed and say "ocupado" (a start in [start, end), an end in (start, end]); they stay selectable and the form's message explains. After midnight: "día siguiente" in the list, "+1 día" in the field. Keyboard: arrows, PageUp/PageDown, Home/End, Enter/Space, Escape; a tap outside closes it. The list is at least 12.5 rem wide; Hasta's opens to the left so it stays inside the dialog at 375.
+
+**Rejected / not done:** the reference round itself (he only wanted the dropdown restyled); the browser's grey native list.
+
+**Lesson:** when he names one part ("el dropdown de las horas"), the change is that part, not the whole control: ask with one word before opening a reference round.
 
 | ID | Question | Why it matters | Default until answered |
 |---|---|---|---|
