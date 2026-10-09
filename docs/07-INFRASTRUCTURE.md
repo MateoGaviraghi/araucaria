@@ -65,7 +65,9 @@ Temporary sources: `C:\Users\mateo\Downloads\contenido-araucaria\`. Output goes 
 | `hero-poster.jpg` 1080×1920 **155 KB**, `hero-poster.avif` **50 KB** | the clip's own first frame (7 s) | `-frames:v 1 -q:v 4`; AVIF with `libaom-av1 -crf 34 -still-picture 1` |
 | `galeria/*.mp4` — 6 tiles 480×848, 2–8 s, **2.85 MB** together, plus a `.jpg` poster each | 5 of the 6 WhatsApp videos | Same as the hero with `scale=480:-2` and `-crf 28` |
 | `fotos/*.jpg` — 5 stills 1080×1920 and 2 crops ~450 px, **1.19 MB** | the walkthrough; one Instagram carousel screenshot | `-frames:v 1 -q:v 4`; crops with `crop=w:h:x:y`, never upscaled |
-| `logo-araucaria.png` — 404×404, **194 KB** | the Instagram logo card | `crop=404:404:230:238`. Temporary, flat background (`CR-03`) |
+| `logo-araucaria.png` — 256×256, transparent, ~100 KB | `assets/marca/logo-araucaria-transparente.png` (1132 px master, `D-052`) | `scale=256:256:flags=lanczos`. Until 2026-10-09 it was a 404 px crop of the Instagram card |
+
+**Brand files outside the pipeline (`D-052`):** `assets/marca/` holds the two logo masters Mateo recreated on 2026-10-09 (`logo-araucaria-transparente.png`, the emblem on alpha; `logo-araucaria-azul.png`, 1254 px on its navy). From them, by hand: `app/icon.png` (192, the tab), `app/apple-icon.png` (180, home screen, navy version) and `app/opengraph-image.png` (1200×630, navy version centred on its navy, the WhatsApp/Instagram link preview), with `app/opengraph-image.alt.txt`. Next.js turns these files into the `<link rel="icon">` and `og:image` tags; `metadataBase` in `app/layout.tsx` is `https://araucariamultiespacio.com.ar`.
 
 Measured 2026-09-17: **6.64 MB of the 25 MB budget**, 23 files.
 

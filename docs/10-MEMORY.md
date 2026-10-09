@@ -714,6 +714,19 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Lesson:** when he names one part ("el dropdown de las horas"), the change is that part, not the whole control: ask with one word before opening a reference round.
 
+### D-052 · 2026-10-09 · Own domain araucariamultiespacio.com.ar, and the recreated logo everywhere (brings forward the "own domain" of phase 2)
+
+**What he did and asked:** bought `araucariamultiespacio.com.ar` at DonWeb (*"ayudame a configurarlo"*); then, on the WhatsApp preview with no image, *"tendría que estar el logo en ambos lados"* (tab and preview) → **"go"**; he recreated the logo with ChatGPT from the Instagram card (1254 px, a navy and a transparent version) and asked *"modificá por el nuevo logo de calidad en todos los lados que esté"* → **"ok"** to commit and push.
+
+**Decision:**
+- **Domain:** added to the Vercel project `araucaria-multiespacio` with the CLI (`vercel domains add … --scope mateogaviraghi24-gmailcoms-projects`; the Vercel MCP tool was refused for that scope). DNS stays at DonWeb: zone created by Mateo, `A araucariamultiespacio.com.ar 76.76.21.21` (TTL 900) and the `CNAME www → araucariamultiespacio.com.ar` DonWeb created itself; nameservers stay `ns1/ns2.donweb.com`. Chosen over Vercel's nameservers because Vercel marked the A record as recommended and it needs no NIC delegation change. HTTPS was live ~4 min after the records. `araucaria-multiespacio.vercel.app` keeps working.
+- **Link preview and icons:** `metadataBase` = `https://araucariamultiespacio.com.ar`, description from `01-CONTEXT`, Open Graph `es_AR`; `app/icon.png`, `app/apple-icon.png`, `app/opengraph-image.png` (+ `.alt.txt`).
+- **Logo:** the recreated masters live in `assets/marca/`; the header's `public/media/logo-araucaria.png` is now a 256 px transparent cut of them, and `scripts/build-media.sh` builds it from there. `CR-03` becomes PROVISIONAL.
+
+**Pending, Mateo's:** `www` → apex redirect in Vercel (Settings → Domains → Edit → Redirect, 308); the Instagram bio link; whether to move to Vercel Pro, as `D-005` planned for an own domain (commercial use).
+
+**Reopen if:** the client sends the vector logo (replace the masters and rerun the cuts), or DNS moves away from DonWeb.
+
 | ID | Question | Why it matters | Default until answered |
 |---|---|---|---|
 | OQ-01 | **`D-MEASURE`**: which number proves the site works, where it fires, what records it (in whose account), who reads it and when | Without it nobody can say whether phase 2 is justified | Proposal: "consultas enviadas por WhatsApp por semana", counted when the handoff status panel is shown. Tool and reader undecided. Set before launch (WU-09) |

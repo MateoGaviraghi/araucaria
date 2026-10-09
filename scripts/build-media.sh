@@ -82,9 +82,9 @@ CARRUSEL="$SRC/Screenshot 2026-09-15 075500.png"
 ffmpeg -y -v error -i "$CARRUSEL" -vf "crop=452:418:0:0"   -map_metadata -1 -q:v 3 "$OUT/fotos/pileta-cascada.jpg"
 ffmpeg -y -v error -i "$CARRUSEL" -vf "crop=407:418:455:0" -map_metadata -1 -q:v 3 "$OUT/fotos/salon-vacio.jpg"
 
-# Temporary logo, cropped from the same account. Flat dark-blue background, no transparency:
-# CR-03 (the real vector) is still owed by the client.
-ffmpeg -y -v error -i "$SRC/Screenshot 2026-09-15 075435.png" -vf "crop=404:404:230:238" \
+# Logo for the header (D-052): from the 1132 px transparent master in assets/marca/, which Mateo
+# recreated from the Instagram card on 2026-10-09. CR-03 (the client's vector) can still replace it.
+ffmpeg -y -v error -i "$ROOT/assets/marca/logo-araucaria-transparente.png" -vf "scale=256:256:flags=lanczos" \
   -map_metadata -1 "$OUT/logo-araucaria.png"
 
 echo "--- public/media ---"
