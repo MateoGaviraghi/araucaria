@@ -745,6 +745,22 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the salon wants seasonal prices by date, or more modules.
 
+### D-054 · 2026-10-13 · The client's new photos and videos in the gallery and behind the calendar, and a fifth gallery card "El baño y la cocina"
+
+**What he asked, in his words:** *"te hice una carpeta con nuevas imágenes que quiero que pongamos en el sitio público, ya que quiere que usemos esas para mejorar las imágenes"*. To the plan: **"1 - sí 2 - cocina 3 - go"** (add the bathroom and kitchen card; call it "cocina"; go). Before that, **"1 si"** to moving the folder out of `public/media/` (the pipeline wipes that folder, and 230 MB of iPhone files with GPS would have reached a public repo).
+
+**Decision:**
+- Sources in `C:\Users\mateo\Downloads\contenido-araucaria\nuevas-fotos\` (14 files). `scripts/build-media.sh` reads them (`nuevo` for clips → 720×1280 CRF 28, `foto` for HEIC → 9:16 1080×1920), no audio, no metadata. 12.57 MB total.
+- Gallery: El salón = `salon-recorrido`, `salon-ventanales`, `salon-aparador` (clips) + `salon-desde-galeria` (photo); **El baño y la cocina** (new, second, detail "Baño y espacio de lavado con pileta" from `01-CONTEXT`) = `cocina` (clip) + `bano` (photo); El patio = the old `patio` tile + `patio-galeria`, `patio-pergola`, `patio-cesped`; La parrilla and La pileta unchanged (no new material).
+- Desktop gallery: one column per space whatever the count (`grid-auto-flow: column`); it was a fixed 4-column grid and the fifth card wrapped alone.
+- Behind the calendar: `salon-ventanales`, `salon-desde-galeria`, `salon-fondo` replace `salon-ventanal`, `salon-interior` and the Instagram crop `salon-vacio`.
+- Dropped outputs: `galeria/jardin`, `galeria/pergola`, `fotos/salon-interior`, `fotos/salon-ventanal`, `fotos/salon-vacio`. `CR-01`/`CR-02` become PARCIAL.
+- The card tones are `index % 4`, so with five cards La pileta now takes the first tone; with the shift, El patio and La parrilla changed tone too (seen on the phone, not asked).
+
+**Not used:** the photo `IMG_0796` (the kitchen; the clip shows it better) and the two SUM logos (`IMG_0803`, `IMG_0804`), which are step 3.
+
+**Reopen if:** the client sends the pool or the grill in the same quality.
+
 | ID | Question | Why it matters | Default until answered |
 |---|---|---|---|
 | OQ-01 | **`D-MEASURE`**: which number proves the site works, where it fires, what records it (in whose account), who reads it and when | Without it nobody can say whether phase 2 is justified | Proposal: "consultas enviadas por WhatsApp por semana", counted when the handoff status panel is shown. Tool and reader undecided. Set before launch (WU-09) |

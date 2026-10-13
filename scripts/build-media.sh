@@ -59,10 +59,9 @@ tile() { # tile <file> <start> <duration> <name> <poster offset inside the clip>
   clip "$VID/$1" "$2" "$3" 480 28 "$OUT/galeria/$4.mp4"
   frame "$OUT/galeria/$4.mp4" "$5" 480 "$OUT/galeria/$4.jpg"
 }
-tile "WhatsApp Video 2026-09-14 at 09.50.46.mp4" 10  8   jardin  2
+# jardin and pergola left on 2026-10-13: the client's 4K clips of the patio replace them (D-054).
 tile "WhatsApp Video 2026-09-14 at 09.50.46.mp4" 32  8   quincho 0.5
 tile "WhatsApp Video 2026-09-14 at 09.51.05.mp4"  0  8   patio   0.5
-tile "WhatsApp Video 2026-09-14 at 09.51.14.mp4"  0  2.5 pergola 0.5
 tile "WhatsApp Video 2026-09-14 at 09.51.26.mp4"  0  3.9 pileta  0.5
 tile "WhatsApp Video 2026-09-14 at 09.51.37.mp4"  0  2.2 fachada 0.5
 
@@ -72,15 +71,47 @@ tile "WhatsApp Video 2026-09-14 at 09.51.37.mp4"  0  2.2 fachada 0.5
 frame "$HERO"  2.0 1080 "$OUT/fotos/jardin.jpg"
 frame "$HERO" 10.5 1080 "$OUT/fotos/quincho.jpg"
 frame "$HERO" 12.0 1080 "$OUT/fotos/pileta.jpg"
-frame "$HERO" 19.5 1080 "$OUT/fotos/salon-interior.jpg"
-frame "$HERO" 25.5 1080 "$OUT/fotos/salon-ventanal.jpg"
+# salon-interior and salon-ventanal left on 2026-10-13: the client's photos of the salón replace them.
 
 # The two professional photos of the SUM, cropped out of an Instagram carousel screenshot.
 # Better framed than any frame of the videos, but a quarter of the resolution: temporary,
 # and no layout may depend on their crop (06-UI-UX §7, CR-01).
 CARRUSEL="$SRC/Screenshot 2026-09-15 075500.png"
+# salon-vacio left on 2026-10-13 (the client's photos of the salón replace it); pileta-cascada stays.
 ffmpeg -y -v error -i "$CARRUSEL" -vf "crop=452:418:0:0"   -map_metadata -1 -q:v 3 "$OUT/fotos/pileta-cascada.jpg"
-ffmpeg -y -v error -i "$CARRUSEL" -vf "crop=407:418:455:0" -map_metadata -1 -q:v 3 "$OUT/fotos/salon-vacio.jpg"
+
+# ---- The client's material of 2026-10-13 (D-054, CR-01/CR-02 in part) ----------
+# iPhone, 4K. The clips are stored landscape with rotation metadata, which ffmpeg applies before the
+# filters, so `scale=720:-2` is the displayed (vertical) width: 720x1280, like the hero. The photos are
+# HEIC 3:4; the gallery shows every piece 9:16 without cropping it (D-027), so they are cut to 9:16
+# around the centre here, once. HEIC decodes through a tile graph that rejects -vf, hence the PNG step.
+NUE="${NUE:-$SRC/nuevas-fotos}"
+[ -d "$NUE" ] || { echo "new material not found: $NUE"; exit 1; }
+
+nuevo() { # nuevo <file> <start> <duration> <name> <poster offset inside the clip>
+  clip "$NUE/$1" "$2" "$3" 720 28 "$OUT/galeria/$4.mp4"
+  frame "$OUT/galeria/$4.mp4" "$5" 720 "$OUT/galeria/$4.jpg"
+}
+nuevo IMG_0789.MOV 0 8   salon-recorrido 0.5
+nuevo IMG_0793.MOV 0 3.3 salon-ventanales 0.5
+nuevo IMG_0792.MOV 0 2.4 salon-aparador  0.5
+nuevo IMG_2864.mov 0 8   patio-galeria   0.5
+nuevo IMG_2836.mov 0 4.4 patio-pergola   0.5
+nuevo IMG_0968.MOV 0 8   patio-cesped    0.5
+nuevo IMG_2869.mov 0 7   cocina          0.5
+
+foto() { # foto <file.HEIC> <name>
+  local tmp
+  tmp="$(mktemp -u).png"
+  ffmpeg -y -v error -i "$NUE/$1" -frames:v 1 "$tmp"
+  ffmpeg -y -v error -i "$tmp" -map_metadata -1 -q:v 4 \
+    -vf "crop=trunc(ih*9/16/2)*2:ih,scale=1080:1920:flags=lanczos" "$OUT/fotos/$2.jpg"
+  rm -f "$tmp"
+}
+foto IMG_0794.HEIC salon-ventanales
+foto IMG_0799.HEIC salon-desde-galeria
+foto IMG_0800.HEIC salon-fondo
+foto IMG_0798.HEIC bano
 
 # Logo for the header (D-052): from the 1132 px transparent master in assets/marca/, which Mateo
 # recreated from the Instagram card on 2026-10-09. CR-03 (the client's vector) can still replace it.

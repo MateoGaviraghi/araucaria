@@ -416,9 +416,11 @@
     padding-bottom: clamp(40px, 6svh, 96px);
   }
 
+  /* Una columna por espacio, sean cuantos sean (cinco desde D-054). */
   .gal-capas {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
     align-items: start;
     gap: clamp(12px, 1.2vw, 24px);
   }

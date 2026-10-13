@@ -10,13 +10,13 @@ import { ABRE, CURVA, ENTRE_LINEAS, ESCONDIDO, Mascara, partesDelMes, quieto } f
 // 1,2 s, y el nombre sube desde su máscara. Antes de que la sección llegue, todo espera escondido.
 
 const FOTOS = [
-  { src: "/media/fotos/salon-ventanal.jpg", alt: "El salón y su ventanal" },
+  { src: "/media/fotos/salon-ventanales.jpg", alt: "El salón, con el ventanal que da al jardín" },
   { src: "/media/fotos/pileta.jpg", alt: "La pileta" },
   { src: "/media/fotos/jardin.jpg", alt: "El jardín" },
   { src: "/media/fotos/quincho.jpg", alt: "La parrilla" },
-  { src: "/media/fotos/salon-interior.jpg", alt: "El interior del salón" },
+  { src: "/media/fotos/salon-desde-galeria.jpg", alt: "El salón visto desde la galería" },
   { src: "/media/fotos/pileta-cascada.jpg", alt: "La cascada de la pileta" },
-  { src: "/media/fotos/salon-vacio.jpg", alt: "El salón vacío, listo para armar" },
+  { src: "/media/fotos/salon-fondo.jpg", alt: "El salón vacío, listo para armar" },
 ];
 
 const ENTRA = 1.2;

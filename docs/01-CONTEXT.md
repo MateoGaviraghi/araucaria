@@ -98,6 +98,7 @@ Nothing is paid online in phase 1.
 | `IMG_9789.MOV` — iPhone, HEVC, 1080×1920 vertical, 43 s, 58 MB | Good quality; must be transcoded (`07-INFRASTRUCTURE.md`) | Hero / gallery video |
 | 6 WhatsApp videos, 480×848 or 848×480, 2–52 s | Low resolution | Small gallery tiles only |
 | Original photos and 5 videos | With Mateo, not yet in the repo | Replace the temporary assets (`CR-01`, `CR-02`) |
+| 5 photos (HEIC) and 7 clips (4K) from the client, 2026-10-13: salón, patio, bathroom, kitchen | Good quality | In the gallery and behind the calendar since `D-054` |
 
 Local path of the temporary assets: `C:\Users\mateo\Downloads\contenido-araucaria\` (videos in `videos-muestra-salon\`).
 
