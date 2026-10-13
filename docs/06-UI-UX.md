@@ -50,6 +50,8 @@ The order below is the structure. Mateo decides which section is designed next, 
 
 The calendar is animated and professional; its visual and motion design was decided in a `seccion-premium` round (`D-033`): free days lit, one module left at half light with "solo noche" / "solo mediodía", taken days dark with a RESERVADO stamp; picking a day slides a curtain over the photo with the date and the modules. **Accessibility is fixed now:** reachable and operable by keyboard, each day announces its date and state, and focus stays visible.
 
+**On the phone (below 600 px, `D-056`)** a day is ~44 px wide, so it carries no words: a day with one module left shows a **sun** (mediodía free) or a **moon** (noche free) under the number, and a full day is crossed by a **beige diagonal line** from corner to corner that draws itself when the month arrives (where the stamp falls on desktop). The legend there reads "Libre · ☀ Queda mediodía · ☾ Queda noche · ⧄ Reservado". Desktop keeps "solo noche" / "solo mediodía" and the RESERVADO stamp (its box widened to 7.2 em so the last letter fits).
+
 ## 4. The inquiry form (block 6)
 
 ### 4.1 Fields

@@ -775,6 +775,21 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the client sends a vector, or the other spaces open and the site becomes the multiespacio's again.
 
+### D-056 · 2026-10-13 · On the phone the public calendar shows icons and a diagonal line instead of words (changes the phone look of D-033)
+
+**What he said, with a screenshot from his iPhone:** *"hay que mejorar el diseño de cuando dice reservado ya que además de chico encima no entra dentro del día y sobresale y queda feo, y mejorar también que se ve muy pequeño el solo mediodía"*. Two options each; his answer: **"1 b 2 b 3 go"**.
+
+**Cause:** below 600 px a day cell is ~44 px wide; "RESERVADO" needs ~55 px even at 8 px, and "solo mediodía" was 8 px. No size of a word fits.
+
+**Decision (phone only, `components/calendario/grilla.tsx` + `calendario.css`):**
+- One module left: a sun (mediodía free) or a moon (noche free), 15 px, under the number; "solo …" hidden.
+- Full day: a beige diagonal line (1.8 px, inset 5 px, bottom-left to top-right) instead of the stamp, drawn with a GSAP `clip-path` reveal (0.5 s, the stamps' stagger and delay); the number stays dimmed.
+- Phone legend: "Libre · sun Queda mediodía · moon Queda noche · line Reservado".
+- Desktop unchanged, except the stamp's box: 6.2 em → 7.2 em, because the last "O" touched its border.
+- Checked at 360, 375, 390 and 1440 with test blocks on dev (removed after): every icon and line inside its day, no page overflow, no errors.
+
+**Rejected:** A for both — a stamp shrunk to fit ("OCUPADO"), and bigger text without "solo".
+
 | ID | Question | Why it matters | Default until answered |
 |---|---|---|---|
 | OQ-01 | **`D-MEASURE`**: which number proves the site works, where it fires, what records it (in whose account), who reads it and when | Without it nobody can say whether phase 2 is justified | Proposal: "consultas enviadas por WhatsApp por semana", counted when the handoff status panel is shown. Tool and reader undecided. Set before launch (WU-09) |
