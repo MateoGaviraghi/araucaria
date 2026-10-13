@@ -95,6 +95,7 @@ Nothing is paid online in phase 1.
 | 9 Instagram screenshots, ~860 px | Several show two photos side by side (~430 px each) | Temporary imagery only |
 | Logo `logo-araucaria.jpg`, 4 KB | Too small for any real use | Reference only — original needed (`CR-03`) |
 | Logo recreated by Mateo from that card (2026-10-09, `D-052`), 1254 px, navy and transparent versions, in `assets/marca/` | Same design, letters checked | Header, tab icon, link preview — until the client's vector arrives (`CR-03`) |
+| The **SUM's own logo** from the client (2026-10-13), different from the multiespacio's: a brown emblem with wave cut-outs, "ARAUCARIA" in peach and "SUM" in dark blue, on light blue (and a grey-on-white version). PNG 1080×1350, `assets/marca/logo-sum-*` | Good | Header, tab icon, link preview, and the name "Araucaria SUM" since `D-055`. The client says the multiespacio logo is for when the other spaces open |
 | `IMG_9789.MOV` — iPhone, HEVC, 1080×1920 vertical, 43 s, 58 MB | Good quality; must be transcoded (`07-INFRASTRUCTURE.md`) | Hero / gallery video |
 | 6 WhatsApp videos, 480×848 or 848×480, 2–52 s | Low resolution | Small gallery tiles only |
 | Original photos and 5 videos | With Mateo, not yet in the repo | Replace the temporary assets (`CR-01`, `CR-02`) |

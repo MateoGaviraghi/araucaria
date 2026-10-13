@@ -267,7 +267,7 @@ function Pie({ horarios }: { horarios: readonly Modulo[] }) {
             <L>Araucaria</L>
           </p>
           <p className="pie-sub">
-            <L>multiespacio</L>
+            <L>SUM</L>
           </p>
           <p className="pie-frase">
             <L>Salón de eventos con patio, pileta y parrilla, en Candioti Norte.</L>
@@ -323,7 +323,7 @@ function Pie({ horarios }: { horarios: readonly Modulo[] }) {
       </div>
 
       <div className="pie-base">
-        <L>© Araucaria multiespacio · Güemes 3660, Santa Fe</L>
+        <L>© Araucaria SUM · Güemes 3660, Santa Fe</L>
         <L>Barrio Candioti Norte</L>
       </div>
 

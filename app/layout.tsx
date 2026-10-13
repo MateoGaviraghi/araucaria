@@ -16,8 +16,8 @@ const titulo = Instrument_Serif({
 });
 
 // Facts from docs/01-CONTEXT.md. The tab icon, the home-screen icon and the link preview image are the
-// file conventions app/icon.png, app/apple-icon.png and app/opengraph-image.png, cut from the temporary
-// logo until the original arrives (CR-03).
+// file conventions app/icon.png, app/apple-icon.png and app/opengraph-image.png, cut from the SUM logo
+// the client sent (D-055, assets/marca/logo-sum-*).
 const DESCRIPCION =
   "Salón de eventos en Güemes 3660, Santa Fe: cumpleaños, eventos infantiles, reuniones, talleres y celebraciones. Consultá la disponibilidad.";
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_AR",
-    siteName: "Araucaria multiespacio",
+    siteName: "Araucaria SUM",
     title: "Araucaria",
     description: DESCRIPCION,
     url: "/",

@@ -174,11 +174,11 @@ export function Nav() {
     <>
       <header ref={barra} className="nav-barra" data-abierto={abierto ? "" : undefined}>
         <div className="nav-barra-cuerpo">
-          <a className="nav-marca" href="#inicio" onClick={(e) => ir(e, "#inicio")} aria-label="Araucaria multiespacio, al inicio">
-            <Image src="/media/logo-araucaria.png" alt="" width={52} height={52} priority />
+          <a className="nav-marca" href="#inicio" onClick={(e) => ir(e, "#inicio")} aria-label="Araucaria SUM, al inicio">
+            <Image src="/media/logo-sum.png" alt="" width={52} height={52} priority />
             <span className="nav-marca-nombre">
               Araucaria
-              <small>multiespacio</small>
+              <small>SUM</small>
             </span>
           </a>
           <nav className="nav-links" aria-label="Secciones">

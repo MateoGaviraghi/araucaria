@@ -74,7 +74,8 @@
   font-size: 0.62em;
   letter-spacing: 0.34em;
   opacity: 0.72;
-  text-transform: lowercase;
+  /* "SUM" en mayúsculas, como en el logo del SUM (D-055); antes decía "multiespacio" en minúsculas. */
+  text-transform: uppercase;
 }
 
 .nav-links {

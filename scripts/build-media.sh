@@ -113,10 +113,11 @@ foto IMG_0799.HEIC salon-desde-galeria
 foto IMG_0800.HEIC salon-fondo
 foto IMG_0798.HEIC bano
 
-# Logo for the header (D-052): from the 1132 px transparent master in assets/marca/, which Mateo
-# recreated from the Instagram card on 2026-10-09. CR-03 (the client's vector) can still replace it.
-ffmpeg -y -v error -i "$ROOT/assets/marca/logo-araucaria-transparente.png" -vf "scale=256:256:flags=lanczos" \
-  -map_metadata -1 "$OUT/logo-araucaria.png"
+# Logo for the header (D-055): the SUM's brown emblem, cut out of the client's logo on its light blue
+# (assets/marca/logo-sum-emblema.png, 486 px; the waves are holes that show what is behind). The
+# multiespacio logo of D-052 stays in assets/marca/ for when the other spaces open.
+ffmpeg -y -v error -i "$ROOT/assets/marca/logo-sum-emblema.png" -vf "scale=256:256:flags=lanczos" \
+  -map_metadata -1 "$OUT/logo-sum.png"
 
 echo "--- public/media ---"
 find "$OUT" -type f -printf "%8s  %P\n" | sort -k2

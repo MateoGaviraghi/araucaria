@@ -761,6 +761,20 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the client sends the pool or the grill in the same quality.
 
+### D-055 · 2026-10-13 · The site is "Araucaria SUM", with the SUM's own logo (replaces the multiespacio logo of D-052 on the site)
+
+**What he said:** the client sent the SUM's logos, *"que son distintos al del multiespacio"*, which is for when the other spaces open. To the three questions: **"1 - marrón 2 - sí 3 - después"** (the brown version; "Araucaria SUM" where it said "Araucaria multiespacio"; the colours later), then **"go"**.
+
+**Decision:**
+- Header logo `public/media/logo-sum.png`: the brown emblem cut out of the light-blue version, with the waves as holes (alpha from the distance to the background colour), so on the dark header they show the dark blue. Tab icon: the same emblem. Home-screen icon and link preview (1200×630): the full logo ("ARAUCARIA" / "SUM") on its light blue.
+- Name: header "ARAUCARIA / SUM" (the subtitle now uppercase, as in the logo), footer "Araucaria / SUM" and "© Araucaria SUM · Güemes 3660, Santa Fe", `og:site_name` "Araucaria SUM". The Instagram handle and the domain keep "araucariamultiespacio": they are the real ones.
+- Masters in `assets/marca/logo-sum-*`; the multiespacio masters stay there.
+- The site's colours do not change now: `OQ-11`.
+
+**Rejected / not done:** the grey version (Mateo chose the brown one, the version the client sent "con el fondo que va"); the SUM's colours on the whole site (later, `OQ-11`).
+
+**Reopen if:** the client sends a vector, or the other spaces open and the site becomes the multiespacio's again.
+
 | ID | Question | Why it matters | Default until answered |
 |---|---|---|---|
 | OQ-01 | **`D-MEASURE`**: which number proves the site works, where it fires, what records it (in whose account), who reads it and when | Without it nobody can say whether phase 2 is justified | Proposal: "consultas enviadas por WhatsApp por semana", counted when the handoff status panel is shown. Tool and reader undecided. Set before launch (WU-09) |
@@ -773,6 +787,7 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 | OQ-08 | Whether `.claude/launch.json` belongs in the repo. It is the config that starts the dev server for the design rounds; it has stayed untracked through four commits because Mateo has not said | Anyone picking up the project cannot start the preview with one command | Stays untracked and gets named in every handoff. **Closed 2026-09-23:** Mateo said *"si"*; `.claude/launch.json` is committed |
 | OQ-09 | In variant B the captions read *El salón · El salón · El patio · El patio · El patio · El patio · La parrilla · La pileta · La pileta*. Four "El patio" in a row is faithful to the four-space split but it shows | Whether the gallery stays at nine pieces | Stays at nine; the clean fix is dropping one of the four patio pieces and going to eight (raised 2026-09-23, unanswered). **Closed 2026-09-23 by `D-028`:** variant B no longer exists; in the stories each space shows its own takes, so no caption repeats |
 | OQ-10 | The first `/admin/login` load after idle takes ~3.2 s (`G-064`). Options: find why the static shell does not arrive at once (suspect: `no-store` on `/admin/*`), or a Neon plan that does not scale to zero | The owner's first impression of the panel | Mateo chose to move on (2026-09-25: *"seguir"*). Open |
+| OQ-11 | Whether the site takes the SUM logo's colours (light blue, brown, peach, dark blue) instead of today's dark blue and beige (`D-055`). A redesign, done with references on the running page. Mateo: "después" (2026-10-13) |
 
 ## Gotchas
 
