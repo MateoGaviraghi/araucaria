@@ -31,11 +31,11 @@ import { usePanel } from "./panel-marco";
 // The three sections of the owner panel (D-046). Everything is said in words: a reservation reads
 // "Noche · Juan Pérez", never a colour or a half of a square.
 
-const orden = (i: number) => ({ "--i": i }) as CSSProperties;
+export const orden = (i: number) => ({ "--i": i }) as CSSProperties;
 const sinAnio = (date: IsoDate) => formatLongDate(date).replace(/ de \d{4}$/, "");
 const DIA_SEMANA = ["", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-function Cabeza({ titulo, bajada, children }: { titulo: string; bajada: string; children?: React.ReactNode }) {
+export function Cabeza({ titulo, bajada, children }: { titulo: string; bajada: string; children?: React.ReactNode }) {
   return (
     <header className="pn-cabeza pn-anima">
       <div>
@@ -68,9 +68,10 @@ function Telefono({ phone }: { phone: string | null }) {
 }
 
 function Modulo({ reserva }: { reserva: Reserva }) {
+  const { ajustes } = usePanel();
   return (
     <span className="pn-modulo-texto">
-      {moduloTexto(reserva)} <span>{horarioTexto(reserva)}</span>
+      {moduloTexto(reserva)} <span>{horarioTexto(reserva, ajustes)}</span>
     </span>
   );
 }

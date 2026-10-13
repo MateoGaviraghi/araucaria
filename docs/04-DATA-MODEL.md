@@ -26,6 +26,20 @@ create table reservations (
 -- A "personalizado" blocks the modules its hours overlap (mediodía 10–17 h, noche 19–02 h), maybe none:
 -- the app computes them (lib/reservas.ts modulosDeHorario) and writes them as module_blocks rows.
 
+-- The modules' hours and prices, edited by the owner in the panel (D-053, migration 0003). Public.
+-- Seeded with the client's values of 2026-10-13: mediodia 600-1110 $260000, noche 1200-1560 $260000,
+-- dia-completo 600-1560 $500000.
+create table module_settings (
+  code        text primary key check (code in ('mediodia','noche','dia-completo')),
+  start_min   smallint not null,   -- minutes from 00:00 of the date; past 1440 = next day
+  end_min     smallint not null,
+  price       integer not null check (price between 0 and 99999999),  -- whole pesos
+  updated_at  timestamptz not null default now(),
+  check (start_min between 480 and 1410 and end_min > start_min and end_min <= 1800
+         and start_min % 30 = 0 and end_min % 30 = 0)
+);
+-- The app also requires mediodia.end_min <= noche.start_min (zod, updateModuleSettings).
+
 -- Availability: one row per crossed-out module. Rows loaded before D-046 have no reservation.
 create table module_blocks (
   id              uuid primary key default gen_random_uuid(),
@@ -68,7 +82,7 @@ create table admin_audit (
   at          timestamptz not null default now(),
   action      text not null check (action in
                 ('login_ok','login_fail','login_locked','logout',
-                 'block','unblock','password_rotated','edit')),  -- 'edit': D-050, migration 0002
+                 'block','unblock','password_rotated','edit','settings')),  -- 'edit': D-050, 0002; 'settings': D-053, 0003
   detail      jsonb not null default '{}',  -- e.g. {"date":"2026-10-18","modules":["mediodia","noche"]}
   ip_hash     text,
   session_id  uuid

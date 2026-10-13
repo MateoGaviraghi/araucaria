@@ -28,6 +28,7 @@ export const AUDIT_ACTIONS = [
   "unblock",
   "password_rotated",
   "edit",
+  "settings",
 ] as const;
 
 // A reservation the owner loads in the panel (D-046): who booked a date. Its modules are rows of
@@ -80,6 +81,27 @@ export const moduleBlocks = pgTable(
     unique("module_blocks_date_module_key").on(t.date, t.module),
     check("module_blocks_module_check", sql`${t.module} in ('mediodia', 'noche')`),
     index("module_blocks_reservation_id_idx").on(t.reservationId),
+  ],
+);
+
+// The hours and prices of the three modules, edited by the owner in the panel (D-053). One row per
+// choice; minutes from 00:00 of the date (past 1440 is the next day), price in whole pesos. Public.
+export const moduleSettings = pgTable(
+  "module_settings",
+  {
+    code: text("code", { enum: ["mediodia", "noche", "dia-completo"] }).primaryKey(),
+    startMin: smallint("start_min").notNull(),
+    endMin: smallint("end_min").notNull(),
+    price: integer("price").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check("module_settings_code_check", sql`${t.code} in ('mediodia', 'noche', 'dia-completo')`),
+    check(
+      "module_settings_hours_check",
+      sql`${t.startMin} between 480 and 1410 and ${t.endMin} > ${t.startMin} and ${t.endMin} <= 1800 and ${t.startMin} % 30 = 0 and ${t.endMin} % 30 = 0`,
+    ),
+    check("module_settings_price_check", sql`${t.price} between 0 and 99999999`),
   ],
 );
 
@@ -137,7 +159,7 @@ export const adminAudit = pgTable(
   (t) => [
     check(
       "admin_audit_action_check",
-      sql`${t.action} in ('login_ok', 'login_fail', 'login_locked', 'logout', 'block', 'unblock', 'password_rotated', 'edit')`,
+      sql`${t.action} in ('login_ok', 'login_fail', 'login_locked', 'logout', 'block', 'unblock', 'password_rotated', 'edit', 'settings')`,
     ),
     index("admin_audit_at_idx").on(t.at),
   ],

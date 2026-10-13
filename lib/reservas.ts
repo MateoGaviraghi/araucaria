@@ -1,6 +1,7 @@
 // Reservations as the owner panel shows them (D-046). Pure: no React, no I/O, safe in client code.
 
 import { MODULE_ORDER, MODULE_WORDS, type BlockChoice, type Choice, type ModuleCode } from "@/components/calendar/month";
+import { ventana, type Ajustes } from "@/lib/ajustes";
 import { formatDayMonth, isoWeekday, type IsoDate } from "@/lib/dates";
 
 export type Reserva = {
@@ -70,17 +71,10 @@ const eleccionDeModulos = (modules: readonly ModuleCode[]): BlockChoice =>
 export const eleccionDe = (reserva: Reserva): Choice =>
   reserva.customFrom !== null ? "personalizado" : eleccionDeModulos(reserva.modules);
 
-// docs/01-CONTEXT.md, modules and prices.
-export const HORARIO: Record<BlockChoice, string> = {
-  mediodia: "10 a 17 h",
-  noche: "19 a 02 h",
-  "dia-completo": "10 a 02 h",
-};
+/** "10 a 18:30 h": a module's hours as the owner set them in the panel (D-053). */
+export const horarioDe = (ajustes: Ajustes, choice: BlockChoice) => horarioDeHoras(ajustes[choice].desde, ajustes[choice].hasta);
 
 // ---- "Personalizado" (D-050): hours agreed on WhatsApp, in minutes from 00:00 of the date.
-
-/** Where each module sits, in the same minutes: "noche" ends at 02:00 of the next day (26 h). */
-export const VENTANA: Record<ModuleCode, readonly [number, number]> = { mediodia: [600, 1020], noche: [1140, 1560] };
 
 export const PASO = 30;
 /** Starts from 08:00 to 23:30; ends up to 06:00 of the next day (the database checks the same). */
@@ -91,15 +85,18 @@ export const HASTA_MAX = 1800;
 export const horarioValido = (desde: number, hasta: number) =>
   desde >= DESDE_MIN && desde <= DESDE_MAX && hasta > desde && hasta <= HASTA_MAX && desde % PASO === 0 && hasta % PASO === 0;
 
-/** The modules a "personalizado" overlaps, which the public calendar shows as taken ("auto", D-050). */
-export const modulosDeHorario = (desde: number, hasta: number): ModuleCode[] =>
-  MODULE_ORDER.filter((m) => desde < VENTANA[m][1] && hasta > VENTANA[m][0]);
+/**
+ * The modules a "personalizado" overlaps, which the public calendar shows as taken ("auto", D-050),
+ * with the modules' hours of the moment (D-053).
+ */
+export const modulosDeHorario = (desde: number, hasta: number, ajustes: Ajustes): ModuleCode[] =>
+  MODULE_ORDER.filter((m) => desde < ventana(ajustes, m)[1] && hasta > ventana(ajustes, m)[0]);
 
 /** 870 → "14:30", 1560 → "02:00" */
 export const hora = (minutos: number) =>
   `${String(Math.floor(minutos / 60) % 24).padStart(2, "0")}:${String(minutos % 60).padStart(2, "0")}`;
 
-/** "14 a 21 h", "8:30 a 02 h": the style of HORARIO (hours after midnight keep their 0). */
+/** "14 a 21 h", "8:30 a 02 h" (hours after midnight keep their 0). */
 function horaCorta(minutos: number) {
   const h = Math.floor(minutos / 60) % 24;
   const texto = minutos >= 1440 ? String(h).padStart(2, "0") : String(h);
@@ -107,10 +104,10 @@ function horaCorta(minutos: number) {
 }
 export const horarioDeHoras = (desde: number, hasta: number) => `${horaCorta(desde)} a ${horaCorta(hasta)} h`;
 
-export const horarioTexto = (reserva: Reserva) =>
+export const horarioTexto = (reserva: Reserva, ajustes: Ajustes) =>
   reserva.customFrom !== null && reserva.customTo !== null
     ? horarioDeHoras(reserva.customFrom, reserva.customTo)
-    : HORARIO[eleccionDeModulos(reserva.modules)];
+    : horarioDe(ajustes, eleccionDeModulos(reserva.modules));
 
 export const moduloTexto = (reserva: Reserva) => MODULE_WORDS[eleccionDe(reserva)].label;
 

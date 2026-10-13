@@ -32,6 +32,7 @@ Out of scope: denial of service at network scale (Vercel's default mitigation), 
 | `takenInMonth` | ❌ | ✅ |
 | `createReservation` | ❌ | ✅ |
 | `editReservation` | ❌ | ✅ |
+| `updateModuleSettings` (`D-053`) | ❌ | ✅ |
 | `cancelReservation` | ❌ | ✅ |
 | `unblockModule` (modules loaded before `D-046`) | ❌ | ✅ |
 | Rotate password | ❌ (not an app feature) | ❌ (operator script, §6) |
@@ -50,7 +51,7 @@ Out of scope: denial of service at network scale (Vercel's default mitigation), 
 | C-08 | Input validation | zod on every action; dates within today_AR … today_AR + 12 months; module from an enum; ids are uuids | Malformed POST returns `INVALID_INPUT` |
 | C-09 | Bot filter on login | Honeypot field `website` must be empty; submissions < 2 s after render are rejected as `INVALID_CREDENTIALS` | Filling the hidden field fails |
 | C-10 | Logout | Sets `revoked_at`, clears the cookie, audits. A **visible "Cerrar sesión"** in the panel topbar | Session row revoked after logout |
-| C-11 | Audit | `admin_audit` rows for `login_ok`, `login_fail`, `login_locked`, `logout`, `block`, `unblock`, `edit` (`D-050`), `password_rotated`, with `ip_hash` and session id. Kept 12 months | Rows appear for each action |
+| C-11 | Audit | `admin_audit` rows for `login_ok`, `login_fail`, `login_locked`, `logout`, `block`, `unblock`, `edit` (`D-050`), `settings` (`D-053`, the new hours and prices), `password_rotated`, with `ip_hash` and session id. Kept 12 months | Rows appear for each action |
 | C-12 | Errors | Generic messages to the user; details only in server logs. No stack traces in production | Forced error shows the generic copy |
 | C-13 | Headers | `07-INFRASTRUCTURE.md` §Security headers; `/admin/*` also `noindex` + `no-store` | Response headers in DevTools |
 | C-14 | Secrets | Only `DATABASE_URL` and `IP_HASH_SALT` are secret. Post-build grep of `.next/` for each secret value returns zero hits | Grep before launch |

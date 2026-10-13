@@ -3,6 +3,7 @@
 import { useLenis } from "lenis/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildMonth, type AvailabilityEntry, type Choice, type DayCell } from "@/components/calendar/month";
+import type { Modulo } from "@/content/modulos";
 import { addMonthsToMonth, monthOf, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { Formulario } from "@/components/formulario/formulario";
 import { altoNav } from "@/components/nav/nav";
@@ -26,12 +27,18 @@ import "./calendario.css";
 
 const CORTINA = 1.1; // s, power3.inOut: la misma cortina de las historias de la galería
 
-export type Datos = { today: IsoDate; lastBookable: IsoDate; entradas: readonly AvailabilityEntry[] | null };
+export type Datos = {
+  today: IsoDate;
+  lastBookable: IsoDate;
+  entradas: readonly AvailabilityEntry[] | null;
+  /** Horarios y precios del momento (D-053). */
+  modulos: readonly Modulo[];
+};
 
-/** Lo que el calendario le pasa al formulario al tocar "Seguir con mis datos". */
-export type Seleccion = { fecha: IsoDate; modulo: Choice };
+/** Lo que el calendario le pasa al formulario al tocar "Seguir con mis datos", con el módulo tal como se ve. */
+export type Seleccion = { fecha: IsoDate; modulo: Choice; detalle: Modulo };
 
-function useEstado({ today, lastBookable, entradas }: Datos) {
+function useEstado({ today, lastBookable, entradas, modulos }: Datos) {
   const primero = monthOf(today);
   const ultimo = monthOf(lastBookable);
   const [mes, setMes] = useState<IsoMonth>(primero);
@@ -54,6 +61,7 @@ function useEstado({ today, lastBookable, entradas }: Datos) {
 
   return {
     today,
+    modulos,
     cargada: entradas !== null,
     mes,
     sentido,
@@ -78,8 +86,9 @@ export function Calendario(datos: Datos) {
 
   // "Seguir con mis datos": el formulario sigue adentro del panel, sobre el día elegido (D-034).
   function seguir() {
-    if (!cal.dia || !cal.modulo) return;
-    setSiguiendo({ fecha: cal.dia.date, modulo: cal.modulo });
+    const detalle = cal.modulos.find((m) => m.codigo === cal.modulo);
+    if (!cal.dia || !cal.modulo || !detalle) return;
+    setSiguiendo({ fecha: cal.dia.date, modulo: cal.modulo, detalle });
   }
   const raiz = useRef<HTMLElement>(null);
   const [llego, setLlego] = useState(false);

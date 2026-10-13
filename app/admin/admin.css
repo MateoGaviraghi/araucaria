@@ -309,7 +309,8 @@
   left: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* Inicio, Reservas, Calendario, Precios (D-053) y "Nueva" */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   min-height: var(--pn-pestanas);
   padding: 0.25rem 0.25rem max(0.25rem, env(safe-area-inset-bottom));
   border-top: 1px solid var(--pn-borde);
@@ -1496,6 +1497,98 @@
 .pn-datos dd span {
   color: var(--pn-tinta-2);
   font-weight: 400;
+}
+
+/* Precios y horarios (D-053): un bloque por módulo, lado a lado en escritorio */
+.pn-precios {
+  display: grid;
+  gap: 1rem;
+}
+
+.pn-precios-modulos {
+  display: grid;
+  gap: 1rem;
+}
+
+.pn-precio {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  margin: 0;
+}
+
+.pn-precio-nombre {
+  float: left;
+  width: 100%;
+  margin: 0 0 0.25rem;
+  padding: 0;
+  font-family: var(--pn-serif);
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.pn-precio-nombre + * {
+  clear: both;
+}
+
+.pn-precio-input {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.pn-precio-vista {
+  display: grid;
+  gap: 0.125rem;
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--pn-borde);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pn-precio-vista span {
+  color: var(--pn-tinta-3);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pn-precios-pie {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pn-precios-estado {
+  min-height: 1.25rem;
+  margin: 0;
+  color: var(--pn-tinta-2);
+  font-size: 0.875rem;
+}
+
+.pn-precios-estado[data-tono="bien"] {
+  color: var(--pn-beige);
+  font-weight: 600;
+}
+
+.pn-precios-estado[data-tono="error"] {
+  color: var(--pn-error);
+  font-weight: 600;
+}
+
+@media (min-width: 64rem) {
+  .pn-precios-modulos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pn-precios-pie {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .pn-precios-pie .pn-form-acciones {
+    margin-top: 0;
+  }
 }
 
 .pn-datos dd.pn-datos-notas {

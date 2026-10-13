@@ -16,7 +16,8 @@ import { hashSessionToken, isWellFormedSessionToken } from "@/lib/auth/tokens";
 import type { AvailabilityEntry, ModuleCode } from "@/components/calendar/month";
 import { addMonthsToMonth, firstDayOfMonth, lastBookableDate, type IsoDate, type IsoMonth } from "@/lib/dates";
 import { db } from "@/lib/db/client";
-import { adminAudit, adminCredential, adminSessions, loginAttempts, moduleBlocks, reservations } from "@/lib/db/schema";
+import { adminAudit, adminCredential, adminSessions, loginAttempts, moduleBlocks, moduleSettings, reservations } from "@/lib/db/schema";
+import { AJUSTES_INICIALES, CODIGOS_AJUSTE, type Ajustes } from "@/lib/ajustes";
 import { agrupar, type FilaReserva, type Reserva } from "@/lib/reservas";
 
 // The only module that imports the database client (docs/09-RULES.md §2).
@@ -149,6 +150,54 @@ export async function getAvailability(today: IsoDate): Promise<AvailabilityEntry
     console.error("getAvailability: availability unavailable", error);
     return null;
   }
+}
+
+// ---- Hours and prices of the modules (D-053). Public, no session: the site and the panel read them.
+
+// Cached under the `modulos` tag, so the static shell carries them and "Guardar" in the panel
+// (updateTag) shows the new values on the next request. If the table cannot be read, the values of
+// docs/01-CONTEXT.md, and only for an hour.
+export const MODULOS_TAG = "modulos";
+
+export async function getModuleSettings(): Promise<Ajustes> {
+  "use cache";
+  cacheTag(MODULOS_TAG);
+  try {
+    const filas = await db.select().from(moduleSettings);
+    cacheLife("days");
+    const ajustes: Ajustes = { ...AJUSTES_INICIALES };
+    for (const f of filas) ajustes[f.code] = { desde: f.startMin, hasta: f.endMin, precio: f.price };
+    return ajustes;
+  } catch (error) {
+    console.error("getModuleSettings: settings unavailable, using the defaults", error);
+    cacheLife("hours");
+    return AJUSTES_INICIALES;
+  }
+}
+
+/** The three rows and the audit in one batch. The audit keeps the new values (no personal data). */
+export async function saveModuleSettings(ajustes: Ajustes, input: { sessionId: string; ipHash: string }): Promise<void> {
+  const filas = CODIGOS_AJUSTE.map((code) => ({
+    code,
+    startMin: ajustes[code].desde,
+    endMin: ajustes[code].hasta,
+    price: ajustes[code].precio,
+  }));
+  await db.batch([
+    db
+      .insert(moduleSettings)
+      .values(filas)
+      .onConflictDoUpdate({
+        target: moduleSettings.code,
+        set: {
+          startMin: sql`excluded.start_min`,
+          endMin: sql`excluded.end_min`,
+          price: sql`excluded.price`,
+          updatedAt: sql`now()`,
+        },
+      }),
+    db.insert(adminAudit).values({ action: "settings", detail: { ajustes }, ipHash: input.ipHash, sessionId: input.sessionId }),
+  ]);
 }
 
 // ---- Reservations (owner panel, D-046). Callers run requireAdmin() first.

@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import { MODULE_WORDS, enabledChoices, type Choice } from "@/components/calendar/month";
-import { MODULOS } from "@/content/modulos";
 import { gsap, useGSAP } from "@/lib/gsap";
 import type { Estado } from "./calendario";
 import { ABRE, CURVA, ENTRE_LINEAS, ESCONDIDO, Mascara, partesDelDia, quieto } from "./comun";
@@ -45,7 +44,7 @@ export function Detalle({ cal, onSeguir }: { cal: Estado; onSeguir: () => void }
       </p>
 
       <ul className="cal-modulos">
-        {MODULOS.map((m) => {
+        {cal.modulos.map((m) => {
           const libre = libres.includes(m.codigo);
           return (
             <li key={m.codigo} className="cal-mascara">

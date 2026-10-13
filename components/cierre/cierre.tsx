@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { MODULOS } from "@/content/modulos";
+import type { Modulo } from "@/content/modulos";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { enlace, hayNumero } from "@/components/formulario/consulta";
 import { Logo, type Marca } from "./logos";
@@ -25,7 +25,6 @@ const TELEFONOS = [
 ];
 const MAIL = "Araucaria3650@gmail.com";
 const INSTAGRAM = { ver: "@araucariamultiespacio", url: "https://www.instagram.com/araucariamultiespacio/" };
-const HORARIOS = MODULOS.filter((m) => m.codigo === "mediodia" || m.codigo === "noche");
 
 const CURVA = "power3.out";
 const ABRE = 0.9;
@@ -224,7 +223,7 @@ function Filas() {
   );
 }
 
-function Pie() {
+function Pie({ horarios }: { horarios: readonly Modulo[] }) {
   const tarjeta = useRef<HTMLDivElement>(null);
 
   // Nada se ilumina con el mouse (Mateo: "sacale lo de que ilumine con el mouse"). La tarjeta se inclina
@@ -287,7 +286,7 @@ function Pie() {
             <L>Horarios</L>
           </p>
           <ul className="pie-lista">
-            {HORARIOS.map((m) => (
+            {horarios.map((m) => (
               <li key={m.codigo}>
                 <Dato marca="reloj">
                   {m.nombre} · {m.horario.replace(" hs", "")}
@@ -335,7 +334,8 @@ function Pie() {
 
 // ---------------------------------------------------------------- El cierre entero: el mapa y el pie
 
-export function Cierre() {
+/** `horarios`: Mediodía y Noche como los cargó la dueña en el panel (D-053). */
+export function Cierre({ horarios }: { horarios: readonly Modulo[] }) {
   const raiz = useRef<HTMLDivElement>(null);
   useEntrada(raiz, (el) => {
     const seccion = el.querySelector(".cie-ubicacion")!;
@@ -353,7 +353,7 @@ export function Cierre() {
         <Mapa className="cie-ubicacion-mapa" corrimiento={{ x: 300, y: -130 }} />
       </section>
       <footer className="pie-marco">
-        <Pie />
+        <Pie horarios={horarios} />
       </footer>
     </div>
   );

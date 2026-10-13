@@ -9,6 +9,9 @@ import { SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from "@/lib/auth/config";
 import { clientIp, hashIp } from "@/lib/auth/ip";
 import {
   AVAILABILITY_TAG,
+  MODULOS_TAG,
+  getModuleSettings,
+  saveModuleSettings,
   deleteBlock,
   deleteReservation,
   getTakenInMonth,
@@ -19,6 +22,7 @@ import {
   type DatosDeReserva,
 } from "@/lib/dal";
 import { isValidIsoDate, isValidIsoMonth, lastBookableDate, todayInBuenosAires } from "@/lib/dates";
+import { CODIGOS_AJUSTE, PRECIO_MAX, type Ajustes } from "@/lib/ajustes";
 import { horarioValido, modulosDeHorario } from "@/lib/reservas";
 
 // Admin Server Actions are public endpoints: requireAdmin() comes first (C-05), then zod (C-08).
@@ -59,13 +63,13 @@ type DatosEntrada = {
 };
 
 /** Validated input → what the DAL stores. null when it does not pass zod or the bookable range. */
-function datosDe(input: DatosEntrada): DatosDeReserva | null {
+async function datosDe(input: DatosEntrada): Promise<DatosDeReserva | null> {
   const parsed = ReservaSchema.safeParse(input);
   if (!parsed.success || !inRange(parsed.data.date)) return null;
   const { date, choice, customFrom, customTo, clientName, clientPhone, notes } = parsed.data;
   const modules: ModuleCode[] =
     choice === "personalizado"
-      ? modulosDeHorario(customFrom!, customTo!)
+      ? modulosDeHorario(customFrom!, customTo!, await getModuleSettings())
       : choice === "dia-completo"
         ? ["mediodia", "noche"]
         : [choice];
@@ -95,7 +99,7 @@ export async function createReservation(input: DatosEntrada): Promise<ActionResu
   const session = await requireAdmin();
   if (!session) return { ok: false, code: "UNAUTHORIZED" };
 
-  const datos = datosDe(input);
+  const datos = await datosDe(input);
   if (!datos) return { ok: false, code: "INVALID_INPUT" };
 
   try {
@@ -116,7 +120,7 @@ export async function editReservation(input: DatosEntrada & { id: string }): Pro
   if (!session) return { ok: false, code: "UNAUTHORIZED" };
 
   const id = IdSchema.safeParse({ id: input.id });
-  const datos = datosDe(input);
+  const datos = await datosDe(input);
   if (!id.success || !datos) return { ok: false, code: "INVALID_INPUT" };
 
   try {
@@ -164,6 +168,35 @@ export async function unblockModule(input: { id: string }): Promise<ActionResult
     return { ok: true };
   } catch (error) {
     console.error("unblockModule: unexpected failure", error);
+    return { ok: false, code: "RETRY" };
+  }
+}
+
+// "Precios y horarios" (D-053): the owner sets each module's hours and price. Mediodía must end before
+// Noche starts, or the same day could be booked twice for the same hours.
+const AjusteSchema = z.object({
+  desde: z.number().int(),
+  hasta: z.number().int(),
+  precio: z.number().int().min(0).max(PRECIO_MAX),
+});
+const AjustesSchema = z
+  .object({ mediodia: AjusteSchema, noche: AjusteSchema, "dia-completo": AjusteSchema })
+  .refine((a) => CODIGOS_AJUSTE.every((c) => horarioValido(a[c].desde, a[c].hasta)))
+  .refine((a) => a.mediodia.hasta <= a.noche.desde);
+
+export async function updateModuleSettings(input: Ajustes): Promise<ActionResult> {
+  const session = await requireAdmin();
+  if (!session) return { ok: false, code: "UNAUTHORIZED" };
+
+  const parsed = AjustesSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, code: "INVALID_INPUT" };
+
+  try {
+    await saveModuleSettings(parsed.data, { sessionId: session.sessionId, ipHash: await ipHash() });
+    updateTag(MODULOS_TAG);
+    return { ok: true };
+  } catch (error) {
+    console.error("updateModuleSettings: unexpected failure", error);
     return { ok: false, code: "RETRY" };
   }
 }

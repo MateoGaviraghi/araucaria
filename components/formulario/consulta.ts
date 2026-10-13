@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import type { Seleccion } from "@/components/calendario/calendario";
-import { MODULOS } from "@/content/modulos";
 import { formatLongDate } from "@/lib/dates";
 
 // El formulario de consulta (bloque 6, D-034): los campos y sus reglas (docs/06-UI-UX.md §4.1, con
@@ -81,7 +80,7 @@ function valido(campo: Campo, v: Valores, sel: Seleccion | null): boolean {
 }
 
 export function modulo(sel: Seleccion) {
-  return MODULOS.find((m) => m.codigo === sel.modulo)!;
+  return sel.detalle;
 }
 
 /** "Noche (19:00 a 02:00 hs)" */

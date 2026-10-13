@@ -14,13 +14,6 @@ export const BAJADA =
 
 export const CTA = "Consultar disponibilidad";
 
-// docs/01-CONTEXT.md §Modules and prices. Los precios viven en PRICING-TABLE, no acá.
-export const MODULOS = [
-  { nombre: "Mediodía", horario: "10:00 a 17:00" },
-  { nombre: "Noche", horario: "19:00 a 02:00" },
-  { nombre: "Día completo", horario: "10:00 a 02:00" },
-];
-
 // Las dos tomas del hero: plano general las dos, 720 de ancho las dos (ver build-media.sh).
 // `foco` es dónde se recorta cada una cuando la pantalla es horizontal: medido cuadro a cuadro.
 export const RECORRIDO: Toma[] = [

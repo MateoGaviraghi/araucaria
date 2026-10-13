@@ -727,6 +727,24 @@ Mateo sent four screenshots, two of Araucaria's `D-041` header and two of Sanaly
 
 **Reopen if:** the client sends the vector logo (replace the masters and rerun the cuts), or DNS moves away from DonWeb.
 
+### D-053 · 2026-10-13 · The owner edits the modules' hours and prices in the panel (replaces the fixed values of `content/modulos.ts` and `lib/reservas.ts`)
+
+**What he asked, in his words:** *"que la persona pueda editar los horarios de mediodía o noche, jornada completa, porque… ahora que viene el verano ella las quiere editar, entonces para que no me pida a mí esos valores que son fijos pueda editarlo, al igual que el costo del SUM"*, with the client's new values: *"Módulo mediodía: 10:00 a 18:30 hs. $260.000 · Módulo noche: 20:00 a 02:00 hs. $260.000 · Día completo: 10:00 a 02:00 hs. $500.000"*. To the plan: **"1 si 2 go"** (move the photos folder; go).
+
+**Decision:**
+- Table `module_settings` (migration `0003_hot_blob`, seeded with the client's values); audit action `settings`.
+- `getModuleSettings()` in `lib/dal.ts`: `"use cache"`, tag `modulos`, `cacheLife("days")`; on a read failure the defaults of `lib/ajustes.ts` (the same values), cached only `"hours"`. It is read by the home page (footer hours, so it stays in the static shell), the calendar's server part (module list for the day and the WhatsApp message), the panel layout (hours for the reservation texts and the "Personalizado" overlap) and the server actions (`modulosDeHorario` with the hours of the moment).
+- `updateModuleSettings` (admin, zod: each module 08:00–23:30 start, end up to 06:00 next day, half hours, price 0–99,999,999; Mediodía must end by the time Noche starts) → upsert + audit in one batch → `updateTag('modulos')`.
+- Panel: "Precios" section (`/admin/precios`), described in `06-UI-UX`. The phone tab bar now has five places.
+- The selection the calendar passes to the form carries its module's text (`Seleccion.detalle`), so the WhatsApp message says exactly what the visitor saw.
+- Existing reservations do not change; a "personalizado" saved before keeps the modules it blocked then.
+- Removed the unused, stale `MODULOS` list of `components/hero/contenido.ts`.
+- `.claude/launch.json` gains `araucaria-prod-local` (`next start -p 3100`), to test caching on a production build.
+
+**Rejected / not done:** a reference round for the screen (the panel's own pieces, as in `D-050`/`D-051`); letting Mediodía and Noche overlap.
+
+**Reopen if:** the salon wants seasonal prices by date, or more modules.
+
 | ID | Question | Why it matters | Default until answered |
 |---|---|---|---|
 | OQ-01 | **`D-MEASURE`**: which number proves the site works, where it fires, what records it (in whose account), who reads it and when | Without it nobody can say whether phase 2 is justified | Proposal: "consultas enviadas por WhatsApp por semana", counted when the handoff status panel is shown. Tool and reader undecided. Set before launch (WU-09) |

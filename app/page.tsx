@@ -6,6 +6,8 @@ import { Hero } from "@/components/hero/hero";
 import { Incluye } from "@/components/incluye/incluye";
 import { Nav } from "@/components/nav/nav";
 import { ScrollSuave } from "@/components/scroll-suave";
+import { modulosDe } from "@/content/modulos";
+import { getModuleSettings } from "@/lib/dal";
 
 // El header (D-041) espera arriba, fuera de la pantalla, hasta que GSAP lo baja.
 const GUION_NAV = `(function(){try{
@@ -60,7 +62,10 @@ document.head.appendChild(s);
 setTimeout(function(){s.remove();},3000);
 }catch(e){}})();`;
 
-export default function HomePage() {
+// Los horarios del pie (D-053) salen de una lectura en caché: siguen en el armado estático y el panel
+// los renueva al guardar.
+export default async function HomePage() {
+  const horarios = modulosDe(await getModuleSettings()).filter((m) => m.codigo === "mediodia" || m.codigo === "noche");
   return (
     <>
       <ScrollSuave />
@@ -76,7 +81,7 @@ export default function HomePage() {
         <Disponibilidad />
       </Suspense>
       <script dangerouslySetInnerHTML={{ __html: GUION_CIERRE }} />
-      <Cierre />
+      <Cierre horarios={horarios} />
     </>
   );
 }

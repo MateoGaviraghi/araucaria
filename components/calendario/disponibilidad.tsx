@@ -1,5 +1,6 @@
 import { connection } from "next/server";
-import { getAvailability } from "@/lib/dal";
+import { modulosDe } from "@/content/modulos";
+import { getAvailability, getModuleSettings } from "@/lib/dal";
 import { lastBookableDate, todayInBuenosAires } from "@/lib/dates";
 import { Calendario } from "./calendario";
 import "./calendario.css";
@@ -12,8 +13,8 @@ import "./calendario.css";
 export async function Disponibilidad() {
   await connection();
   const today = todayInBuenosAires();
-  const entradas = await getAvailability(today);
-  return <Calendario today={today} lastBookable={lastBookableDate(today)} entradas={entradas} />;
+  const [entradas, ajustes] = await Promise.all([getAvailability(today), getModuleSettings()]);
+  return <Calendario today={today} lastBookable={lastBookableDate(today)} entradas={entradas} modulos={modulosDe(ajustes)} />;
 }
 
 /** Mientras llega la disponibilidad: el mismo lugar y el mismo fondo, para que nada salte. */

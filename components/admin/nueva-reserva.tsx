@@ -24,15 +24,15 @@ import {
   DESDE_MAX,
   DESDE_MIN,
   HASTA_MAX,
-  HORARIO,
   PASO,
-  VENTANA,
   eleccionDe,
   hora,
+  horarioDe,
   horarioDeHoras,
   modulosDeHorario,
   type Reserva,
 } from "@/lib/reservas";
+import { ventana, type Ajustes } from "@/lib/ajustes";
 import { IconoFlecha } from "./iconos";
 import { SelectorHora } from "./selector-hora";
 
@@ -67,12 +67,15 @@ const capitalizar = (texto: string) => `${texto.charAt(0).toUpperCase()}${texto.
 // D-050: a fourth choice, "Personalizado", with the hours agreed on WhatsApp; the notes; and the same
 // form, filled in, edits a reservation (`inicial`), whose own modules then count as free.
 export function NuevaReserva({
+  ajustes,
   fecha,
   inicial,
   guardando,
   alGuardar,
   alCancelar,
 }: {
+  /** The modules' hours of the moment (D-053). */
+  ajustes: Ajustes;
   fecha: IsoDate | null;
   inicial?: Reserva;
   guardando: boolean;
@@ -119,12 +122,12 @@ export function NuevaReserva({
   const eleccion = choice && libre(choice) ? choice : null;
   const personalizado = eleccion === "personalizado";
   const conHoras = desde !== null && hasta !== null;
-  const ocupa = conHoras ? modulosDeHorario(desde, hasta) : [];
+  const ocupa = conHoras ? modulosDeHorario(desde, hasta, ajustes) : [];
   const pisa = ocupa.filter((m) => tomados?.includes(m));
   // An hour inside a module already taken: a start can't be in [inicio, fin), an end in (inicio, fin].
   const pisaHora = (minutos: number, extremo: "desde" | "hasta") =>
     (tomados ?? []).some((m) => {
-      const [inicio, fin] = VENTANA[m];
+      const [inicio, fin] = ventana(ajustes, m);
       return extremo === "desde" ? minutos >= inicio && minutos < fin : minutos > inicio && minutos <= fin;
     });
   const digitos = clientPhone.replace(/\D/g, "");
@@ -278,7 +281,7 @@ export function NuevaReserva({
                         : !disponible
                           ? "Ocupado"
                           : opcion !== "personalizado"
-                            ? HORARIO[opcion]
+                            ? horarioDe(ajustes, opcion)
                             : conHoras
                               ? horarioDeHoras(desde, hasta)
                               : "Otro horario"}

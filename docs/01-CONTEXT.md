@@ -45,15 +45,18 @@ When two sources disagree, the row says so and names the winner.
 
 ### Modules and prices
 
+**Since 2026-10-13 the owner edits hours and prices herself in the panel ("Precios y horarios", `D-053`); the database table `module_settings` is the source the site shows.** The table below is what the client sent on 2026-10-13 (*"MODALIDADES Y VALORES ACTUALIZADOS"*) and what migration `0003` loaded; it is also the fallback if the table cannot be read.
+
 | Module (code) | Label | Hours | Price |
 |---|---|---|---|
-| `mediodia` | Módulo mediodía | 10:00 a 17:00 hs | **$240.000** |
-| `noche` | Módulo noche | 19:00 a 02:00 hs (ends the next day) | **$240.000** |
-| — (both modules) | Día completo | 10:00 a 02:00 hs | **$400.000** |
+| `mediodia` | Módulo mediodía | 10:00 a 18:30 hs | **$260.000** |
+| `noche` | Módulo noche | 20:00 a 02:00 hs (ends the next day) | **$260.000** |
+| — (both modules) | Día completo | 10:00 a 02:00 hs | **$500.000** |
 | `personalizado` (`D-050`) | Personalizado | Agreed with the client on WhatsApp ("Horario a coordinar") | **A coordinar** |
 
 - The price **includes cleaning** ("El valor final incluye la limpieza del lugar").
 - VAT included or not, and how long prices are valid: `{{CONFIRMAR}}` (`CI-05`).
+- Before 2026-10-13: mediodía 10:00 a 17:00 hs $240.000, noche 19:00 a 02:00 hs $240.000, día completo 10:00 a 02:00 hs $400.000.
 
 ### Rules to show
 

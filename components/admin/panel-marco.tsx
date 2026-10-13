@@ -7,6 +7,7 @@ import { cancelReservation, createReservation, editReservation, logout, unblockM
 import { MODULE_WORDS } from "@/components/calendar/month";
 import { ConfirmAlert, type AlertMessage } from "@/components/ui/confirm-alert";
 import type { ActionResult } from "@/lib/action-result";
+import type { Ajustes } from "@/lib/ajustes";
 import { todayInBuenosAires, type IsoDate } from "@/lib/dates";
 import {
   diaLargo,
@@ -19,7 +20,16 @@ import {
   type Reserva,
 } from "@/lib/reservas";
 import { Dialogo } from "./dialogo";
-import { IconoAfuera, IconoCalendario, IconoInicio, IconoMas, IconoReservas, IconoSalir, IconoTelefono } from "./iconos";
+import {
+  IconoAfuera,
+  IconoCalendario,
+  IconoInicio,
+  IconoMas,
+  IconoPrecio,
+  IconoReservas,
+  IconoSalir,
+  IconoTelefono,
+} from "./iconos";
 import { NuevaReserva, type DatosReserva } from "./nueva-reserva";
 
 // The frame of the owner panel (D-046): the side menu (a bottom tab bar on the phone), "Nueva reserva"
@@ -33,6 +43,8 @@ type Panel = {
   editarReserva: (reserva: Reserva) => void;
   cancelarReserva: (reserva: Reserva) => void;
   ocupado: boolean;
+  /** The modules' hours and prices of the moment (D-053). */
+  ajustes: Ajustes;
 };
 
 const PanelContexto = createContext<Panel | null>(null);
@@ -47,6 +59,7 @@ const SECCIONES = [
   { href: "/admin", nombre: "Inicio", Icono: IconoInicio },
   { href: "/admin/reservas", nombre: "Reservas", Icono: IconoReservas },
   { href: "/admin/calendario", nombre: "Calendario", Icono: IconoCalendario },
+  { href: "/admin/precios", nombre: "Precios", Icono: IconoPrecio },
 ] as const;
 
 const STALE_ACTION = "Failed to find Server Action";
@@ -65,7 +78,7 @@ type Deshacer = () => Promise<ActionResult<unknown>>;
 /** Only a reservation with its data, from today on: the actions refuse past dates. */
 const editable = (reserva: Reserva) => reserva.id !== null && reserva.date >= todayInBuenosAires();
 
-export function PanelMarco({ children }: { children: ReactNode }) {
+export function PanelMarco({ ajustes, children }: { ajustes: Ajustes; children: ReactNode }) {
   const router = useRouter();
   const ruta = usePathname();
   const [ocupado, startTransition] = useTransition();
@@ -176,6 +189,7 @@ export function PanelMarco({ children }: { children: ReactNode }) {
     },
     cancelarReserva: setACancelar,
     ocupado,
+    ajustes,
   };
 
   const activa = (href: string) => (href === "/admin" ? ruta === "/admin" : ruta.startsWith(href));
@@ -256,6 +270,7 @@ export function PanelMarco({ children }: { children: ReactNode }) {
         alCerrar={() => setNueva(null)}
       >
         <NuevaReserva
+            ajustes={ajustes}
           key={nueva?.vez}
           fecha={nueva?.fecha ?? null}
           guardando={ocupado}
@@ -273,6 +288,7 @@ export function PanelMarco({ children }: { children: ReactNode }) {
       >
         {editando && (
           <NuevaReserva
+            ajustes={ajustes}
             key={editando.clave}
             fecha={null}
             inicial={editando}
@@ -295,7 +311,7 @@ export function PanelMarco({ children }: { children: ReactNode }) {
               <div>
                 <dt>Módulo</dt>
                 <dd>
-                  {moduloTexto(detalle)} <span>· {horarioTexto(detalle)}</span>
+                  {moduloTexto(detalle)} <span>· {horarioTexto(detalle, ajustes)}</span>
                 </dd>
               </div>
               <div>

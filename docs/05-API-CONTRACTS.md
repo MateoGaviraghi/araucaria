@@ -39,6 +39,7 @@ Expected failures are returned values. Only programmer errors throw. The UI maps
 | `takenInMonth(input)` | Admin | `month: 'YYYY-MM'` · `except?: uuid` (the reservation being edited, whose modules count as free, `D-050`) | `requireAdmin()` → every module taken that month, date and module only (`D-047`) | `ActionResult<{ taken: { date; module }[] }>` |
 | `createReservation(input)` | Admin | `date` (today_AR ≤ date ≤ today_AR + 12 months) · `choice: 'mediodia' \| 'noche' \| 'dia-completo' \| 'personalizado'` · `customFrom`, `customTo: number \| null` (minutes from 00:00; required for `personalizado`, null otherwise; 480–1410 and up to 1800, half hours, `D-050`) · `clientName: string (trimmed, 1–80)` · `clientPhone: string` (10 national digits without 0 or 15, or empty) · `notes: string` (trimmed, ≤ 500, empty = none) | `requireAdmin()` → one batch: the reservation, its modules (1, 2, or for `personalizado` the ones its hours overlap, maybe none), audit `block` (date, modules, reservation id; **no name, phone or notes**) → on unique violation `ALREADY_TAKEN` → `updateTag('availability')` | `ActionResult<{ id: string }>`: the id, so the panel can undo at once |
 | `editReservation(input)` | Admin | `id: uuid` + the same fields as `createReservation` (`D-050`) | `requireAdmin()` → one batch: update the reservation, delete its modules, insert the new ones, audit `edit` (date, modules, reservation id) only if it still exists → `ALREADY_TAKEN` on unique violation (nothing changes), `NOT_FOUND` if it was cancelled → `updateTag('availability')` | `ActionResult` |
+| `updateModuleSettings(input)` | Admin | `{ mediodia, noche, 'dia-completo' }`, each `{ desde, hasta, precio }`: minutes 480–1410 / up to 1800 in half hours, `hasta > desde`, price 0–99,999,999 whole pesos; `mediodia.hasta ≤ noche.desde` (`D-053`) | `requireAdmin()` → upsert the three `module_settings` rows + audit `settings` (the new values) in one batch → `updateTag('modulos')` (the static home page, the calendar's modules and the panel read them through `getModuleSettings()`, cached under that tag) | `ActionResult` |
 | `cancelReservation(input)` | Admin | `id: uuid` | `requireAdmin()` → delete the reservation (its modules go with it) and audit `unblock` in one statement → `updateTag('availability')` | `ActionResult`; `NOT_FOUND` when already gone |
 | `unblockModule(input)` | Admin | `id: uuid` (a module row) | Only for modules loaded before `D-046`, which have no reservation: `requireAdmin()` → delete by id → audit `unblock` → `updateTag('availability')` | `ActionResult` |
 
@@ -48,6 +49,7 @@ Signatures take **identifiers and changes, never whole objects**. Nothing the cl
 type DatosEntrada = { date: string; choice: string; customFrom: number | null; customTo: number | null; clientName: string; clientPhone: string; notes: string };
 export async function createReservation(input: DatosEntrada): Promise<ActionResult<{ id: string }>>
 export async function editReservation(input: DatosEntrada & { id: string }): Promise<ActionResult>
+export async function updateModuleSettings(input: Record<'mediodia' | 'noche' | 'dia-completo', { desde: number; hasta: number; precio: number }>): Promise<ActionResult>
 export async function cancelReservation(input: { id: string }): Promise<ActionResult>
 export async function unblockModule(input: { id: string }): Promise<ActionResult>
 export async function takenInMonth(input: { month: string; except?: string }): Promise<ActionResult<{ taken: AvailabilityEntry[] }>>
@@ -89,8 +91,8 @@ Forma de pago: {formaPago}
 | `{tipoEvento}` | Form choice | One of: Cumpleaños · Evento infantil · Reunión · Taller · Celebración · Otro. "Otro" carries what the visitor wrote: "Otro (Bautismo)" (`D-034`) |
 | `{personas}` | Form | Integer 1–35 |
 | `{fechaLarga}` | Calendar | `es-AR` long date with weekday, e.g. "sábado 18 de octubre de 2026" |
-| `{moduloEtiqueta}` | Module choice | "Mediodía (10:00 a 17:00 hs)" · "Noche (19:00 a 02:00 hs)" · "Día completo (10:00 a 02:00 hs)" · "Personalizado (Horario a coordinar)" (`D-050`) |
-| `{precio}` | `content/` constants | `$240.000` or `$400.000` (`es-AR` thousands separator), or "A coordinar" for Personalizado (`D-050`) |
+| `{moduloEtiqueta}` | Module choice, with the hours set in the panel (`D-053`) | e.g. "Mediodía (10:00 a 18:30 hs)" · "Noche (20:00 a 02:00 hs)" · "Día completo (10:00 a 02:00 hs)" · "Personalizado (Horario a coordinar)" (`D-050`) |
+| `{precio}` | The panel's price (`D-053`), `es-AR` thousands separator | e.g. `$260.000`, `$500.000`, or "A coordinar" for Personalizado (`D-050`) |
 | `{formaPago}` | Form radio | "Efectivo" · "Transferencia" |
 
 ### Example

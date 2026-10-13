@@ -27,6 +27,14 @@ export const IconoReservas = ({ className }: Props) => (
   </svg>
 );
 
+/** A price tag, for "Precios" (D-053). */
+export const IconoPrecio = ({ className }: Props) => (
+  <svg {...base} className={className}>
+    <path d="M3.5 3.5h6.25l6.75 6.75-6.25 6.25-6.75-6.75z" />
+    <circle cx="7" cy="7" r="1.1" fill="currentColor" stroke="none" />
+  </svg>
+);
+
 export const IconoCalendario = ({ className }: Props) => (
   <svg {...base} className={className}>
     <rect x="3" y="4.25" width="14" height="12.5" rx="2" />
